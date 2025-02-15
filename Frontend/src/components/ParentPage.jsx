@@ -58,12 +58,12 @@ export default function ParentDashboard() {
                 </ScrollArea>
               </SheetContent>
             </Sheet>
-            <h1 className="text-xl font-bold">ParentO Dashboard</h1>
+            <h1 className="text-xl font-bold text-[#00308F]">ParentO Dashboard</h1>
           </div>
 
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5 text-[#00308F] mr-2" />
             </Button>
             
             <DropdownMenu>
@@ -100,7 +100,7 @@ export default function ParentDashboard() {
       {/* Main Content */}
       <main className="pt-20 p-4 max-w-7xl mx-auto">
         {/* Welcome Card */}
-        <Card className="mb-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+        <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">Welcome Back!</h2>
@@ -121,7 +121,7 @@ export default function ParentDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Calendar className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
                   Today's Activity
                 </CardTitle>
               </CardHeader>
@@ -129,7 +129,7 @@ export default function ParentDashboard() {
                 <div className="space-y-3">
                   {['Math Quiz', 'Science Experiment'].map((activity, index) => (
                     <div key={index} className="flex items-center space-x-2 text-gray-700 p-2 rounded-lg hover:bg-gray-50">
-                      <ChevronRight className="h-4 w-4 text-indigo-400" />
+                      <ChevronRight className="h-4 w-4 text-[#00308F]" />
                       <span>{activity}</span>
                     </div>
                   ))}
@@ -141,7 +141,7 @@ export default function ParentDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <BookOpen className="h-5 w-5 text-indigo-600 mr-2" />
+                  <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
                   Major Activities
                 </CardTitle>
               </CardHeader>
@@ -151,11 +151,8 @@ export default function ParentDashboard() {
                     { name: 'Science Fair', time: 'Next Week' },
                     { name: 'Debate Competition', time: 'In 2 Weeks' }
                   ].map((activity, index) => (
-                    <div key={index} className="p-3 bg-indigo-50 rounded-lg">
-                      <p className="text-indigo-700 font-medium">{activity.name}</p>
-                      <Badge variant="secondary" className="mt-1">
-                        {activity.time}
-                      </Badge>
+                    <div key={index} className="p-3 bg-[#00308F]/10 rounded-lg">
+                      <p className="text-[#00308F] font-medium">{activity.name}</p>
                     </div>
                   ))}
                 </div>
@@ -169,7 +166,7 @@ export default function ParentDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Calendar className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
                   Previous Activities
                 </CardTitle>
               </CardHeader>
@@ -181,7 +178,7 @@ export default function ParentDashboard() {
                         <p className="font-semibold text-gray-800">History Presentation</p>
                         <p className="text-sm text-gray-600 mt-1">Completed on Oct 15</p>
                       </div>
-                      <Badge className="bg-green-100 text-green-700">Completed</Badge>
+                      <Badge className="bg-[#00308F]/10 text-[#00308F]">Completed</Badge>
                     </div>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -190,7 +187,7 @@ export default function ParentDashboard() {
                         <p className="font-semibold text-gray-800">Math Olympiad</p>
                         <p className="text-sm text-gray-600 mt-1">Completed on Oct 10</p>
                       </div>
-                      <Badge className="bg-green-100 text-green-700">Completed</Badge>
+                      <Badge className="bg-[#00308F]/10 text-[#00308F]">Completed</Badge>
                     </div>
                   </div>
                 </div>
@@ -201,14 +198,14 @@ export default function ParentDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Trophy className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
                   Points
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center p-4">
                   <div className="text-center">
-                    <p className="text-4xl font-bold text-indigo-600">85</p>
+                    <p className="text-4xl font-bold text-[#00308F]">85</p>
                     <p className="text-gray-600 mt-2">Current Score</p>
                     <Button variant="outline" className="mt-4">
                       View History
@@ -222,7 +219,7 @@ export default function ParentDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Star className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Star className="h-5 w-5 text-[#00308F] mr-2" />
                   Leaderboard
                 </CardTitle>
               </CardHeader>
@@ -237,7 +234,7 @@ export default function ParentDashboard() {
                       key={student.name}
                       className={`flex items-center justify-between p-3 rounded-lg ${
                         student.position === 1
-                          ? 'bg-indigo-50 border border-indigo-200'
+                          ? 'bg-[#00308F]/10 border border-[#00308F]/20'
                           : 'bg-gray-50 border border-gray-200'
                       }`}
                     >
@@ -245,7 +242,7 @@ export default function ParentDashboard() {
                         <div
                           className={`h-7 w-7 rounded-full flex items-center justify-center ${
                             student.position === 1
-                              ? 'bg-indigo-200 text-indigo-700'
+                              ? 'bg-[#00308F]/20 text-[#00308F]'
                               : 'bg-gray-200 text-gray-700'
                           }`}
                         >
@@ -254,7 +251,7 @@ export default function ParentDashboard() {
                         <span
                           className={
                             student.position === 1 
-                              ? 'text-indigo-700 font-semibold' 
+                              ? 'text-[#00308F] font-semibold' 
                               : 'text-gray-700 font-semibold'
                           }
                         >
@@ -264,7 +261,7 @@ export default function ParentDashboard() {
                       <Badge
                         className={
                           student.position === 1
-                            ? 'bg-indigo-200 text-indigo-700'
+                            ? 'bg-[#00308F]/20 text-[#00308F]'
                             : 'bg-gray-200 text-gray-700'
                         }
                       >
@@ -281,7 +278,7 @@ export default function ParentDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xl font-bold flex items-center">
-                <Bell className="h-5 w-5 text-indigo-600 mr-2" />
+                <Bell className="h-5 w-5 text-[#00308F] mr-2" />
                 Announcements
               </CardTitle>
             </CardHeader>
@@ -290,7 +287,7 @@ export default function ParentDashboard() {
                 <div className="space-y-4">
                   {announcements.map((announcement, index) => (
                     <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="h-2 w-2 bg-indigo-600 rounded-full"></div>
+                      <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
                       <p className="text-gray-700 flex-1">{announcement}</p>
                       <Badge>New</Badge>
                     </div>

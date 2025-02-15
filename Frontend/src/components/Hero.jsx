@@ -37,7 +37,7 @@ export default function Hero() {
             Parent Login
           </button>
           <button className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
-            Teacher Login bugugugug
+            Teacher Login 
           </button>
         </div>
 
