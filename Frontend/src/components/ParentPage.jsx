@@ -12,7 +12,8 @@ import {
   Star,
   Settings,
   Menu,
-  Plus
+  Plus,
+  X
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -87,6 +88,8 @@ export default function ParentDashboard() {
   const [expandedActivity, setExpandedActivity] = useState(null);
   const [selectedYear, setSelectedYear] = useState('2024');
   const [selectedMonth, setSelectedMonth] = useState('february');
+  const [showAllLeaderboard, setShowAllLeaderboard] = useState(false);
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
 
   const getFilteredActivities = () => {
     return activityHistory.filter(day => {
@@ -98,22 +101,39 @@ export default function ParentDashboard() {
   };
 
   const leaderboardData = [
-    { name: "Ankit", points: 95, studentName: "Student A" },
-    { name: "Riya", points: 90, studentName: "Student B" },
-    { name: "Aryan", points: 88, studentName: "Student C" },
-    { name: "Priya", points: 85, studentName: "Student D" },
-    { name: "Rahul", points: 82, studentName: "Student E" },
+    { name: "Parent A", points: 100, studentName: "Student A" },
+    { name: "Parent B", points: 90, studentName: "Student B" },
+    { name: "Parent C", points: 85, studentName: "Student C" },
+    { name: "Parent D", points: 80, studentName: "Student D" },
+    { name: "Parent E", points: 75, studentName: "Student E" },
+    { name: "Parent F", points: 70, studentName: "Student F" },
+    { name: "Parent G", points: 65, studentName: "Student G" },
+    { name: "Parent H", points: 60, studentName: "Student H" },
+    { name: "Parent I", points: 55, studentName: "Student I" },
+    { name: "Parent J", points: 50, studentName: "Student J" },
   ];
 
+  const medalIcons = ["🥇", "🥈", "🥉"];
+
   const formatNumberToEmoji = (num) => {
-    const medalIcons = ["🥇", "🥈", "🥉"];
     if (num <= 3) return medalIcons[num - 1];
     
-    const emojiMap = {
-      '0': '0️⃣', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣', '4': '4️⃣',
-      '5': '5️⃣', '6': '6️⃣', '7': '7️⃣', '8': '8️⃣', '9': '9️⃣'
-    };
-    return num.toString().split('').map(digit => emojiMap[digit]).join('');
+    // Convert number to string and map each digit to emoji
+    return num.toString().split('').map(digit => {
+      const emojiMap = {
+        '0': '0️⃣',
+        '1': '1️⃣',
+        '2': '2️⃣',
+        '3': '3️⃣',
+        '4': '4️⃣',
+        '5': '5️⃣',
+        '6': '6️⃣',
+        '7': '7️⃣',
+        '8': '8️⃣',
+        '9': '9️⃣'
+      };
+      return emojiMap[digit];
+    }).join('');
   };
 
   return (
@@ -193,8 +213,8 @@ export default function ParentDashboard() {
 
         {/* Main Content Grid */}
         <div className="space-y-6">
-          {/* First Row: Today's Activity, Points Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* First Row: Today's Activity */}
+          <div className="grid grid-cols-1 gap-6">
             {/* Today's Activity */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -251,48 +271,9 @@ export default function ParentDashboard() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Points Overview */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Points Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="text-center p-6 bg-gray-50 rounded-lg">
-                    <p className="text-4xl font-bold text-[#00308F]">85</p>
-                    <p className="text-gray-600 mt-2">Total Points</p>
-                    <div className="mt-4 flex justify-center gap-4">
-                      <div className="text-center">
-                        <p className="text-lg font-semibold text-[#00308F]">Level 5</p>
-                        <p className="text-sm text-gray-600">Current Level</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-semibold text-[#00308F]">15</p>
-                        <p className="text-sm text-gray-600">To Next Level</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-gray-600">This Week</p>
-                      <p className="text-xl font-semibold text-[#00308F]">25 pts</p>
-                    </div>
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-gray-600">This Month</p>
-                      <p className="text-xl font-semibold text-[#00308F]">85 pts</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Second Row: Leaderboard and Announcements */}
+          {/* Second Row: Leaderboard and Points Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Leaderboard */}
             <Card>
@@ -304,29 +285,58 @@ export default function ParentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {leaderboardData.map((student, index) => (
+                  {leaderboardData.slice(0, 3).map((parent, index) => (
                     <div
                       key={index}
-                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between"
+                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors"
+                      onClick={() => setShowLeaderboardModal(true)}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl min-w-[2rem]">
                           {formatNumberToEmoji(index + 1)}
                         </span>
                         <div>
-                          <p className="font-medium text-gray-800">{student.name}</p>
-                          <p className="text-sm text-gray-600">{student.studentName}</p>
+                          <p className="font-medium text-gray-800">{parent.name}</p>
+                          <p className="text-sm text-gray-600">{parent.studentName}</p>
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
-                        {student.points} pts
+                        {parent.points} pts
                       </Badge>
                     </div>
                   ))}
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-2"
+                    onClick={() => setShowLeaderboardModal(true)}
+                  >
+                    View Full Leaderboard
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Points Overview */}
+            <Card className="h-[220px]">
+              <CardHeader className="flex flex-row items-center justify-between pb-1">
+                <CardTitle className="text-lg font-bold flex items-center">
+                  <Trophy className="h-4 w-4 text-[#00308F] mr-2" />
+                  Points Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center h-[160px]">
+                  <div className="text-center">
+                    <p className="text-7xl font-bold text-[#00308F]">85</p>
+                    <p className="text-gray-600 mt-1 text-lg">Total Points</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Third Row: Announcements and Activity History */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Announcements */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -355,99 +365,146 @@ export default function ParentDashboard() {
                 </ScrollArea>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Activity History */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            {/* Activity History */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
+                  Activity History
+                </CardTitle>
+                <div className="flex gap-2">
+                  <select 
+                    className="px-2 py-1 border rounded-md text-sm"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                  >
+                    {['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'
+                    ].map(month => (
+                      <option key={month.toLowerCase()} value={month.toLowerCase()}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <select 
+                    className="px-2 py-1 border rounded-md text-sm"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                  >
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-6">
+                    {getFilteredActivities().length > 0 ? (
+                      getFilteredActivities().map((day, dayIndex) => (
+                        <div key={dayIndex} className="border-b pb-4 last:border-0">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-gray-800">
+                              {new Date(day.date).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </h3>
+                            <Badge variant="outline" className="text-[#00308F]">
+                              {day.activities.length} Activities
+                            </Badge>
+                          </div>
+                          <div className="space-y-3">
+                            {day.activities.map((activity, actIndex) => (
+                              <div 
+                                key={actIndex}
+                                className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <h4 className="font-medium text-gray-800">
+                                      {activity.title}
+                                    </h4>
+                                    <p className="text-sm text-gray-600">
+                                      Points earned: {activity.points}
+                                    </p>
+                                  </div>
+                                  <Badge 
+                                    className={
+                                      activity.status === 'completed' 
+                                        ? "bg-green-100 text-green-800" 
+                                        : "bg-yellow-100 text-yellow-800"
+                                    }
+                                  >
+                                    {activity.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No activities found for {selectedMonth} {selectedYear}
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+
+      {/* Leaderboard Modal */}
+      {showLeaderboardModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-2"
+                onClick={() => setShowLeaderboardModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
               <CardTitle className="text-xl font-bold flex items-center">
-                <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                Activity History
+                <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
+                Full Leaderboard
               </CardTitle>
-              <div className="flex gap-2">
-                <select 
-                  className="px-2 py-1 border rounded-md text-sm"
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                >
-                  {['January', 'February', 'March', 'April', 'May', 'June', 
-                    'July', 'August', 'September', 'October', 'November', 'December'
-                  ].map(month => (
-                    <option key={month.toLowerCase()} value={month.toLowerCase()}>
-                      {month}
-                    </option>
-                  ))}
-                </select>
-                <select 
-                  className="px-2 py-1 border rounded-md text-sm"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                >
-                  <option value="2023">2023</option>
-                  <option value="2024">2024</option>
-                </select>
-              </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-6">
-                  {getFilteredActivities().length > 0 ? (
-                    getFilteredActivities().map((day, dayIndex) => (
-                      <div key={dayIndex} className="border-b pb-4 last:border-0">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-semibold text-gray-800">
-                            {new Date(day.date).toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </h3>
-                          <Badge variant="outline" className="text-[#00308F]">
-                            {day.activities.length} Activities
-                          </Badge>
-                        </div>
-                        <div className="space-y-3">
-                          {day.activities.map((activity, actIndex) => (
-                            <div 
-                              key={actIndex}
-                              className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
-                            >
-                              <div className="flex justify-between items-center">
-                                <div>
-                                  <h4 className="font-medium text-gray-800">
-                                    {activity.title}
-                                  </h4>
-                                  <p className="text-sm text-gray-600">
-                                    Points earned: {activity.points}
-                                  </p>
-                                </div>
-                                <Badge 
-                                  className={
-                                    activity.status === 'completed' 
-                                      ? "bg-green-100 text-green-800" 
-                                      : "bg-yellow-100 text-yellow-800"
-                                  }
-                                >
-                                  {activity.status}
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-3">
+                  {leaderboardData.map((parent, index) => (
+                    <div
+                      key={index}
+                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl min-w-[2rem]">
+                          {formatNumberToEmoji(index + 1)}
+                        </span>
+                        <div>
+                          <p className="font-medium text-gray-800">{parent.name}</p>
+                          <p className="text-sm text-gray-600">{parent.studentName}</p>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No activities found for {selectedMonth} {selectedYear}
+                      <Badge className="bg-white text-[#00308F]">
+                        {parent.points} pts
+                      </Badge>
                     </div>
-                  )}
+                  ))}
                 </div>
               </ScrollArea>
             </CardContent>
           </Card>
         </div>
-      </main>
+      )}
     </div>
   );
 }
