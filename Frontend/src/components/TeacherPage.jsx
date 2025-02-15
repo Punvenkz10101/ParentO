@@ -506,7 +506,11 @@ export default function TeacherDashboard() {
                   <Bell className="h-5 w-5 text-indigo-600 mr-2" />
                   Announcements
                 </CardTitle>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowAnnouncementForm(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add
                 </Button>
@@ -522,7 +526,7 @@ export default function TeacherDashboard() {
                         <div className="h-2 w-2 bg-indigo-600 rounded-full"></div>
                         <p className="text-gray-700 flex-1">
                           <span className="font-medium">{announcement.title}</span>
-                          <span className="mx-1">:</span>
+                          {"   "}
                           <span>{announcement.description}</span>
                         </p>
                         <Badge>New</Badge>
@@ -777,7 +781,11 @@ export default function TeacherDashboard() {
                 <div className="flex justify-end gap-2">
                   <Button 
                     variant="outline" 
-                    onClick={() => setShowAnnouncementForm(false)}
+                    onClick={() => {
+                      setShowAnnouncementForm(false);
+                      setNewAnnouncementTitle("");
+                      setNewAnnouncementDescription("");
+                    }}
                   >
                     Cancel
                   </Button>
