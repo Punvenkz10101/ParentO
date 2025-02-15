@@ -10,10 +10,9 @@ function App() {
         <Route path="/" element={<Hero />} />
         <Route path="/login/:userType" element={<AuthForm type="login" />} />
         <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
+        <Route path='/parentDashboard' element={<ParentDashboard/>}/>
+        <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
       </Routes>
-    /* <Hero /> */
-   /* <ParentDashboard />
-    <TeacherDashboard/>*/
   );
 }
 
