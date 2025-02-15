@@ -1,9 +1,11 @@
 import Hero from './components/Hero'
+import ParentDashboard from './components/ParentPage'
 
 function App() {
   return (
     <main>
-      <Hero />
+      {/* <Hero /> */}
+      <ParentDashboard />
     </main>
   )
 }
