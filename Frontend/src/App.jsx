@@ -5,7 +5,7 @@ function App() {
   return (
     <main>
       {/* <Hero /> */}
-      {/* <ParentDashboard /> */}
+      <ParentDashboard />
       <TeacherDashboard/>
     </main>
   )

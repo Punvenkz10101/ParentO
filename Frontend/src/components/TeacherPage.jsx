@@ -249,12 +249,12 @@ export default function TeacherDashboard() {
                 </ScrollArea>
               </SheetContent>
             </Sheet>
-            <h1 className="text-xl font-bold">Teacher Dashboard</h1>
+            <h1 className="text-xl font-bold text-[#00308F]">Teacher Dashboard</h1>
           </div>
 
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5 text-[#00308F]" />
             </Button>
             
             <DropdownMenu>
@@ -291,7 +291,7 @@ export default function TeacherDashboard() {
       {/* Main Content */}
       <main className="pt-20 p-4 max-w-7xl mx-auto">
         {/* Welcome Card */}
-        <Card className="mb-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+        <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">Welcome Back!</h2>
@@ -312,7 +312,7 @@ export default function TeacherDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Calendar className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
                   Today's Activities
                 </CardTitle>
                 <Button onClick={() => setShowActivityForm(true)} variant="outline" size="sm">
@@ -331,7 +331,7 @@ export default function TeacherDashboard() {
                         <div className="flex items-center space-x-2 text-gray-700">
                           <ChevronRight 
                             className={cn(
-                              "h-4 w-4 text-indigo-400 transition-transform",
+                              "h-4 w-4 text-[#00308F] transition-transform",
                               expandedActivity === index ? "transform rotate-90" : ""
                             )} 
                           />
@@ -366,7 +366,7 @@ export default function TeacherDashboard() {
                                     key={taskIndex} 
                                     className="flex items-center bg-gray-50 px-3 py-2 rounded-lg"
                                   >
-                                    <div className="h-2 w-2 bg-indigo-600 rounded-full mr-2"></div>
+                                    <div className="h-2 w-2 bg-[#00308F] rounded-full mr-2"></div>
                                     <span>{task}</span>
                                   </div>
                                 ))}
@@ -385,7 +385,7 @@ export default function TeacherDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Trophy className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
                   Parent Progress
                 </CardTitle>
               </CardHeader>
@@ -395,7 +395,7 @@ export default function TeacherDashboard() {
                     {parentsProgress.map((parent, index) => (
                       <div 
                         key={index} 
-                        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors"
+                        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
                       >
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -403,7 +403,7 @@ export default function TeacherDashboard() {
                             <p className="text-sm text-gray-600">{parent.studentName}</p>
                           </div>
                           <div className="text-right">
-                            <Badge className="bg-indigo-100 text-indigo-700 mb-1">
+                            <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
                               {parent.points} Points
                             </Badge>
                           </div>
@@ -413,13 +413,13 @@ export default function TeacherDashboard() {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Activities Completed</span>
-                            <span className="font-medium text-indigo-600">
+                            <span className="font-medium text-[#00308F]">
                               {parent.activitiesCompleted}/{parent.totalActivities}
                             </span>
                           </div>
                           <div className="w-full bg-gray-100 rounded-full h-2.5">
                             <div 
-                              className="bg-indigo-600 h-full rounded-full"
+                              className="bg-[#00308F] h-full rounded-full"
                               style={{ 
                                 width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
                               }}
@@ -439,11 +439,11 @@ export default function TeacherDashboard() {
                         <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                           <div className="bg-gray-50 p-2 rounded-md">
                             <p className="text-gray-600">Daily Streak</p>
-                            <p className="font-semibold text-indigo-600">3 days</p>
+                            <p className="font-semibold text-[#00308F]">3 days</p>
                           </div>
                           <div className="bg-gray-50 p-2 rounded-md">
                             <p className="text-gray-600">Completion Rate</p>
-                            <p className="font-semibold text-indigo-600">
+                            <p className="font-semibold text-[#00308F]">
                               {Math.round((parent.activitiesCompleted / parent.totalActivities) * 100)}%
                             </p>
                           </div>
@@ -462,7 +462,7 @@ export default function TeacherDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Trophy className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
                   Parent Leaderboard
                 </CardTitle>
               </CardHeader>
@@ -471,7 +471,7 @@ export default function TeacherDashboard() {
                   {leaderboardData.slice(0, 5).map((parent, index) => (
                     <div
                       key={index}
-                      className="p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg flex items-center justify-between cursor-pointer hover:from-indigo-100 hover:to-indigo-200 transition-colors"
+                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors"
                       onClick={() => setShowLeaderboardOverlay(true)}
                     >
                       <div className="flex items-center gap-3">
@@ -483,7 +483,7 @@ export default function TeacherDashboard() {
                           <p className="text-sm text-gray-600">{parent.studentName}</p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-white">
+                      <Badge className="bg-white text-[#00308F]">
                         {parent.points} pts
                       </Badge>
                     </div>
@@ -503,7 +503,7 @@ export default function TeacherDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Bell className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Bell className="h-5 w-5 text-[#00308F] mr-2" />
                   Announcements
                 </CardTitle>
                 <Button 
@@ -523,7 +523,7 @@ export default function TeacherDashboard() {
                         key={index} 
                         className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
-                        <div className="h-2 w-2 bg-indigo-600 rounded-full"></div>
+                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
                         <p className="text-gray-700 flex-1">
                           <span className="font-medium">{announcement.title}</span>
                           {"   "}
@@ -543,7 +543,7 @@ export default function TeacherDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <Calendar className="h-5 w-5 text-indigo-600 mr-2" />
+                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
                   Activity History
                 </CardTitle>
                 <div className="flex gap-2">
@@ -590,7 +590,7 @@ export default function TeacherDashboard() {
                                 day: 'numeric'
                               })}
                             </h3>
-                            <Badge variant="outline" className="text-indigo-600">
+                            <Badge variant="outline" className="text-[#00308F]">
                               {day.activities.length} Activities
                             </Badge>
                           </div>
@@ -701,7 +701,7 @@ export default function TeacherDashboard() {
                         type="checkbox"
                         checked={selectedTasks.completion}
                         onChange={(e) => setSelectedTasks({...selectedTasks, completion: e.target.checked})}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 rounded border-gray-300 text-[#00308F] focus:ring-[#00308F]"
                       />
                       <span className="ml-2 text-sm text-gray-600">Submit task completion (5 points)</span>
                     </div>
@@ -710,7 +710,7 @@ export default function TeacherDashboard() {
                         type="checkbox"
                         checked={selectedTasks.photo}
                         onChange={(e) => setSelectedTasks({...selectedTasks, photo: e.target.checked})}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 rounded border-gray-300 text-[#00308F] focus:ring-[#00308F]"
                       />
                       <span className="ml-2 text-sm text-gray-600">Upload photo of work (5 points)</span>
                     </div>
@@ -719,7 +719,7 @@ export default function TeacherDashboard() {
                         type="checkbox"
                         checked={selectedTasks.video}
                         onChange={(e) => setSelectedTasks({...selectedTasks, video: e.target.checked})}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 rounded border-gray-300 text-[#00308F] focus:ring-[#00308F]"
                       />
                       <span className="ml-2 text-sm text-gray-600">Submit video of activity (5 points)</span>
                     </div>
@@ -813,7 +813,7 @@ export default function TeacherDashboard() {
                 <IoClose className="h-5 w-5" />
               </Button>
               <CardTitle className="text-xl font-bold flex items-center">
-                <Trophy className="h-5 w-5 text-indigo-600 mr-2" />
+                <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
                 Full Leaderboard
               </CardTitle>
             </CardHeader>
@@ -823,7 +823,7 @@ export default function TeacherDashboard() {
                   {leaderboardData.map((parent, index) => (
                     <div
                       key={index}
-                      className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg flex items-center justify-between"
+                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl min-w-[2rem]">
@@ -834,22 +834,9 @@ export default function TeacherDashboard() {
                           <p className="text-sm text-gray-600">{parent.studentName}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <Badge 
-                          variant="secondary" 
-                          className={cn(
-                            "bg-white mb-1",
-                            index < 3 ? "text-yellow-600" : 
-                            index < 5 ? "text-indigo-600" : 
-                            "text-gray-600"
-                          )}
-                        >
-                          {parent.points} pts
-                        </Badge>
-                        <p className="text-xs text-gray-500">
-                          Level {Math.floor(parent.points / 20) + 1}
-                        </p>
-                      </div>
+                      <Badge className="bg-white text-[#00308F]">
+                        {parent.points} pts
+                      </Badge>
                     </div>
                   ))}
                 </div>
