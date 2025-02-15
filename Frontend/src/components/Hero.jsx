@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+
 
 export default function Hero() {
   const [selectedVideo, setSelectedVideo] = useState(null);
-
+const navigate=useNavigate();
   const languages = [
     { name: 'Hindi', src: '/videos/hindi.mp4' },
     { name: 'Tamil', src: '/videos/tamil.mp4' },
@@ -33,11 +36,11 @@ export default function Hero() {
 
         {/* Buttons */}
         <div className="mt-8 flex flex-wrap gap-6 justify-center">
-          <button className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
+          <button onClick={()=>{navigate('/login/parent')}} className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
             Parent Login
           </button>
-          <button className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
-            Teacher Login 
+          <button onClick={()=>{navigate('/login/teacher')}} className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
+            Teacher Login
           </button>
         </div>
 
