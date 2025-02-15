@@ -21,14 +21,23 @@ export default function AuthForm({ type }) {
       if (type === 'login') {
         localStorage.setItem('token', res.data.token);
         alert('Login successful!');
-        navigate('/');
+        if (userType === 'parent') {
+          navigate('/parentDashboard');
+        } else if (userType === 'teacher') {
+          navigate('/teacherDashboard');
+        } else {
+          navigate('/');  // Default fallback
+        }
       } else {
         alert('Signup successful! Please log in.');
         navigate(`/login/${userType}`);
       }
     } catch (err) {
-      alert(err.response?.data?.error || 'An error occurred');
+      console.error('Error:', err);  // Log full error for debugging
+      console.error('Response:', err.response);  // Log response object
+      alert(err.response?.data?.error || err.message || 'An error occurred');
     }
+    
   };
 
   return (
