@@ -317,22 +317,22 @@ export default function ParentDashboard() {
             </Card>
 
             {/* Points Overview */}
-            <Card className="h-[220px]">
-              <CardHeader className="flex flex-row items-center justify-between pb-1">
-                <CardTitle className="text-lg font-bold flex items-center">
-                  <Trophy className="h-4 w-4 text-[#00308F] mr-2" />
-                  Points Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center h-[160px]">
-                  <div className="text-center">
-                    <p className="text-7xl font-bold text-[#00308F]">85</p>
-                    <p className="text-gray-600 mt-1 text-lg">Total Points</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Points Overview */}
+<Card className="h-[365px] flex flex-col justify-center bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+  <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <CardTitle className="text-xl font-bold flex items-center">
+      <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
+      Points Overview
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="flex flex-col justify-center items-center h-full">
+    <div className="text-center">
+      <p className="text-9xl font-bold text-[#00308F]">85</p>
+      <p className="text-gray-600 mt-2 text-xl">Total Points</p>
+    </div>
+  </CardContent>
+</Card>
+
           </div>
 
           {/* Third Row: Announcements and Activity History */}
