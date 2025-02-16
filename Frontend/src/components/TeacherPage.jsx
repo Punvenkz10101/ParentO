@@ -232,54 +232,41 @@ export default function TeacherDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
-      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50">
-        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64">
-                <ScrollArea className="h-full">
-                  <div className="space-y-4 py-4">
-                    <h2 className="text-lg font-semibold px-4">Dashboard</h2>
-                  </div>
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
-            <h1 className="text-xl font-bold text-[#00308F]">Teacher Dashboard</h1>
+      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
+        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
+          {/* Logo on the left */}
+          <div className="flex items-center flex-shrink-0">
+            <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5 text-[#00308F]" />
-            </Button>
-            
+          {/* Centered Dashboard Title */}
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">Teacher Dashboard</h1>
+          </div>
+
+          {/* Avatar Dropdown on the right */}
+          <div className="flex items-center flex-shrink-0 w-[48px]">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/teacher.png" alt="Teacher" />
-                    <AvatarFallback>T</AvatarFallback>
-                  </Avatar>
-                </Button>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src="/avatars/teacher.png" alt="Teacher" />
+                  <AvatarFallback className="text-lg">T</AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="text-base">
+                  <User className="mr-2 h-5 w-5" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="text-base">
+                  <Settings className="mr-2 h-5 w-5" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="text-base text-red-600">
+                  <LogOut className="mr-2 h-5 w-5" />
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -382,78 +369,57 @@ export default function TeacherDashboard() {
             </Card>
 
             {/* Parent Progress */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Parent Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[300px] pr-4">
-                  <div className="space-y-4">
-                    {parentsProgress.map((parent, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="font-semibold text-gray-800">{parent.name}</p>
-                            <p className="text-sm text-gray-600">{parent.studentName}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
-                              {parent.points} Points
-                            </Badge>
-                          </div>
-                        </div>
+           {/* Parent Progress */}
+<Card>
+  <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <CardTitle className="text-xl font-bold flex items-center">
+      <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
+      Parent Progress
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ScrollArea className="h-[300px] pr-4">
+      <div className="space-y-4">
+        {parentsProgress.map((parent, index) => (
+          <div 
+            key={index} 
+            className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
+          >
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <p className="font-semibold text-gray-800">{parent.name}</p>
+                <p className="text-sm text-gray-600">{parent.studentName}</p>
+              </div>
+              <div className="text-right">
+                <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
+                  {parent.points} Points
+                </Badge>
+              </div>
+            </div>
 
-                        {/* Activities Progress */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Activities Completed</span>
-                            <span className="font-medium text-[#00308F]">
-                              {parent.activitiesCompleted}/{parent.totalActivities}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2.5">
-                            <div 
-                              className="bg-[#00308F] h-full rounded-full"
-                              style={{ 
-                                width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Level and Stats */}
-                        <div className="mt-3 flex items-center space-x-2">
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                          <span className="text-gray-600 text-sm">
-                            Level {Math.floor(parent.points / 20) + 1}
-                          </span>
-                        </div>
-
-                        {/* Quick Stats */}
-                        <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                          <div className="bg-gray-50 p-2 rounded-md">
-                            <p className="text-gray-600">Daily Streak</p>
-                            <p className="font-semibold text-[#00308F]">3 days</p>
-                          </div>
-                          <div className="bg-gray-50 p-2 rounded-md">
-                            <p className="text-gray-600">Completion Rate</p>
-                            <p className="font-semibold text-[#00308F]">
-                              {Math.round((parent.activitiesCompleted / parent.totalActivities) * 100)}%
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+            {/* Activities Progress */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Activities Completed</span>
+                <span className="font-medium text-[#00308F]">
+                  {parent.activitiesCompleted}/{parent.totalActivities}
+                </span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-2.5">
+                <div 
+                  className="bg-[#00308F] h-full rounded-full"
+                  style={{ 
+                    width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  </CardContent>
+</Card>
           </div>
 
           {/* Second Row: Leaderboard and Announcements */}

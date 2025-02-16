@@ -1,14 +1,14 @@
 'use client';
 import React from 'react';
 import { useState } from 'react';
-import { 
-  Bell, 
-  Calendar, 
-  Trophy, 
-  BookOpen, 
-  User, 
-  LogOut, 
-  ChevronRight, 
+import {
+  Bell,
+  Calendar,
+  Trophy,
+  BookOpen,
+  User,
+  LogOut,
+  ChevronRight,
   Star,
   Settings,
   Menu,
@@ -95,8 +95,8 @@ export default function ParentDashboard() {
     return activityHistory.filter(day => {
       const date = new Date(day.date);
       const monthName = date.toLocaleString('default', { month: 'long' }).toLowerCase();
-      return date.getFullYear().toString() === selectedYear && 
-             monthName === selectedMonth.toLowerCase();
+      return date.getFullYear().toString() === selectedYear &&
+        monthName === selectedMonth.toLowerCase();
     });
   };
 
@@ -117,7 +117,7 @@ export default function ParentDashboard() {
 
   const formatNumberToEmoji = (num) => {
     if (num <= 3) return medalIcons[num - 1];
-    
+
     // Convert number to string and map each digit to emoji
     return num.toString().split('').map(digit => {
       const emojiMap = {
@@ -139,54 +139,41 @@ export default function ParentDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
-      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50">
-        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64">
-                <ScrollArea className="h-full">
-                  <div className="space-y-4 py-4">
-                    <h2 className="text-lg font-semibold px-4">Dashboard</h2>
-                  </div>
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
-            <h1 className="text-xl font-bold text-[#00308F]">ParentO Dashboard</h1>
+      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
+        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
+          {/* Logo on the left */}
+          <div className="flex items-center flex-shrink-0">
+            <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5 text-[#00308F]" />
-            </Button>
-            
+          {/* Centered Dashboard Title */}
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">Parents Dashboard</h1>
+          </div>
+
+          {/* Avatar Dropdown on the right */}
+          <div className="flex items-center flex-shrink-0 w-[48px]">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/parent.png" alt="Parent" />
-                    <AvatarFallback>P</AvatarFallback>
-                  </Avatar>
-                </Button>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src="/avatars/parent.png" alt="Parent" />
+                  <AvatarFallback className="text-lg">P</AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="text-base">
+                  <User className="mr-2 h-5 w-5" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="text-base">
+                  <Settings className="mr-2 h-5 w-5" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="text-base text-red-600">
+                  <LogOut className="mr-2 h-5 w-5" />
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -194,9 +181,8 @@ export default function ParentDashboard() {
           </div>
         </div>
       </nav>
-
       {/* Main Content */}
-      <main className="pt-20 p-4 max-w-7xl mx-auto">
+      <main className="pt-20 p-4 max-w-7xl mx-auto overflow-y-auto">
         {/* Welcome Card */}
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
@@ -212,7 +198,7 @@ export default function ParentDashboard() {
         </Card>
 
         {/* Main Content Grid */}
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto">
           {/* First Row: Today's Activity */}
           <div className="grid grid-cols-1 gap-6">
             {/* Today's Activity */}
@@ -227,15 +213,14 @@ export default function ParentDashboard() {
                 <div className="space-y-3">
                   {todaysActivities.map((activity, index) => (
                     <div key={index} className="space-y-2">
-                      <div 
+                      <div
                         className="flex items-center justify-between p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                         onClick={() => setExpandedActivity(expandedActivity === index ? null : index)}
                       >
                         <div className="flex items-center space-x-2 text-gray-700">
-                          <ChevronRight 
-                            className={`h-4 w-4 text-[#00308F] transition-transform ${
-                              expandedActivity === index ? "transform rotate-90" : ""
-                            }`} 
+                          <ChevronRight
+                            className={`h-4 w-4 text-[#00308F] transition-transform ${expandedActivity === index ? "transform rotate-90" : ""
+                              }`}
                           />
                           <span>{activity.title}</span>
                         </div>
@@ -253,8 +238,8 @@ export default function ParentDashboard() {
                               <p className="font-medium mb-2">Required Tasks:</p>
                               <div className="flex flex-wrap gap-4">
                                 {activity.tasks.map((task, taskIndex) => (
-                                  <div 
-                                    key={taskIndex} 
+                                  <div
+                                    key={taskIndex}
                                     className="flex items-center bg-gray-50 px-3 py-2 rounded-lg"
                                   >
                                     <div className="h-2 w-2 bg-[#00308F] rounded-full mr-2"></div>
@@ -305,8 +290,8 @@ export default function ParentDashboard() {
                       </Badge>
                     </div>
                   ))}
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full mt-2"
                     onClick={() => setShowLeaderboardModal(true)}
                   >
@@ -317,21 +302,21 @@ export default function ParentDashboard() {
             </Card>
 
             {/* Points Overview */}
-          {/* Points Overview */}
-<Card className="h-[365px] flex flex-col justify-center bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-  <CardHeader className="flex flex-row items-center justify-between pb-2">
-    <CardTitle className="text-xl font-bold flex items-center">
-      <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-      Points Overview
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="flex flex-col justify-center items-center h-full">
-    <div className="text-center">
-      <p className="text-9xl font-bold text-[#00308F]">85</p>
-      <p className="text-gray-600 mt-2 text-xl">Total Points</p>
-    </div>
-  </CardContent>
-</Card>
+            {/* Points Overview */}
+            <Card className="h-[365px] flex flex-col justify-center bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
+                  Points Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col justify-center items-center h-full">
+                <div className="text-center">
+                  <p className="text-9xl font-bold text-[#00308F]">85</p>
+                  <p className="text-gray-600 mt-2 text-xl">Total Points</p>
+                </div>
+              </CardContent>
+            </Card>
 
           </div>
 
@@ -349,8 +334,8 @@ export default function ParentDashboard() {
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
                     {announcements.map((announcement, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
                         <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
@@ -374,12 +359,12 @@ export default function ParentDashboard() {
                   Activity History
                 </CardTitle>
                 <div className="flex gap-2">
-                  <select 
+                  <select
                     className="px-2 py-1 border rounded-md text-sm"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                   >
-                    {['January', 'February', 'March', 'April', 'May', 'June', 
+                    {['January', 'February', 'March', 'April', 'May', 'June',
                       'July', 'August', 'September', 'October', 'November', 'December'
                     ].map(month => (
                       <option key={month.toLowerCase()} value={month.toLowerCase()}>
@@ -387,7 +372,7 @@ export default function ParentDashboard() {
                       </option>
                     ))}
                   </select>
-                  <select 
+                  <select
                     className="px-2 py-1 border rounded-md text-sm"
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(e.target.value)}
@@ -418,7 +403,7 @@ export default function ParentDashboard() {
                           </div>
                           <div className="space-y-3">
                             {day.activities.map((activity, actIndex) => (
-                              <div 
+                              <div
                                 key={actIndex}
                                 className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
                               >
@@ -431,10 +416,10 @@ export default function ParentDashboard() {
                                       Points earned: {activity.points}
                                     </p>
                                   </div>
-                                  <Badge 
+                                  <Badge
                                     className={
-                                      activity.status === 'completed' 
-                                        ? "bg-green-100 text-green-800" 
+                                      activity.status === 'completed'
+                                        ? "bg-green-100 text-green-800"
                                         : "bg-yellow-100 text-yellow-800"
                                     }
                                   >
