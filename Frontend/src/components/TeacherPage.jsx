@@ -244,9 +244,9 @@ export default function TeacherDashboard() {
   const [showProgressForm, setShowProgressForm] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
-      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
+      <nav className="border-b relative  bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
           {/* Logo on the left */}
           <div className="flex items-center flex-shrink-0">
@@ -261,7 +261,7 @@ export default function TeacherDashboard() {
           {/* Avatar Dropdown on the right */}
           <div className="flex items-center flex-shrink-0 w-[48px]">
             <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none">
+              <DropdownMenuTrigger className="focus:outline-none ">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src="/avatars/teacher.png" alt="Teacher" />
                   <AvatarFallback className="text-lg">T</AvatarFallback>
@@ -290,7 +290,7 @@ export default function TeacherDashboard() {
       </nav>
 
       {/* Main Content */}
-      <main className="pt-20 p-4 max-w-7xl mx-auto">
+      <main className="p-4 max-w-7xl mx-auto">
         {/* Welcome Card */}
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
