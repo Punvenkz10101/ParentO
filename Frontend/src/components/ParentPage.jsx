@@ -199,10 +199,10 @@ export default function ParentDashboard() {
 
         {/* Main Content Grid */}
         <div className="space-y-6 overflow-y-auto">
-          {/* First Row: Today's Activity */}
-          <div className="grid grid-cols-1 gap-6">
+          {/* First Row: Today's Activity and Student Progress */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Today's Activity */}
-            <Card>
+            <Card className="h-[365px]">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
@@ -210,50 +210,80 @@ export default function ParentDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {todaysActivities.map((activity, index) => (
-                    <div key={index} className="space-y-2">
-                      <div
-                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                        onClick={() => setExpandedActivity(expandedActivity === index ? null : index)}
-                      >
-                        <div className="flex items-center space-x-2 text-gray-700">
-                          <ChevronRight
-                            className={`h-4 w-4 text-[#00308F] transition-transform ${expandedActivity === index ? "transform rotate-90" : ""
-                              }`}
-                          />
-                          <span>{activity.title}</span>
+                <ScrollArea className="h-[280px]">
+                  <div className="space-y-3">
+                    {todaysActivities.map((activity, index) => (
+                      <div key={index} className="space-y-2">
+                        <div
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                          onClick={() => setExpandedActivity(expandedActivity === index ? null : index)}
+                        >
+                          <div className="flex items-center space-x-2 text-gray-700">
+                            <ChevronRight
+                              className={`h-4 w-4 text-[#00308F] transition-transform ${expandedActivity === index ? "transform rotate-90" : ""
+                                }`}
+                            />
+                            <span>{activity.title}</span>
+                          </div>
                         </div>
-                      </div>
-                      {expandedActivity === index && (
-                        <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
-                          <p className="mb-2">
-                            <span className="font-medium">Description:</span> {activity.description}
-                          </p>
-                          <p className="mb-2">
-                            <span className="font-medium">Date:</span> {activity.date}
-                          </p>
-                          {activity.tasks && activity.tasks.length > 0 && (
-                            <div>
-                              <p className="font-medium mb-2">Required Tasks:</p>
-                              <div className="flex flex-wrap gap-4">
-                                {activity.tasks.map((task, taskIndex) => (
-                                  <div
-                                    key={taskIndex}
-                                    className="flex items-center bg-gray-50 px-3 py-2 rounded-lg"
-                                  >
-                                    <div className="h-2 w-2 bg-[#00308F] rounded-full mr-2"></div>
-                                    <span>{task}</span>
-                                  </div>
-                                ))}
+                        {expandedActivity === index && (
+                          <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
+                            <p className="mb-2">
+                              <span className="font-medium">Description:</span> {activity.description}
+                            </p>
+                            <p className="mb-2">
+                              <span className="font-medium">Date:</span> {activity.date}
+                            </p>
+                            {activity.tasks && activity.tasks.length > 0 && (
+                              <div>
+                                <p className="font-medium mb-2">Required Tasks:</p>
+                                <div className="flex flex-wrap gap-4">
+                                  {activity.tasks.map((task, taskIndex) => (
+                                    <div
+                                      key={taskIndex}
+                                      className="flex items-center bg-gray-50 px-3 py-2 rounded-lg"
+                                    >
+                                      <div className="h-2 w-2 bg-[#00308F] rounded-full mr-2"></div>
+                                      <span>{task}</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Student Progress */}
+            <Card className="h-[365px]">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
+                  Student Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[280px]">
+                  <div className="space-y-3">
+                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                      <p className="font-medium text-gray-800">Math Exam</p>
+                      <p className="text-sm text-gray-600">Score: 85/100</p>
                     </div>
-                  ))}
-                </div>
+                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                      <p className="font-medium text-gray-800">Science Exam</p>
+                      <p className="text-sm text-gray-600">Score: 90/100</p>
+                    </div>
+                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                      <p className="font-medium text-gray-800">English Exam</p>
+                      <p className="text-sm text-gray-600">Score: 78/100</p>
+                    </div>
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </div>
@@ -302,7 +332,6 @@ export default function ParentDashboard() {
             </Card>
 
             {/* Points Overview */}
-            {/* Points Overview */}
             <Card className="h-[365px] flex flex-col justify-center bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
@@ -317,7 +346,6 @@ export default function ParentDashboard() {
                 </div>
               </CardContent>
             </Card>
-
           </div>
 
           {/* Third Row: Announcements and Activity History */}

@@ -620,6 +620,57 @@ export default function TeacherDashboard() {
           </div>
         </div>
       </main>
+      <Card>
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardTitle className="text-xl font-bold flex items-center">
+        <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
+        Student Progress
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <ScrollArea className="h-[400px] pr-4">
+        <div className="space-y-4">
+          {/* Example Student Progress Form */}
+          <div className="p-4 bg-white rounded-lg border border-gray-200">
+            <h3 className="font-semibold text-gray-800 mb-4">Enter Student Marks</h3>
+            <div className="space-y-3">
+              {/* Student 1 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Student A</label>
+                <input
+                  type="number"
+                  placeholder="Enter marks"
+                  className="w-full p-2 border rounded-md text-sm"
+                />
+              </div>
+              {/* Student 2 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Student B</label>
+                <input
+                  type="number"
+                  placeholder="Enter marks"
+                  className="w-full p-2 border rounded-md text-sm"
+                />
+              </div>
+              {/* Student 3 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Student C</label>
+                <input
+                  type="number"
+                  placeholder="Enter marks"
+                  className="w-full p-2 border rounded-md text-sm"
+                />
+              </div>
+              {/* Add more students as needed */}
+            </div>
+            <Button className="mt-4 w-full" onClick={() => alert("Marks saved!")}>
+              Save Marks
+            </Button>
+          </div>
+        </div>
+      </ScrollArea>
+    </CardContent>
+  </Card>
 
       {/* Activity Form Modal */}
       {showActivityForm && (
