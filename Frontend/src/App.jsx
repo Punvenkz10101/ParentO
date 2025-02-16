@@ -29,6 +29,7 @@ function App() {
       <Route path='/parentDashboard' element={<ParentDashboard/>}/>
       <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
     </Routes>
+    
   );
 }
 

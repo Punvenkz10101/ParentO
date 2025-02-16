@@ -13,7 +13,8 @@ import {
   Settings,
   Menu,
   Plus,
-  Trash2
+  Trash2,
+  X
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -229,6 +230,19 @@ export default function TeacherDashboard() {
 
   const [expandedActivity, setExpandedActivity] = useState(null);
 
+  // Add this new state for students list
+  const [studentsList] = useState([
+    { id: 1, name: "Student A", parentName: "Parent A", attendance: "85%", rollNo: "001" },
+    { id: 2, name: "Student B", parentName: "Parent B", attendance: "90%", rollNo: "002" },
+    { id: 3, name: "Student C", parentName: "Parent C", attendance: "75%", rollNo: "003" },
+    { id: 4, name: "Student D", parentName: "Parent D", attendance: "95%", rollNo: "004" },
+    { id: 5, name: "Student E", parentName: "Parent E", attendance: "88%", rollNo: "005" },
+    // Add more students as needed
+  ]);
+
+  // Add this new state for progress form
+  const [showProgressForm, setShowProgressForm] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
@@ -293,9 +307,9 @@ export default function TeacherDashboard() {
 
         {/* Main Content Grid */}
         <div className="space-y-6">
-          {/* First Row: Today's Activity, Parent Progress */}
+          {/* First Row: Today's Activities and Parent Progress */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Today's Activity */}
+            {/* Today's Activities */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
@@ -369,62 +383,61 @@ export default function TeacherDashboard() {
             </Card>
 
             {/* Parent Progress */}
-           {/* Parent Progress */}
-<Card>
-  <CardHeader className="flex flex-row items-center justify-between pb-2">
-    <CardTitle className="text-xl font-bold flex items-center">
-      <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-      Parent Progress
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-    <ScrollArea className="h-[300px] pr-4">
-      <div className="space-y-4">
-        {parentsProgress.map((parent, index) => (
-          <div 
-            key={index} 
-            className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
-          >
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="font-semibold text-gray-800">{parent.name}</p>
-                <p className="text-sm text-gray-600">{parent.studentName}</p>
-              </div>
-              <div className="text-right">
-                <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
-                  {parent.points} Points
-                </Badge>
-              </div>
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
+                  Parent Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px] pr-4">
+                  <div className="space-y-4">
+                    {parentsProgress.map((parent, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="font-semibold text-gray-800">{parent.name}</p>
+                            <p className="text-sm text-gray-600">{parent.studentName}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
+                              {parent.points} Points
+                            </Badge>
+                          </div>
+                        </div>
 
-            {/* Activities Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Activities Completed</span>
-                <span className="font-medium text-[#00308F]">
-                  {parent.activitiesCompleted}/{parent.totalActivities}
-                </span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2.5">
-                <div 
-                  className="bg-[#00308F] h-full rounded-full"
-                  style={{ 
-                    width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
-  </CardContent>
-</Card>
+                        {/* Activities Progress */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Activities Completed</span>
+                            <span className="font-medium text-[#00308F]">
+                              {parent.activitiesCompleted}/{parent.totalActivities}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div 
+                              className="bg-[#00308F] h-full rounded-full"
+                              style={{ 
+                                width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Second Row: Leaderboard and Announcements */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Leaderboard Card */}
+            {/* Leaderboard */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
@@ -465,7 +478,7 @@ export default function TeacherDashboard() {
               </CardContent>
             </Card>
 
-            {/* Announcements Card */}
+            {/* Announcements */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
@@ -504,8 +517,9 @@ export default function TeacherDashboard() {
             </Card>
           </div>
 
-          {/* Third Row: Activity History */}
-          <div className="mt-6">
+          {/* Third Row: Activity History and Class Students */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Activity History */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
@@ -617,60 +631,51 @@ export default function TeacherDashboard() {
                 </ScrollArea>
               </CardContent>
             </Card>
+
+            {/* Class Students */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <BookOpen className="h-5 w-4 text-[#00308F] mr-2" />
+                  Class Students
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-6">
+                    {studentsList.map((student) => (
+                      <div
+                        key={student.id}
+                        className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="font-medium text-gray-800">{student.name}</p>
+                            <p className="text-sm text-gray-600">{student.parentName}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge className="bg-white text-[#00308F]">
+                              {student.attendance}
+                            </Badge>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setShowProgressForm(true)}
+                              className="bg-white hover:bg-gray-100"
+                            >
+                              Update
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
-      <Card>
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-xl font-bold flex items-center">
-        <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
-        Student Progress
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <ScrollArea className="h-[400px] pr-4">
-        <div className="space-y-4">
-          {/* Example Student Progress Form */}
-          <div className="p-4 bg-white rounded-lg border border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-4">Enter Student Marks</h3>
-            <div className="space-y-3">
-              {/* Student 1 */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Student A</label>
-                <input
-                  type="number"
-                  placeholder="Enter marks"
-                  className="w-full p-2 border rounded-md text-sm"
-                />
-              </div>
-              {/* Student 2 */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Student B</label>
-                <input
-                  type="number"
-                  placeholder="Enter marks"
-                  className="w-full p-2 border rounded-md text-sm"
-                />
-              </div>
-              {/* Student 3 */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Student C</label>
-                <input
-                  type="number"
-                  placeholder="Enter marks"
-                  className="w-full p-2 border rounded-md text-sm"
-                />
-              </div>
-              {/* Add more students as needed */}
-            </div>
-            <Button className="mt-4 w-full" onClick={() => alert("Marks saved!")}>
-              Save Marks
-            </Button>
-          </div>
-        </div>
-      </ScrollArea>
-    </CardContent>
-  </Card>
 
       {/* Activity Form Modal */}
       {showActivityForm && (
@@ -858,6 +863,111 @@ export default function TeacherDashboard() {
                   ))}
                 </div>
               </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Progress Form Modal */}
+      {showProgressForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-xl mx-4">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-xl font-bold flex items-center">
+                <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
+                Update Student Progress
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowProgressForm(false)}
+                className="hover:bg-gray-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-4">
+                  {/* Student Info */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Student Name</label>
+                      <input
+                        type="text"
+                        value="Student A"
+                        disabled
+                        className="w-full p-2 border rounded-md mt-1 bg-gray-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Roll Number</label>
+                      <input
+                        type="text"
+                        value="001"
+                        disabled
+                        className="w-full p-2 border rounded-md mt-1 bg-gray-50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Attendance */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Attendance (%)</label>
+                    <input
+                      type="number"
+                      defaultValue="85"
+                      className="w-full p-2 border rounded-md mt-1"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+
+                  {/* Subject Marks */}
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-gray-800">Subject Marks</h3>
+                    {['Mathematics', 'Science', 'English', 'History'].map((subject, index) => (
+                      <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-700 w-24">{subject}</span>
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="number"
+                            placeholder="Marks"
+                            className="w-20 p-2 border rounded-md"
+                            min="0"
+                            max="100"
+                          />
+                          <span className="text-gray-500">/</span>
+                          <input
+                            type="number"
+                            defaultValue="100"
+                            className="w-20 p-2 border rounded-md"
+                            min="0"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowProgressForm(false)}
+                  className="hover:bg-gray-100"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    handleUpdateMarks();
+                    setShowProgressForm(false);
+                  }}
+                  className="bg-[#00308F] hover:bg-[#00308F]/90"
+                >
+                  Save Progress
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
