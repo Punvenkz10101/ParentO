@@ -14,21 +14,22 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route 
-        path="/" 
-        element={
-          <Hero 
-            onParentLogin={handleParentLogin}
-            onTeacherLogin={handleTeacherLogin}
-          />
-        } 
-      />
-      <Route path="/login/:userType" element={<AuthForm type="login" />} />
-      <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
-      <Route path='/parentDashboard' element={<ParentDashboard/>}/>
-      <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
-    </Routes>
+    // <Routes>
+    //   <Route 
+    //     path="/" 
+    //     element={
+    //       <Hero 
+    //         onParentLogin={handleParentLogin}
+    //         onTeacherLogin={handleTeacherLogin}
+    //       />
+    //     } 
+    //   />
+    //   <Route path="/login/:userType" element={<AuthForm type="login" />} />
+    //   <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
+    //   <Route path='/parentDashboard' element={<ParentDashboard/>}/>
+    //   <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
+    // </Routes>
+    <TeacherDashboard/>
     
   );
 }
