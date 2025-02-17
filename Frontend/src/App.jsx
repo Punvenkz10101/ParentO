@@ -30,9 +30,9 @@ function App() {
       <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
       <Route path='/parentDashboard' element={<ParentDashboard/>}/>
       <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
-      <Route path='/parentProfile' element={<ParentProfile/>}/>  {/* Parent Profile */}
-      <Route path='/teacherProfile' element={<TeacherProfile/>}/>  {/* Teacher Profile */}
     </Routes>
+    // <TeacherDashboard/>
+    
   );
 }
 

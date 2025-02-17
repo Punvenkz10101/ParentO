@@ -31,27 +31,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import axios from 'axios';
 
 export default function ParentDashboard() {
-  const { t, i18n } = useTranslation();
-  const [name, setName] = useState('');
-  const [firstLetter,setFirstLetter]=useState('');
+  const [name, setName] = useState("");
+  const [classrooms, setClassrooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const [classCode, setClassCode] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-      const userName = localStorage.getItem("userName");
-      if (userName) {
-          setName(userName);
-          setFirstLetter(userName.charAt(0).toUpperCase())
-      }
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      setName(userName);
+    }
+    fetchClassrooms();
   }, []);
-
-
 
   const navigate=useNavigate();
   const handleLogout=()=>{
-localStorage.removeItem("token");
-sessionStorage.clear();
-navigate('/')
+    localStorage.removeItem("token");
+    sessionStorage.clear();
+    navigate('/')
   }
   const teacherName = 'Mrs. Sharma';
   const [announcements] = useState([
@@ -158,6 +160,49 @@ navigate('/')
     }).join('');
   };
 
+  const fetchClassrooms = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/classroom/parent/classrooms', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setClassrooms(response.data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching classrooms:', error);
+      setError('Failed to load classrooms. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinClassroom = async () => {
+    try {
+      if (!classCode.trim()) {
+        setError('Please enter a class code');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        'http://localhost:5000/api/classroom/parent/join-classroom',
+        { classCode },
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+
+      setClassrooms([...classrooms, response.data]);
+      setClassCode('');
+      setShowJoinForm(false);
+      setError(null);
+    } catch (error) {
+      console.error('Error joining classroom:', error);
+      setError(error.response?.data?.message || 'Error joining classroom');
+    }
+  };
+
+  const firstLetter = name ? name.charAt(0).toUpperCase() : '';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
@@ -199,8 +244,7 @@ navigate('/')
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src="/avatars/parent.png" alt="Parent" />
-                  <AvatarFallback className="text-l">{firstLetter}</AvatarFallback>
-                </Avatar>
+                  <AvatarFallback className="text-l"> {firstLetter}</AvatarFallback>                </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64" side="bottom">
                 <DropdownMenuLabel className="text-lg">{t('myAccount')}</DropdownMenuLabel>
@@ -238,6 +282,108 @@ navigate('/')
             </Avatar>
           </CardContent>
         </Card>
+
+        {/* Classrooms Section */}
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">My Classrooms</h2>
+            {classrooms.length === 0 && !loading && (
+              <Button onClick={() => setShowJoinForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Join Classroom
+              </Button>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Loading classrooms...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">{error}</p>
+              <Button onClick={fetchClassrooms} className="mt-4">
+                Retry
+              </Button>
+            </div>
+          ) : classrooms.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Classrooms Joined</h3>
+              <p className="text-gray-600 mb-4">Join a classroom using the class code provided by your teacher</p>
+              <Button onClick={() => setShowJoinForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Join Classroom
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {classrooms.map((classroom) => (
+                <Card key={classroom._id} className="p-6">
+                  <h3 className="text-xl font-semibold mb-2">{classroom.name}</h3>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <p className="text-gray-600">Teacher:</p>
+                    <span className="font-medium">{classroom.teacher.name}</span>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Students: {classroom.students?.length || 0}
+                  </p>
+                </Card>
+              ))}
+              <Card 
+                className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
+                onClick={() => setShowJoinForm(true)}
+              >
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
+                  <Plus className="h-8 w-8 mb-2" />
+                  <p>Join New Classroom</p>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Join Classroom Modal */}
+          {showJoinForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <Card className="w-full max-w-md mx-4">
+                <CardHeader>
+                  <CardTitle>Join a Classroom</CardTitle>
+                  {error && (
+                    <p className="text-sm text-red-600 mt-2">{error}</p>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Class Code</label>
+                      <input
+                        type="text"
+                        value={classCode}
+                        onChange={(e) => setClassCode(e.target.value)}
+                        className="w-full p-2 mt-1 border rounded-md"
+                        placeholder="Enter class code"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 mt-6">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowJoinForm(false);
+                          setClassCode('');
+                          setError(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={handleJoinClassroom}>
+                        Join Classroom
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
 
         {/* Main Content Grid */}
         <div className="space-y-6 overflow-y-auto">
