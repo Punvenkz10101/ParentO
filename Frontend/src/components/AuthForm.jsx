@@ -21,11 +21,11 @@ export default function AuthForm({ type }) {
       if (type === "login") {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("userType", userType);
-        alert("Login successful!");
+        localStorage.setItem("userName", res.data.name);
+        console.log(res.data.name)
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
         navigate(dashboardPath);
       } else {
-        alert("Signup successful! Please log in.");
         navigate(`/login/${userType}`);
       }
     } catch (err) {

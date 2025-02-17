@@ -1,6 +1,7 @@
 'use client';
+import {Navigate, useNavigate} from 'react-router-dom'
 import React from 'react';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import {
   Bell,
   Calendar,
@@ -31,6 +32,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function ParentDashboard() {
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+      const userName = localStorage.getItem("userName");
+      if (userName) {
+          setName(userName);
+      }
+  }, []);
+
+
+const firstLetter = name ? name.charAt(0).toUpperCase() : '';
+
+  const navigate=useNavigate();
+  const handleLogout=()=>{
+localStorage.removeItem("token");
+sessionStorage.clear();
+navigate('/')
+  }
   const teacherName = 'Mrs. Sharma';
   const [announcements] = useState([
     {
@@ -157,8 +176,7 @@ export default function ParentDashboard() {
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src="/avatars/parent.png" alt="Parent" />
-                  <AvatarFallback className="text-lg">P</AvatarFallback>
-                </Avatar>
+  <AvatarFallback className="text-l"> {firstLetter}</AvatarFallback>                </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
@@ -172,8 +190,8 @@ export default function ParentDashboard() {
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-base text-red-600">
-                  <LogOut className="mr-2 h-5 w-5" />
+                <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
+                  <LogOut  className="mr-2 h-5 w-5" />
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -188,7 +206,7 @@ export default function ParentDashboard() {
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">Welcome Back!</h2>
-              <p className="opacity-90">Class Teacher: {teacherName}</p>
+              <p className="opacity-90">Class Teacher: {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/parent.png" alt="Parent" />

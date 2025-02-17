@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Bell, 
   Calendar, 
@@ -35,6 +36,22 @@ import { IoClose } from "react-icons/io5";
 import { cn } from "@/lib/utils";
 
 export default function TeacherDashboard() {
+  const navigate=useNavigate();
+  const handleLogout=()=>{
+    localStorage.removeItem("token");
+sessionStorage.clear();
+    navigate('/')
+  }
+  const [name,setName]=useState("");
+  useEffect(()=>{
+const userName=localStorage.getItem("userName");
+if(userName){
+  setName(userName);
+}
+  },[])
+
+  const firstLetter = name ? name.charAt(0).toUpperCase() : '';
+
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
   const [todaysActivities, setTodaysActivities] = useState([
@@ -264,7 +281,7 @@ export default function TeacherDashboard() {
               <DropdownMenuTrigger className="focus:outline-none ">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src="/avatars/teacher.png" alt="Teacher" />
-                  <AvatarFallback className="text-lg">T</AvatarFallback>
+                  <AvatarFallback className="text-lg"> {firstLetter}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
@@ -279,7 +296,7 @@ export default function TeacherDashboard() {
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-base text-red-600">
+                <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600">
                   <LogOut className="mr-2 h-5 w-5" />
                   Logout
                 </DropdownMenuItem>
