@@ -29,8 +29,12 @@ router.post('/login', async (req, res) => {
   const isMatch = await bcrypt.compare(password, teacher.password);
   if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
-  const token = jwt.sign({ id: teacher._id, role: 'teacher' }, JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token });
+  const token = jwt.sign(
+    { id: teacher._id, role: 'teacher',name:teacher.name },
+     JWT_SECRET, 
+     { expiresIn: '1h' });
+     console.log(teacher.name)
+  res.json({ token ,name:teacher.name});
 });
 
 module.exports = router;
