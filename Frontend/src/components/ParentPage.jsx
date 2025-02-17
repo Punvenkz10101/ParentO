@@ -158,7 +158,7 @@ navigate('/')
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
-      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
+      <nav className="border-b relative bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
           {/* Logo on the left */}
           <div className="flex items-center flex-shrink-0">
@@ -176,9 +176,10 @@ navigate('/')
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src="/avatars/parent.png" alt="Parent" />
-  <AvatarFallback className="text-l"> {firstLetter}</AvatarFallback>                </Avatar>
+                  <AvatarFallback className="text-l">{firstLetter}</AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuContent align="end" className="w-64" side="bottom">
                 <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-base">
@@ -191,7 +192,7 @@ navigate('/')
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
-                  <LogOut  className="mr-2 h-5 w-5" />
+                  <LogOut className="mr-2 h-5 w-5" />
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -200,7 +201,7 @@ navigate('/')
         </div>
       </nav>
       {/* Main Content */}
-      <main className="pt-20 p-4 max-w-7xl mx-auto overflow-y-auto">
+      <main className="p-4 max-w-7xl mx-auto overflow-y-auto">
         {/* Welcome Card */}
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">

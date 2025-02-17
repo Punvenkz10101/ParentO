@@ -261,9 +261,9 @@ if(userName){
   const [showProgressForm, setShowProgressForm] = useState(false);
 
   return (
-    <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
-      <nav className="border-b relative  bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
+      <nav className="border-b relative bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
           {/* Logo on the left */}
           <div className="flex items-center flex-shrink-0">
