@@ -1,7 +1,7 @@
 'use client';
-import React from 'react';
-import { useState ,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { 
   Bell, 
   Calendar, 
@@ -259,6 +259,74 @@ if(userName){
 
   // Add this new state for progress form
   const [showProgressForm, setShowProgressForm] = useState(false);
+
+  const [classrooms, setClassrooms] = useState([]);
+  const [showCreateClassroom, setShowCreateClassroom] = useState(false);
+  const [newClassroomName, setNewClassroomName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fetchClassrooms = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      const response = await axios.get('http://localhost:5000/api/classroom/teacher/classrooms', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setClassrooms(response.data);
+    } catch (err) {
+      console.error('Error fetching classrooms:', err);
+      setError('Failed to load classrooms. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateClassroom = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError('');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      const response = await axios.post('http://localhost:5000/api/classroom/teacher/classroom', 
+        { name: newClassroomName },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      setClassrooms([...classrooms, response.data]);
+      setNewClassroomName('');
+      setShowCreateClassroom(false);
+    } catch (err) {
+      console.error('Error creating classroom:', err);
+      setError('Failed to create classroom. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClassrooms();
+  }, []);
 
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
@@ -691,6 +759,86 @@ if(userName){
               </CardContent>
             </Card>
           </div>
+
+          {/* Classrooms Section */}
+          <div className="space-y-4 mt-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">My Classrooms</h2>
+              <Button onClick={() => setShowCreateClassroom(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Classroom
+              </Button>
+            </div>
+
+            {loading && <p className="text-gray-500">Loading classrooms...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {classrooms.map((classroom) => (
+                <Card key={classroom._id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle>{classroom.name}</CardTitle>
+                    <Badge variant="secondary">Code: {classroom.classCode}</Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-500">Students: {classroom.students.length}</p>
+                    <Button variant="link" className="mt-2">
+                      View Details <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+              <Card 
+                className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
+                onClick={() => setShowCreateClassroom(true)}
+              >
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
+                  <Plus className="h-8 w-8 mb-2" />
+                  <p>Add New Classroom</p>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Create Classroom Modal */}
+          {showCreateClassroom && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <Card className="w-full max-w-md">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Create New Classroom</CardTitle>
+                    <Button variant="ghost" size="icon" onClick={() => setShowCreateClassroom(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCreateClassroom} className="space-y-4">
+                    <div>
+                      <label htmlFor="className" className="block text-sm font-medium mb-1">
+                        Classroom Name
+                      </label>
+                      <Input
+                        id="className"
+                        value={newClassroomName}
+                        onChange={(e) => setNewClassroomName(e.target.value)}
+                        placeholder="Enter classroom name"
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button type="button" variant="outline" onClick={() => setShowCreateClassroom(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={loading}>
+                        {loading ? 'Creating...' : 'Create Classroom'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
 
