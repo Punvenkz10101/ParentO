@@ -4,37 +4,66 @@ const classroomSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
   },
   classCode: {
     type: String,
     required: true,
     unique: true,
-    trim: true
   },
   teacher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Teacher',
-    required: true
+    required: true,
+  },
+  teacherName: {
+    type: String,
+    required: true,
   },
   students: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Parent'
+    studentName: {
+      type: String,
+      required: true,
+    },
+    parentName: {
+      type: String,
+      required: true,
+    },
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Parent',
+      required: true,
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now,
+    }
   }],
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   }
 });
 
-// Generate a random class code
-classroomSchema.statics.generateClassCode = function() {
+// Generate a unique class code
+classroomSchema.statics.generateClassCode = async function() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += characters.charAt(Math.floor(Math.random() * characters.length));
+  let classCode;
+  let isUnique = false;
+
+  while (!isUnique) {
+    classCode = '';
+    for (let i = 0; i < 6; i++) {
+      classCode += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    // Check if the generated code already exists
+    const existingClass = await this.findOne({ classCode });
+    if (!existingClass) {
+      isUnique = true;
+    }
   }
-  return code;
+
+  return classCode;
 };
 
 const Classroom = mongoose.model('Classroom', classroomSchema);

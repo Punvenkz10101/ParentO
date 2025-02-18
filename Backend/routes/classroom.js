@@ -9,7 +9,14 @@ const Parent = require('../models/Parent');
 router.post('/teacher/classroom', auth, async (req, res) => {
   try {
     const { name } = req.body;
-    
+    const teacherId = req.user.id;
+
+    // Get teacher details
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher not found' });
+    }
+
     // Validate classroom name
     if (!name || name.trim().length === 0) {
       return res.status(400).json({ message: 'Classroom name is required' });
@@ -42,7 +49,8 @@ router.post('/teacher/classroom', auth, async (req, res) => {
     const classroom = new Classroom({
       name: name.trim(),
       classCode,
-      teacher: req.user.id,
+      teacher: teacherId,
+      teacherName: teacher.name, // Include teacher name
       students: []
     });
 
@@ -55,6 +63,7 @@ router.post('/teacher/classroom', auth, async (req, res) => {
       name: classroom.name,
       classCode: classroom.classCode,
       teacher: req.user.id,
+      teacherName: teacher.name,
       students: []
     });
 
@@ -79,10 +88,12 @@ router.get('/teacher/classrooms', auth, async (req, res) => {
 // Join classroom (Parent only)
 router.post('/parent/join-classroom', auth, async (req, res) => {
   try {
-    const { classCode } = req.body;
-    
-    if (!classCode || classCode.trim().length === 0) {
-      return res.status(400).json({ message: 'Class code is required' });
+    const { classCode, studentName, parentName } = req.body;
+    const parentId = req.user.id;
+
+    // Validate input
+    if (!classCode || !studentName || !parentName) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
     // Find classroom by class code
@@ -91,13 +102,22 @@ router.post('/parent/join-classroom', auth, async (req, res) => {
       return res.status(404).json({ message: 'Invalid class code. Please check and try again.' });
     }
 
-    // Check if parent already joined
-    if (classroom.students.includes(req.user.id)) {
+    // Check if parent has already joined this classroom
+    const existingStudent = classroom.students.find(
+      student => student.parent.toString() === parentId
+    );
+    if (existingStudent) {
       return res.status(400).json({ message: 'You have already joined this classroom' });
     }
 
-    // Add parent to classroom
-    classroom.students.push(req.user.id);
+    // Add student to classroom
+    classroom.students.push({
+      studentName,
+      parentName,
+      parent: parentId,
+      joinedAt: new Date()
+    });
+
     await classroom.save();
 
     res.json(classroom);
@@ -110,8 +130,9 @@ router.post('/parent/join-classroom', auth, async (req, res) => {
 // Get parent's classrooms
 router.get('/parent/classrooms', auth, async (req, res) => {
   try {
-    const classrooms = await Classroom.find({ students: req.user.id })
-      .sort({ createdAt: -1 });
+    const parentId = req.user.id;
+    const classrooms = await Classroom.find({ 'students.parent': parentId })
+      .populate('teacher', 'name email');
     res.json(classrooms);
   } catch (error) {
     console.error('Error fetching classrooms:', error);

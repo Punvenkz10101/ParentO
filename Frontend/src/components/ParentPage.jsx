@@ -1,28 +1,37 @@
 'use client';
-import {Navigate, useNavigate} from 'react-router-dom'
-import React from 'react';
-import { useState,useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Plus,
+  X,
+  User,
+  LogOut,
   Bell,
   Calendar,
   Trophy,
   BookOpen,
-  User,
-  LogOut,
   ChevronRight,
   Star,
   Settings,
   Menu,
-  Plus,
-  X
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "./ui/avatar";
+import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +39,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import axios from 'axios';
+} from "./ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "./ui/sheet";
+import { ScrollArea } from "./ui/scroll-area";
 
 export default function ParentDashboard() {
   const [name, setName] = useState("");
@@ -44,15 +58,8 @@ export default function ParentDashboard() {
   const [parentName, setParentName] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedClassroom, setSelectedClassroom] = useState(null);
-
-  useEffect(() => {
-    const userName = localStorage.getItem("userName");
-    if (userName) {
-      setName(userName);
-      setParentName(userName); 
-    }
-    fetchClassrooms();
-  }, []);
+  const [studentParentDetails, setStudentParentDetails] = useState({});
+  const [teacherDetails, setTeacherDetails] = useState(null);
 
   const navigate=useNavigate();
   const handleLogout=()=>{
@@ -227,6 +234,20 @@ export default function ParentDashboard() {
     setShowDetailsModal(true);
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      setName(userName);
+    }
+    fetchClassrooms();
+  }, [navigate]);
+
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
   return (
@@ -299,8 +320,8 @@ export default function ParentDashboard() {
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">{t('welcomeBack')}</h2>
-              <p className="opacity-90">{t('classTeacher')}: {name}!</p>
+              <h2 className="text-2xl font-bold">Welcome Back!</h2>
+              <p className="opacity-90">Welcome, {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/parent.png" alt="Parent" />
@@ -344,39 +365,41 @@ export default function ParentDashboard() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {classrooms.map((classroom) => (
-                <Card key={classroom._id} className="p-6">
-                  <CardHeader>
-                    <CardTitle>{classroom.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Teacher:</span> {classroom.teacher.name}
-                      </p>
-                      {classroom.students.map((student, index) => (
-                        student.parent._id === localStorage.getItem('userId') && (
-                          <div key={index} className="mt-4 p-3 bg-gray-50 rounded-lg">
-                            <p className="text-sm">
-                              <span className="font-medium">Student:</span> {student.studentName}
-                            </p>
-                            <p className="text-sm">
-                              <span className="font-medium">Parent:</span> {student.parentName}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Joined: {new Date(student.joinedAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        )
-                      ))}
-                    </div>
-                    <Button 
-                      onClick={() => viewClassroomDetails(classroom)}
-                      className="mt-4 w-full"
-                    >
-                      View Details
-                    </Button>
-                  </CardContent>
-                </Card>
+                classroom && (
+                  <Card key={classroom._id} className="p-6 hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-[#00308F]">{classroom.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Teacher:</span> {classroom.teacher.name}
+                        </p>
+                        {classroom.students && classroom.students
+                          .filter(student => student && student.parent && student.parent._id === localStorage.getItem('userId'))
+                          .map((student, index) => (
+                            <div key={index} className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                              <p className="text-sm">
+                                <span className="font-medium">Student:</span> {student.studentName}
+                              </p>
+                              <p className="text-sm">
+                                <span className="font-medium">Parent:</span> {student.parentName}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Joined: {new Date(student.joinedAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                      <Button 
+                        onClick={() => viewClassroomDetails(classroom)} 
+                        className="mt-4 w-full bg-[#00308F] hover:bg-[#002266]"
+                      >
+                        View Details
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
               ))}
               <Card 
                 className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
@@ -395,64 +418,58 @@ export default function ParentDashboard() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <Card className="w-full max-w-md mx-4">
                 <CardHeader>
-                  <CardTitle>Join a Classroom</CardTitle>
-                  {error && (
-                    <p className="text-sm text-red-600 mt-2">{error}</p>
-                  )}
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Join Classroom</CardTitle>
+                    {error && (
+                      <p className="text-sm text-red-600 mt-2">{error}</p>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Class Code</label>
-                      <input
-                        type="text"
+                  <form onSubmit={handleJoinClassroom} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="classCode">Class Code</Label>
+                      <Input
+                        id="classCode"
+                        placeholder="Enter class code"
                         value={classCode}
                         onChange={(e) => setClassCode(e.target.value)}
-                        className="w-full p-2 mt-1 border rounded-md"
-                        placeholder="Enter class code"
                         required
                       />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Student's Name</label>
-                      <input
-                        type="text"
+                    <div className="space-y-2">
+                      <Label htmlFor="studentName">Student Name</Label>
+                      <Input
+                        id="studentName"
+                        placeholder="Enter student name"
                         value={studentName}
                         onChange={(e) => setStudentName(e.target.value)}
-                        className="w-full p-2 mt-1 border rounded-md"
-                        placeholder="Enter student's name"
                         required
                       />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Parent's Name</label>
-                      <input
-                        type="text"
+                    <div className="space-y-2">
+                      <Label htmlFor="parentName">Parent Name</Label>
+                      <Input
+                        id="parentName"
+                        placeholder="Enter parent name"
                         value={parentName}
                         onChange={(e) => setParentName(e.target.value)}
-                        className="w-full p-2 mt-1 border rounded-md"
-                        placeholder="Enter parent's name"
                         required
                       />
                     </div>
-                    <div className="flex justify-end gap-2 mt-6">
+                    <div className="flex justify-end space-x-2">
                       <Button
+                        type="button"
                         variant="outline"
-                        onClick={() => {
-                          setShowJoinForm(false);
-                          setClassCode('');
-                          setStudentName('');
-                          setParentName('');
-                          setError(null);
-                        }}
+                        onClick={() => setShowJoinForm(false)}
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleJoinClassroom}>
+                      <Button type="submit">
                         Join Classroom
                       </Button>
                     </div>
-                  </div>
+                  </form>
                 </CardContent>
               </Card>
             </div>
@@ -800,15 +817,15 @@ export default function ParentDashboard() {
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Class Details</h3>
                   <div className="space-y-2">
-                    <p><span className="font-medium">Teacher:</span> {selectedClassroom.teacher.name}</p>
-                    <p><span className="font-medium">Email:</span> {selectedClassroom.teacher.email}</p>
+                    <p><span className="font-medium">Teacher:</span> {selectedClassroom.teacherName}</p>
+                    <p><span className="font-medium">Email:</span> {selectedClassroom.teacherEmail}</p>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Your Children in this Class</h3>
                   <div className="space-y-4">
                     {selectedClassroom.students
-                      .filter(student => student.parent._id === localStorage.getItem('userId'))
+                      .filter(student => student && student.parent && student.parent._id === localStorage.getItem('userId'))
                       .map((student, index) => (
                         <div key={index} className="p-4 bg-gray-50 rounded-lg">
                           <p><span className="font-medium">Student Name:</span> {student.studentName}</p>
