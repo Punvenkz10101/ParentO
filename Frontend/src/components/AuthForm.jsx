@@ -18,15 +18,19 @@ export default function AuthForm({ type }) {
 
     try {
       const res = await axios.post(url, formData);
+      
       if (type === "login") {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("userType", userType);
         localStorage.setItem("userName", res.data.name);
-        console.log(res.data.name)
+
+        // Redirect to dashboard after login
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
         navigate(dashboardPath);
       } else {
-        navigate(`/login/${userType}`);
+        // Redirect to profile page after signup
+        const profilePath = userType === "parent" ? "/parentProfile" : "/teacherProfile";
+        navigate(profilePath);
       }
     } catch (err) {
       console.error("Error:", err);
@@ -36,7 +40,7 @@ export default function AuthForm({ type }) {
 
   return (
     <div
-      className="flex justify-center items-center h-screen bg-cover bg-center"
+      className="flex justify-center items-center h-screen bg-cover bg-center relative"
       style={{ backgroundImage: "url('/assets/images/nikhita-s-NsPDiPFTp4c-unsplash.jpg')" }}
     >
       {/* Overlay for better readability */}
@@ -79,7 +83,7 @@ export default function AuthForm({ type }) {
           className="w-full p-2 border rounded mb-4"
         />
 
-        <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded">
+        <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           {type === "login" ? "Login" : "Signup"}
         </button>
 
