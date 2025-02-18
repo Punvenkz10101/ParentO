@@ -132,7 +132,8 @@ router.get('/parent/classrooms', auth, async (req, res) => {
   try {
     const parentId = req.user.id;
     const classrooms = await Classroom.find({ 'students.parent': parentId })
-      .populate('teacher', 'name email');
+      .populate('teacher', 'name email') // Populate teacher details including email
+      .sort({ createdAt: -1 });
     res.json(classrooms);
   } catch (error) {
     console.error('Error fetching classrooms:', error);

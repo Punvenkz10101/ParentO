@@ -46,6 +46,7 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
+import { Mail, Users } from 'lucide-react';
 
 export default function ParentDashboard() {
   const [name, setName] = useState("");
@@ -814,25 +815,61 @@ export default function ParentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Class Details</h3>
+                {/* Teacher Details Section */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3 text-blue-900">Teacher Information</h3>
                   <div className="space-y-2">
-                    <p><span className="font-medium">Teacher:</span> {selectedClassroom.teacherName}</p>
-                    <p><span className="font-medium">Email:</span> {selectedClassroom.teacherEmail}</p>
+                    <p className="flex items-center text-gray-700">
+                      <User className="h-4 w-4 mr-2 text-blue-600" />
+                      <span className="font-medium mr-2">Name:</span> 
+                      {selectedClassroom.teacher?.name || 'Not available'}
+                    </p>
+                    <p className="flex items-center text-gray-700">
+                      <Mail className="h-4 w-4 mr-2 text-blue-600" />
+                      <span className="font-medium mr-2">Email:</span>
+                      {selectedClassroom.teacher?.email || 'Not available'}
+                      {selectedClassroom.teacher?.email && (
+                        <a 
+                          href={`mailto:${selectedClassroom.teacher.email}`}
+                          className="ml-2 p-1 hover:bg-blue-100 rounded-full transition-colors"
+                          title="Send email to teacher"
+                        >
+                          <Mail className="h-4 w-4 text-blue-600" />
+                        </a>
+                      )}
+                    </p>
                   </div>
                 </div>
+
+                {/* Student Information Section */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Your Children in this Class</h3>
+                  <h3 className="text-lg font-semibold mb-3">Your Children in this Class</h3>
                   <div className="space-y-4">
                     {selectedClassroom.students
                       .filter(student => student && student.parent && student.parent._id === localStorage.getItem('userId'))
                       .map((student, index) => (
-                        <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                          <p><span className="font-medium">Student Name:</span> {student.studentName}</p>
-                          <p><span className="font-medium">Parent Name:</span> {student.parentName}</p>
-                          <p className="text-sm text-gray-500">
-                            Joined: {new Date(student.joinedAt).toLocaleDateString()}
-                          </p>
+                        <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="space-y-2">
+                            <p className="flex items-center">
+                              <User className="h-4 w-4 mr-2 text-gray-600" />
+                              <span className="font-medium mr-2">Student Name:</span> 
+                              {student.studentName}
+                            </p>
+                            <p className="flex items-center">
+                              <Users className="h-4 w-4 mr-2 text-gray-600" />
+                              <span className="font-medium mr-2">Parent Name:</span> 
+                              {student.parentName}
+                            </p>
+                            <p className="flex items-center text-sm text-gray-500">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              <span className="font-medium mr-2">Joined:</span>
+                              {new Date(student.joinedAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </p>
+                          </div>
                         </div>
                       ))
                     }
