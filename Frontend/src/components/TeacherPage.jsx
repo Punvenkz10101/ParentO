@@ -287,9 +287,9 @@ if(userName){
               <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-base">
-                  <User className="mr-2 h-5 w-5" />
-                  Profile
+               <DropdownMenuItem onClick={()=>navigate('/teacherProfile')} className="text-base">
+                     <User className="mr-2 h-5 w-5" />
+                         Create Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-base">
                   <Settings className="mr-2 h-5 w-5" />
