@@ -1,4 +1,6 @@
+import React from 'react';
 import { Route, Routes } from 'react-router-dom';
+import './i18n/config'; // Import i18next configuration
 import Hero from './components/Hero';
 import AuthForm from './components/AuthForm';
 import ParentDashboard from './components/ParentPage';
@@ -36,12 +38,4 @@ function App() {
 
 export default App;
 
-
-
-
-
-
-
-
-
-
+// Rest of the code remains the same

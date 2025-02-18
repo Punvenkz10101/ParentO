@@ -19,6 +19,18 @@ const classroomSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  added 4 packages, and audited 416 packages in 6s
+  
+  138 packages are looking for funding
+    run `npm fund` for details
+  
+  3 moderate severity vulnerabilities
+  
+  Some issues need review, and may require choosing
+  a different dependency.
+  
+  Run `npm audit` for details.
+  
   students: [{
     studentName: {
       type: String,
