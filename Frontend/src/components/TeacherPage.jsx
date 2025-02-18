@@ -2,20 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
+import { toast } from 'react-hot-toast';
+import {
   Bell, 
   Calendar, 
   Trophy, 
   BookOpen, 
-  User, 
-  LogOut, 
-  ChevronRight, 
   Star,
   Settings,
   Menu,
+  ChevronRight, 
+  Copy, 
+  X,
   Plus,
   Trash2,
-  X
+  LogOut, 
+  User
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -327,6 +329,40 @@ if(userName){
   useEffect(() => {
     fetchClassrooms();
   }, []);
+
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedClassroom, setSelectedClassroom] = useState(null);
+  const [studentParentDetails, setStudentParentDetails] = useState({});
+
+  const fetchParentDetails = async (parentId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/parent/${parentId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching parent details:', error);
+      return null;
+    }
+  };
+
+  const viewClassroomDetails = async (classroom) => {
+    setSelectedClassroom(classroom);
+    setShowDetailsModal(true);
+    
+    // Fetch parent details for each student
+    const parentDetailsMap = {};
+    for (const student of classroom.students) {
+      if (student && student.parent) {
+        const parentDetails = await fetchParentDetails(student.parent._id);
+        if (parentDetails) {
+          parentDetailsMap[student.parent._id] = parentDetails;
+        }
+      }
+    }
+    setStudentParentDetails(parentDetailsMap);
+  };
 
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
@@ -773,28 +809,53 @@ if(userName){
             {loading && <p className="text-gray-500">Loading classrooms...</p>}
             {error && <p className="text-red-500">{error}</p>}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
               {classrooms.map((classroom) => (
-                <Card key={classroom._id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle>{classroom.name}</CardTitle>
-                    <Badge variant="secondary">Code: {classroom.classCode}</Badge>
+                <Card key={classroom._id} className="p-6">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle>{classroom.name}</CardTitle>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-sm text-gray-600">Class Code: {classroom.classCode}</p>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          navigator.clipboard.writeText(classroom.classCode);
+                          toast.success('Class code copied!');
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-500">Students: {classroom.students.length}</p>
-                    <Button variant="link" className="mt-2">
-                      View Details <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-600">
+                          Total Students: {classroom.students?.length || 0}
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => viewClassroomDetails(classroom)} 
+                        className="w-full"
+                      >
+                        View Details
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
+  
+              {/* Add New Classroom Card */}
               <Card 
                 className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
                 onClick={() => setShowCreateClassroom(true)}
               >
                 <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
                   <Plus className="h-8 w-8 mb-2" />
-                  <p>Add New Classroom</p>
+                  <p>Create New Classroom</p>
                 </div>
               </Card>
             </div>
@@ -802,7 +863,7 @@ if(userName){
 
           {/* Create Classroom Modal */}
           {showCreateClassroom && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <Card className="w-full max-w-md">
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -1132,6 +1193,94 @@ if(userName){
                 >
                   Save Progress
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Classroom Details Modal */}
+      {showDetailsModal && selectedClassroom && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
+            <CardHeader className="border-b pb-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-2xl text-[#00308F]">{selectedClassroom.name}</CardTitle>
+                  <p className="text-gray-500 mt-1">Class Code: {selectedClassroom.classCode}</p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setSelectedClassroom(null);
+                  }}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {/* Class Information */}
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h3 className="text-lg font-semibold text-[#00308F] mb-3">Class Information</h3>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <span className="font-medium">Total Students:</span> {selectedClassroom.students.length}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Created On:</span> {new Date(selectedClassroom.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Student Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#00308F] mb-3">Student Information</h3>
+                <div className="space-y-4">
+                  {selectedClassroom.students.map((student, index) => {
+                    const parentDetails = studentParentDetails[student.parent?._id];
+                    return (
+                      <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="text-sm font-medium">{student.studentName}</p>
+                            {parentDetails ? (
+                              <div className="mt-2 space-y-1">
+                                <p className="text-sm">
+                                  <span className="font-medium">Parent:</span> {parentDetails.name}
+                                </p>
+                                <p className="text-sm">
+                                  <span className="font-medium">Email:</span> {parentDetails.email}
+                                </p>
+                                <p className="text-sm">
+                                  <span className="font-medium">Phone:</span> {parentDetails.phoneNumber || 'Not provided'}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-500">
+                                <span className="font-medium">Parent:</span> {student.parentName}
+                                {student.parent && <span className="ml-2">(Loading details...)</span>}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              Joined: {new Date(student.joinedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleRemoveStudent(student._id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </CardContent>
           </Card>
