@@ -59,13 +59,13 @@ export default function Hero({ onParentLogin, onTeacherLogin }) {
         <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto px-4">
           <button 
             onClick={handleParentLogin} 
-            className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+            className=" w-full px-8 py-3 text-lg font-semibold bg-[#00308F] text-white hover:bg-gray-200 hover:text-black rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
             Parent Login
           </button>
           <button 
             onClick={handleTeacherLogin} 
-            className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+            className=" w-full px-8 py-3 text-lg font-semibold bg-[#00308F] text-white hover:bg-gray-200 hover:text-black rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
             Teacher Login
           </button>
@@ -83,8 +83,8 @@ export default function Hero({ onParentLogin, onTeacherLogin }) {
               <button
                 key={index}
                 onClick={() => openVideoModal(lang.src)}
-                className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
-              >
+                className=" w-full px-8 py-3 text-lg font-semibold bg-[#00308F] text-white hover:bg-gray-200 hover:text-black rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+                >
                 {lang.name}
               </button>
             ))}
@@ -95,7 +95,7 @@ export default function Hero({ onParentLogin, onTeacherLogin }) {
               <button
                 key={index + 3}
                 onClick={() => openVideoModal(lang.src)}
-                className="w-full md:w-1/3 px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+                className="w-full md:w-1/3 px-8 py-3 text-lg font-semibold bg-[#00308F] text-white hover:bg-gray-200 hover:text-black rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
               >
                 {lang.name}
               </button>

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
 import {
@@ -14,10 +14,27 @@ import { Input } from "@/components/ui/input";
 
 export default function ParentProfile() {
   const [profileImage, setProfileImage] = useState(null);
-  const fileInputRef = useRef(null);
-  const userName = localStorage.getItem("userName");
-  const navigate = useNavigate();
+    const [userName, setUserName] = useState(''); // State for user name
+    const [userEmail, setUserEmail] = useState('')
 
+  const fileInputRef = useRef(null);
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const storedName = localStorage.getItem("userName");
+    const storedEmail = localStorage.getItem("userEmail");
+  
+    console.log('Stored Name:', storedName);
+    console.log('Stored Email:', storedEmail); // Log email to check if it's correct
+  
+    if (storedName) {
+      setUserName(storedName);
+    }
+    if (storedEmail) {
+      setUserEmail(storedEmail);
+    }
+  }, []);
+  
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -63,6 +80,11 @@ export default function ParentProfile() {
           <Button onClick={handleUploadClick} className="bg-[#00308F] text-white hover:bg-[#1E40AF] focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
             {profileImage ? "Change Profile Image" : "Upload Profile Image"}
           </Button>
+
+          <div className="mt-4 text-center">
+            <p className="text-lg font-semibold">Name : {userName || "User Name"}</p> {/* Display userName */}
+          <p className="text-gray-600">Email : {userEmail || "User Email"}</p> {/* Display userEmail */}
+          </div>
         </CardContent>
       </Card>
     </div>

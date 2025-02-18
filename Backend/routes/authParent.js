@@ -13,7 +13,13 @@ router.post('/signup', async (req, res) => {
   
   try {
     const parent = await Parent.create({ name, email, password: hashedPassword });
-    res.status(201).json({ message: 'Parent registered successfully' });
+    const token = jwt.sign(
+      { id: parent._id, role: 'parent', name: parent.name , email: parent.email},
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(201).json({ token, name: parent.name, email: parent.email });
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
   }
@@ -30,11 +36,12 @@ router.post('/login', async (req, res) => {
   if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
   const token = jwt.sign(
-    { id: parent._id, role: 'parent',name:parent.name}, 
+    { id: parent._id, role: 'parent',name:parent.name, email: parent.email}, 
     JWT_SECRET, 
     { expiresIn: '1h' });
     console.log(parent.name);
-  res.json({ token ,name:parent.name});
+    console.log(parent.email);
+  res.json({ token ,name:parent.name, email: parent.email});
  
 });
 

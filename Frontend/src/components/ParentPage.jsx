@@ -32,17 +32,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function ParentDashboard() {
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
+  const [firstLetter,setFirstLetter]=useState('');
 
   useEffect(() => {
       const userName = localStorage.getItem("userName");
       if (userName) {
           setName(userName);
+          setFirstLetter(userName.charAt(0).toUpperCase())
       }
   }, []);
 
 
-const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
   const navigate=useNavigate();
   const handleLogout=()=>{

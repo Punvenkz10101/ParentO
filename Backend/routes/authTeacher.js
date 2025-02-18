@@ -13,11 +13,21 @@ router.post('/signup', async (req, res) => {
 
   try {
     const teacher = await Teacher.create({ name, email, password: hashedPassword });
-    res.status(201).json({ message: 'Teacher registered successfully' });
+
+    const token = jwt.sign(
+      { id: teacher._id, role: 'teacher', name: teacher.name ,email:teacher.email},
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Send the token and name in the response
+    res.status(201).json({ token, name: teacher.name,email:teacher.email });
+
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
   }
 });
+
 
 // Teacher Login
 router.post('/login', async (req, res) => {
@@ -30,11 +40,11 @@ router.post('/login', async (req, res) => {
   if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
   const token = jwt.sign(
-    { id: teacher._id, role: 'teacher',name:teacher.name },
+    { id: teacher._id, role: 'teacher',name:teacher.name,email:teacher.email },
      JWT_SECRET, 
      { expiresIn: '1h' });
      console.log(teacher.name)
-  res.json({ token ,name:teacher.name});
+  res.json({ token ,name:teacher.name,email:teacher.email});
 });
 
 module.exports = router;
