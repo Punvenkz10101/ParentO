@@ -23,11 +23,17 @@ export default function AuthForm({ type }) {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("userType", userType);
         localStorage.setItem("userName", res.data.name);
+        localStorage.setItem("userEmail", res.data.email);
+
 
         // Redirect to dashboard after login
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
         navigate(dashboardPath);
       } else {
+        localStorage.setItem("userName", res.data.name);
+        localStorage.setItem("userEmail", res.data.email);
+        
+
         // Redirect to profile page after signup
         const profilePath = userType === "parent" ? "/parentProfile" : "/teacherProfile";
         navigate(profilePath);
@@ -83,7 +89,7 @@ export default function AuthForm({ type }) {
           className="w-full p-2 border rounded mb-4"
         />
 
-        <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        <button type="submit" className="w-full bg-[#00308F] text-white px-4 py-2 rounded hover:bg-blue-600">
           {type === "login" ? "Login" : "Signup"}
         </button>
 
