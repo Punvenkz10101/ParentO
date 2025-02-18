@@ -182,9 +182,9 @@ navigate('/')
               <DropdownMenuContent align="end" className="w-64" side="bottom">
                 <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-base">
+                <DropdownMenuItem onClick={()=>navigate('/parentProfile')} className="text-base">
                   <User className="mr-2 h-5 w-5" />
-                  Profile
+                 Create Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-base">
                   <Settings className="mr-2 h-5 w-5" />
