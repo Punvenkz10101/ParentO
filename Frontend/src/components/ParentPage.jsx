@@ -40,11 +40,16 @@ export default function ParentDashboard() {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [classCode, setClassCode] = useState('');
   const [error, setError] = useState(null);
+  const [studentName, setStudentName] = useState('');
+  const [parentName, setParentName] = useState('');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedClassroom, setSelectedClassroom] = useState(null);
 
   useEffect(() => {
     const userName = localStorage.getItem("userName");
     if (userName) {
       setName(userName);
+      setParentName(userName); 
     }
     fetchClassrooms();
   }, []);
@@ -184,21 +189,42 @@ export default function ParentDashboard() {
         return;
       }
 
+      if (!studentName.trim()) {
+        setError('Please enter student name');
+        return;
+      }
+
+      if (!parentName.trim()) {
+        setError('Please enter parent name');
+        return;
+      }
+
       const token = localStorage.getItem('token');
       const response = await axios.post(
         'http://localhost:5000/api/classroom/parent/join-classroom',
-        { classCode },
+        { 
+          classCode,
+          studentName: studentName.trim(),
+          parentName: parentName.trim()
+        },
         { headers: { Authorization: `Bearer ${token}` }}
       );
 
       setClassrooms([...classrooms, response.data]);
       setClassCode('');
+      setStudentName('');
+      setParentName('');
       setShowJoinForm(false);
       setError(null);
     } catch (error) {
       console.error('Error joining classroom:', error);
       setError(error.response?.data?.message || 'Error joining classroom');
     }
+  };
+
+  const viewClassroomDetails = (classroom) => {
+    setSelectedClassroom(classroom);
+    setShowDetailsModal(true);
   };
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
@@ -319,14 +345,37 @@ export default function ParentDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {classrooms.map((classroom) => (
                 <Card key={classroom._id} className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{classroom.name}</h3>
-                  <div className="flex items-center space-x-2 mb-4">
-                    <p className="text-gray-600">Teacher:</p>
-                    <span className="font-medium">{classroom.teacher.name}</span>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Students: {classroom.students?.length || 0}
-                  </p>
+                  <CardHeader>
+                    <CardTitle>{classroom.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Teacher:</span> {classroom.teacher.name}
+                      </p>
+                      {classroom.students.map((student, index) => (
+                        student.parent._id === localStorage.getItem('userId') && (
+                          <div key={index} className="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <p className="text-sm">
+                              <span className="font-medium">Student:</span> {student.studentName}
+                            </p>
+                            <p className="text-sm">
+                              <span className="font-medium">Parent:</span> {student.parentName}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Joined: {new Date(student.joinedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                    <Button 
+                      onClick={() => viewClassroomDetails(classroom)}
+                      className="mt-4 w-full"
+                    >
+                      View Details
+                    </Button>
+                  </CardContent>
                 </Card>
               ))}
               <Card 
@@ -361,6 +410,29 @@ export default function ParentDashboard() {
                         onChange={(e) => setClassCode(e.target.value)}
                         className="w-full p-2 mt-1 border rounded-md"
                         placeholder="Enter class code"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Student's Name</label>
+                      <input
+                        type="text"
+                        value={studentName}
+                        onChange={(e) => setStudentName(e.target.value)}
+                        className="w-full p-2 mt-1 border rounded-md"
+                        placeholder="Enter student's name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Parent's Name</label>
+                      <input
+                        type="text"
+                        value={parentName}
+                        onChange={(e) => setParentName(e.target.value)}
+                        className="w-full p-2 mt-1 border rounded-md"
+                        placeholder="Enter parent's name"
+                        required
                       />
                     </div>
                     <div className="flex justify-end gap-2 mt-6">
@@ -369,6 +441,8 @@ export default function ParentDashboard() {
                         onClick={() => {
                           setShowJoinForm(false);
                           setClassCode('');
+                          setStudentName('');
+                          setParentName('');
                           setError(null);
                         }}
                       >
@@ -702,6 +776,52 @@ export default function ParentDashboard() {
                   ))}
                 </div>
               </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Classroom Details Modal */}
+      {showDetailsModal && selectedClassroom && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-2xl">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>{selectedClassroom.name}</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowDetailsModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Class Details</h3>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Teacher:</span> {selectedClassroom.teacher.name}</p>
+                    <p><span className="font-medium">Email:</span> {selectedClassroom.teacher.email}</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Your Children in this Class</h3>
+                  <div className="space-y-4">
+                    {selectedClassroom.students
+                      .filter(student => student.parent._id === localStorage.getItem('userId'))
+                      .map((student, index) => (
+                        <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                          <p><span className="font-medium">Student Name:</span> {student.studentName}</p>
+                          <p><span className="font-medium">Parent Name:</span> {student.parentName}</p>
+                          <p className="text-sm text-gray-500">
+                            Joined: {new Date(student.joinedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
