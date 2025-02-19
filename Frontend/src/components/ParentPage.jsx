@@ -64,6 +64,7 @@ export default function ParentDashboard() {
   const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [studentParentDetails, setStudentParentDetails] = useState({});
   const [teacherDetails, setTeacherDetails] = useState(null);
+  const [hasJoinedClassroom, setHasJoinedClassroom] = useState(false);
 
   const navigate=useNavigate();
   const handleLogout=()=>{
@@ -195,6 +196,11 @@ export default function ParentDashboard() {
 
   const handleJoinClassroom = async () => {
     try {
+      if (hasJoinedClassroom) {
+        setError('You can only join one classroom at a time');
+        return;
+      }
+
       if (!classCode.trim()) {
         setError('Please enter a class code');
         return;
@@ -221,15 +227,43 @@ export default function ParentDashboard() {
         { headers: { Authorization: `Bearer ${token}` }}
       );
 
-      setClassrooms([...classrooms, response.data]);
+      setClassrooms([response.data]);
+      setHasJoinedClassroom(true);
       setClassCode('');
       setStudentName('');
       setParentName('');
       setShowJoinForm(false);
       setError(null);
+      toast.success('Successfully joined classroom');
     } catch (error) {
       console.error('Error joining classroom:', error);
       setError(error.response?.data?.message || 'Error joining classroom');
+    }
+  };
+
+  const handleExitClassroom = async (classroomId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        'http://localhost:5000/api/classroom/parent/exit-classroom',
+        {},
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+      
+      // Reset all related states
+      setClassrooms([]);
+      setHasJoinedClassroom(false);
+      setSelectedClassroom(null);
+      setShowDetailsModal(false);
+      
+      // Show success message
+      toast.success('Successfully exited classroom');
+      
+      // Refresh classrooms list
+      await fetchClassrooms();
+    } catch (error) {
+      console.error('Error exiting classroom:', error);
+      toast.error(error.response?.data?.message || 'Error exiting classroom');
     }
   };
 
@@ -249,7 +283,10 @@ export default function ParentDashboard() {
     if (userName) {
       setName(userName);
     }
-    fetchClassrooms();
+    
+    fetchClassrooms().then(() => {
+      setHasJoinedClassroom(classrooms.length > 0);
+    });
   }, [navigate]);
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
@@ -385,6 +422,12 @@ export default function ParentDashboard() {
                         className="mt-4 w-full bg-[#00308F] hover:bg-[#002266]"
                       >
                         {t('viewDetails')}
+                      </Button>
+                      <Button 
+                        onClick={() => handleExitClassroom(classroom._id)}
+                        className="mt-4 w-full bg-red-600 hover:bg-red-700"
+                      >
+                        Exit Classroom
                       </Button>
                     </CardContent>
                   </Card>

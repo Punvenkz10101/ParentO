@@ -91,6 +91,12 @@ router.post('/parent/join-classroom', auth, async (req, res) => {
     const { classCode, studentName, parentName } = req.body;
     const parentId = req.user.id;
 
+    // Check if parent is already in a classroom
+    const existingClassroom = await Classroom.findOne({ 'students.parent': parentId });
+    if (existingClassroom) {
+      return res.status(400).json({ message: 'You can only join one classroom at a time' });
+    }
+
     // Validate input
     if (!classCode || !studentName || !parentName) {
       return res.status(400).json({ message: 'Please provide all required fields' });
@@ -138,6 +144,30 @@ router.get('/parent/classrooms', auth, async (req, res) => {
   } catch (error) {
     console.error('Error fetching classrooms:', error);
     res.status(500).json({ message: 'Server error while fetching classrooms' });
+  }
+});
+
+// Add this new route for exiting classroom
+router.post('/parent/exit-classroom', auth, async (req, res) => {
+  try {
+    const parentId = req.user.id;
+    
+    // Find classroom where this parent is enrolled
+    const classroom = await Classroom.findOne({ 'students.parent': parentId });
+    if (!classroom) {
+      return res.status(404).json({ message: 'No classroom found for this parent' });
+    }
+
+    // Remove the student entry for this parent
+    classroom.students = classroom.students.filter(
+      student => student.parent.toString() !== parentId
+    );
+
+    await classroom.save();
+    res.json({ message: 'Successfully exited classroom' });
+  } catch (error) {
+    console.error('Error exiting classroom:', error);
+    res.status(500).json({ message: 'Server error while exiting classroom' });
   }
 });
 
