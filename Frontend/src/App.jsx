@@ -6,6 +6,7 @@ import TeacherDashboard from './components/TeacherPage';
 import ParentProfile from './components/ParentProfile';
 import TeacherProfile from './components/TeacherProfile';
 
+
 function App() {
   const handleParentLogin = () => {
     window.location.href = '/login/parent';
@@ -33,6 +34,7 @@ function App() {
       <Route path='/parentProfile' element={<ParentProfile/>}/>  {/* Parent Profile */}
       <Route path='/teacherProfile' element={<TeacherProfile/>}/>  {/* Teacher Profile */}
     </Routes>
+    
   );
 }
 

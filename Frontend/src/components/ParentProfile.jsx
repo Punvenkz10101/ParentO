@@ -1,5 +1,5 @@
-'use client';
-import { useState, useRef,useEffect } from 'react';
+// ParentProfile.jsx
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
 import {
@@ -11,32 +11,44 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import axios from 'axios';
 
 export default function ParentProfile() {
   const [profileImage, setProfileImage] = useState(null);
-    const [userName, setUserName] = useState(''); // State for user name
-    const [userEmail, setUserEmail] = useState('')
-
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
-
   const navigate = useNavigate();
+
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     const storedEmail = localStorage.getItem("userEmail");
-  
-    console.log('Stored Name:', storedName);
-    console.log('Stored Email:', storedEmail); // Log email to check if it's correct
-  
-    if (storedName) {
-      setUserName(storedName);
-    }
+
+    if (storedName) setUserName(storedName);
     if (storedEmail) {
       setUserEmail(storedEmail);
+      fetchProfileImage(storedEmail);
     }
   }, []);
+
+  const fetchProfileImage = async (email) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/upload/profile/${email}`);
+      setProfileImage(response.data.profileImage);
+    } catch (error) {
+      console.log("No image found", error);
+    }
+  };
+  useEffect(() => {
+    if (userEmail) fetchProfileImage(userEmail);
+  }, [userEmail]);
   
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
+    setSelectedFile(file);
+
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -46,14 +58,40 @@ export default function ParentProfile() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    if (!selectedFile) {
+      alert("Please select an image before saving.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    const storedEmail = localStorage.getItem("userEmail");
+    if (!storedEmail) {
+      alert("User email not found. Please log in again.");
+      return;
+    }
+    formData.append('email', storedEmail);
+
+    formData.append('role', 'parent');
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/upload', formData);
+      setProfileImage(response.data.profileImage);
+      alert("Profile image saved successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+
   const handleUploadClick = () => {
     fileInputRef.current.click();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center relative">
-      {/* Back Button */}
-      <button 
+      <button
         className="absolute top-6 left-6 text-gray-700 hover:text-[#00308F] transition"
         onClick={() => navigate("/parentDashboard")}
       >
@@ -77,14 +115,13 @@ export default function ParentProfile() {
             )}
           </Avatar>
           <Input type="file" className="hidden" ref={fileInputRef} onChange={handleImageChange} accept="image/*" />
-          <Button onClick={handleUploadClick} className="bg-[#00308F] text-white hover:bg-[#1E40AF] focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
-            {profileImage ? "Change Profile Image" : "Upload Profile Image"}
-          </Button>
+          <Button onClick={handleUploadClick}>Upload Profile Image</Button>
+          <Button onClick={handleSaveProfile} className="mt-2 bg-green-500 hover:bg-green-700">Save Profile</Button>
 
           <div className="mt-4 text-center">
-            <p className="text-lg font-semibold">Name : {userName || "User Name"}</p> {/* Display userName */}
-          <p className="text-gray-600">Email : {userEmail || "User Email"}</p> {/* Display userEmail */}
-          </div>
+            <p className="text-lg font-semibold">Name: {userName || "User Name"}</p>
+            <p className="text-gray-600">Email: {userEmail || "User Email"}</p>
+          </div>
         </CardContent>
       </Card>
     </div>

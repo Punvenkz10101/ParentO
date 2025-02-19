@@ -1,14 +1,20 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const parentAuthRoutes = require('./routes/authParent');
-const teacherAuthRoutes = require('./routes/authTeacher');
+// server.js
+import dotenv from 'dotenv';
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import parentAuthRoutes from './routes/authParent.js'; // Correct imports
+import teacherAuthRoutes from './routes/authTeacher.js';
+import uploadRoutes from './routes/upload.js';
+
+dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+// server.js
+app.use(cors({ origin: 'http://localhost:5173' })); // Allow your frontend origin
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -18,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI, {
 
 app.use('/api/parent', parentAuthRoutes);
 app.use('/api/teacher', teacherAuthRoutes);
+app.use('/api/upload', uploadRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
