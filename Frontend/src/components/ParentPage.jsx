@@ -2,6 +2,7 @@
 import {Navigate, useNavigate} from 'react-router-dom'
 import React from 'react';
 import { useState,useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   Calendar,
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function ParentDashboard() {
+  const { t, i18n } = useTranslation();
   const [name, setName] = useState('');
   const [firstLetter,setFirstLetter]=useState('');
 
@@ -161,14 +163,34 @@ navigate('/')
       {/* Top Navigation Bar */}
       <nav className="border-b relative bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
-          {/* Logo on the left */}
-          <div className="flex items-center flex-shrink-0">
-            <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
+          {/* Logo and Language Selector */}
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold text-[#00308F]">{t('parentO')}</h1>
+            <select
+              className="px-2 py-1 border rounded-md text-sm bg-white text-[#00308F]"
+              value={i18n.language}
+              onChange={(e) => {
+                i18n.changeLanguage(e.target.value);
+                localStorage.setItem('preferredLanguage', e.target.value);
+              }}
+            >
+              <option value="en">English</option>
+              <option value="hi">हिंदी</option>
+              <option value="kn">ಕನ್ನಡ</option>
+              <option value="te">తెలుగు</option>
+              <option value="ta">தமிழ்</option>
+              <option value="mr">मराठी</option>
+              <option value="bn">বাংলা</option>
+              <option value="bho">भोजपुरी</option>
+              <option value="ml">മലയാളം</option>
+              <option value="gu">ગુજરાતી</option>
+              <option value="pa">ਪੰਜਾਬੀ</option>
+            </select>
           </div>
 
           {/* Centered Dashboard Title */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">Parents Dashboard</h1>
+            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">{t('parentsDashboard')}</h1>
           </div>
 
           {/* Avatar Dropdown on the right */}
@@ -181,20 +203,20 @@ navigate('/')
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64" side="bottom">
-                <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-lg">{t('myAccount')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={()=>navigate('/parentProfile')} className="text-base">
                   <User className="mr-2 h-5 w-5" />
-                 Create Profile
+                 {t('createProfile')}
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-base">
                   <Settings className="mr-2 h-5 w-5" />
-                  Settings
+                  {t('settings')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-5 w-5" />
-                  Logout
+                  {t('logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -207,8 +229,8 @@ navigate('/')
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Welcome Back!</h2>
-              <p className="opacity-90">Class Teacher: {name}!</p>
+              <h2 className="text-2xl font-bold">{t('welcomeBack')}</h2>
+              <p className="opacity-90">{t('classTeacher')}: {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/parent.png" alt="Parent" />
@@ -226,7 +248,7 @@ navigate('/')
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Today's Activities
+                  {t('todaysActivities')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -249,14 +271,14 @@ navigate('/')
                         {expandedActivity === index && (
                           <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
                             <p className="mb-2">
-                              <span className="font-medium">Description:</span> {activity.description}
+                              <span className="font-medium">{t('description')}: </span> {activity.description}
                             </p>
                             <p className="mb-2">
-                              <span className="font-medium">Date:</span> {activity.date}
+                              <span className="font-medium">{t('date')}: </span> {activity.date}
                             </p>
                             {activity.tasks && activity.tasks.length > 0 && (
                               <div>
-                                <p className="font-medium mb-2">Required Tasks:</p>
+                                <p className="font-medium mb-2">{t('requiredTasks')}:</p>
                                 <div className="flex flex-wrap gap-4">
                                   {activity.tasks.map((task, taskIndex) => (
                                     <div
@@ -284,23 +306,23 @@ navigate('/')
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
-                  Student Progress
+                  {t('studentProgress')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px]">
                   <div className="space-y-3">
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">Math Exam</p>
-                      <p className="text-sm text-gray-600">Score: 85/100</p>
+                      <p className="font-medium text-gray-800">{t('mathExam')}</p>
+                      <p className="text-sm text-gray-600">{t('score')}: 85/100</p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">Science Exam</p>
-                      <p className="text-sm text-gray-600">Score: 90/100</p>
+                      <p className="font-medium text-gray-800">{t('scienceExam')}</p>
+                      <p className="text-sm text-gray-600">{t('score')}: 90/100</p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">English Exam</p>
-                      <p className="text-sm text-gray-600">Score: 78/100</p>
+                      <p className="font-medium text-gray-800">{t('englishExam')}</p>
+                      <p className="text-sm text-gray-600">{t('score')}: 78/100</p>
                     </div>
                   </div>
                 </ScrollArea>
@@ -315,7 +337,7 @@ navigate('/')
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Class Leaderboard
+                  {t('classLeaderboard')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -336,7 +358,7 @@ navigate('/')
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
-                        {parent.points} pts
+                        {parent.points} {t('points')}
                       </Badge>
                     </div>
                   ))}
@@ -345,7 +367,7 @@ navigate('/')
                     className="w-full mt-2"
                     onClick={() => setShowLeaderboardModal(true)}
                   >
-                    View Full Leaderboard
+                    {t('viewFullLeaderboard')}
                   </Button>
                 </div>
               </CardContent>
@@ -356,13 +378,13 @@ navigate('/')
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Points Overview
+                  {t('pointsOverview')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col justify-center items-center h-full">
                 <div className="text-center">
                   <p className="text-9xl font-bold text-[#00308F]">85</p>
-                  <p className="text-gray-600 mt-2 text-xl">Total Points</p>
+                  <p className="text-gray-600 mt-2 text-xl">{t('totalPoints')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -375,7 +397,7 @@ navigate('/')
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                  Announcements
+                  {t('announcements')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -391,7 +413,7 @@ navigate('/')
                           <p className="font-medium text-gray-800">{announcement.title}</p>
                           <p className="text-gray-600">{announcement.description}</p>
                         </div>
-                        <Badge>New</Badge>
+                        <Badge>{t('new')}</Badge>
                       </div>
                     ))}
                   </div>
@@ -404,7 +426,7 @@ navigate('/')
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Activity History
+                  {t('activityHistory')}
                 </CardTitle>
                 <div className="flex gap-2">
                   <select
@@ -416,7 +438,7 @@ navigate('/')
                       'July', 'August', 'September', 'October', 'November', 'December'
                     ].map(month => (
                       <option key={month.toLowerCase()} value={month.toLowerCase()}>
-                        {month}
+                        {t(month)}
                       </option>
                     ))}
                   </select>
@@ -446,7 +468,7 @@ navigate('/')
                               })}
                             </h3>
                             <Badge variant="outline" className="text-[#00308F]">
-                              {day.activities.length} Activities
+                              {day.activities.length} {t('activities')}
                             </Badge>
                           </div>
                           <div className="space-y-3">
@@ -461,7 +483,7 @@ navigate('/')
                                       {activity.title}
                                     </h4>
                                     <p className="text-sm text-gray-600">
-                                      Points earned: {activity.points}
+                                      {t('pointsEarned')}: {activity.points}
                                     </p>
                                   </div>
                                   <Badge
@@ -481,7 +503,7 @@ navigate('/')
                       ))
                     ) : (
                       <div className="text-center py-8 text-gray-500">
-                        No activities found for {selectedMonth} {selectedYear}
+                        {t('noActivitiesFound')} {selectedMonth} {selectedYear}
                       </div>
                     )}
                   </div>
@@ -507,7 +529,7 @@ navigate('/')
               </Button>
               <CardTitle className="text-xl font-bold flex items-center">
                 <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                Full Leaderboard
+                {t('fullLeaderboard')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -528,7 +550,7 @@ navigate('/')
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
-                        {parent.points} pts
+                        {parent.points} {t('points')}
                       </Badge>
                     </div>
                   ))}

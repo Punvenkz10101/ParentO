@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
-import { useState ,useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Bell, 
   Calendar, 
@@ -36,19 +37,20 @@ import { IoClose } from "react-icons/io5";
 import { cn } from "@/lib/utils";
 
 export default function TeacherDashboard() {
-  const navigate=useNavigate();
-  const handleLogout=()=>{
+  const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const handleLogout = () => {
     localStorage.removeItem("token");
-sessionStorage.clear();
+    sessionStorage.clear();
     navigate('/')
   }
-  const [name,setName]=useState("");
-  useEffect(()=>{
-const userName=localStorage.getItem("userName");
-if(userName){
-  setName(userName);
-}
-  },[])
+  const [name, setName] = useState("");
+  useEffect(() => {
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      setName(userName);
+    }
+  }, [])
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
@@ -56,13 +58,13 @@ if(userName){
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
   const [todaysActivities, setTodaysActivities] = useState([
     {
-      title: "Math Quiz",
-      description: "Weekly mathematics assessment covering algebra",
+      title: t('mathQuiz'),
+      description: t('weeklyMathematicsAssessment'),
       date: new Date().toISOString().split('T')[0]
     },
     {
-      title: "Science Experiment",
-      description: "Chemical reactions demonstration",
+      title: t('scienceExperiment'),
+      description: t('chemicalReactionsDemonstration'),
       date: new Date().toISOString().split('T')[0]
     }
   ]);
@@ -76,58 +78,58 @@ if(userName){
   });
   const [announcements, setAnnouncements] = useState([
     {
-      title: 'PTA Meeting',
-      description: 'Meeting on Monday at 10 AM'
+      title: t('ptaMeeting'),
+      description: t('meetingOnMondayAt10AM')
     },
     {
-      title: 'Annual Sports Day',
-      description: 'Event on 15th Nov'
+      title: t('annualSportsDay'),
+      description: t('eventOn15thNov')
     },
     {
-      title: 'Fee Payment',
-      description: 'Deadline extended to 30th Oct'
+      title: t('feePayment'),
+      description: t('deadlineExtendedTo30thOct')
     }
   ]);
   const [parentsProgress] = useState([
     { 
-      name: 'Parent A', 
-      studentName: 'Student A', 
+      name: t('parentA'), 
+      studentName: t('studentA'), 
       points: 85,
       activitiesCompleted: 8,
       totalActivities: 10,
-      lastActive: '2 hours ago' 
+      lastActive: t('twoHoursAgo') 
     },
     { 
-      name: 'Parent B', 
-      studentName: 'Student B', 
+      name: t('parentB'), 
+      studentName: t('studentB'), 
       points: 65,
       activitiesCompleted: 6,
       totalActivities: 10,
-      lastActive: '1 hour ago' 
+      lastActive: t('oneHourAgo') 
     },
     { 
-      name: 'Parent C', 
-      studentName: 'Student C', 
+      name: t('parentC'), 
+      studentName: t('studentC'), 
       points: 90,
       activitiesCompleted: 9,
       totalActivities: 10,
-      lastActive: '30 mins ago' 
+      lastActive: t('thirtyMinsAgo') 
     },
     { 
-      name: 'Parent D', 
-      studentName: 'Student D', 
+      name: t('parentD'), 
+      studentName: t('studentD'), 
       points: 45,
       activitiesCompleted: 4,
       totalActivities: 10,
-      lastActive: '4 hours ago' 
+      lastActive: t('fourHoursAgo') 
     },
     { 
-      name: 'Parent E', 
-      studentName: 'Student E', 
+      name: t('parentE'), 
+      studentName: t('studentE'), 
       points: 70,
       activitiesCompleted: 7,
       totalActivities: 10,
-      lastActive: '1 hour ago' 
+      lastActive: t('oneHourAgo') 
     }
   ]);
   const [showLeaderboardOverlay, setShowLeaderboardOverlay] = useState(false);
@@ -135,38 +137,38 @@ if(userName){
     {
       date: '2024-02-20',
       activities: [
-        { title: 'Math Quiz', completed: 15, total: 20 },
-        { title: 'Science Experiment', completed: 18, total: 20 }
+        { title: t('mathQuiz'), completed: 15, total: 20 },
+        { title: t('scienceExperiment'), completed: 18, total: 20 }
       ]
     },
     {
       date: '2024-02-19',
       activities: [
-        { title: 'English Essay', completed: 16, total: 20 },
-        { title: 'History Test', completed: 19, total: 20 }
+        { title: t('englishEssay'), completed: 16, total: 20 },
+        { title: t('historyTest'), completed: 19, total: 20 }
       ]
     },
     {
       date: '2024-02-18',
       activities: [
-        { title: 'Geography Project', completed: 17, total: 20 },
-        { title: 'Art Assignment', completed: 20, total: 20 }
+        { title: t('geographyProject'), completed: 17, total: 20 },
+        { title: t('artAssignment'), completed: 20, total: 20 }
       ]
     },
     // Add more historical data...
   ]);
 
   const leaderboardData = [
-    { name: "Parent A", points: 100, studentName: "Student A" },
-    { name: "Parent B", points: 90, studentName: "Student B" },
-    { name: "Parent C", points: 85, studentName: "Student C" },
-    { name: "Parent D", points: 80, studentName: "Student D" },
-    { name: "Parent E", points: 75, studentName: "Student E" },
-    { name: "Parent F", points: 70, studentName: "Student F" },
-    { name: "Parent G", points: 65, studentName: "Student G" },
-    { name: "Parent H", points: 60, studentName: "Student H" },
-    { name: "Parent I", points: 55, studentName: "Student I" },
-    { name: "Parent J", points: 50, studentName: "Student J" },
+    { name: t('parentA'), points: 100, studentName: t('studentA') },
+    { name: t('parentB'), points: 90, studentName: t('studentB') },
+    { name: t('parentC'), points: 85, studentName: t('studentC') },
+    { name: t('parentD'), points: 80, studentName: t('studentD') },
+    { name: t('parentE'), points: 75, studentName: t('studentE') },
+    { name: t('parentF'), points: 70, studentName: t('studentF') },
+    { name: t('parentG'), points: 65, studentName: t('studentG') },
+    { name: t('parentH'), points: 60, studentName: t('studentH') },
+    { name: t('parentI'), points: 55, studentName: t('studentI') },
+    { name: t('parentJ'), points: 50, studentName: t('studentJ') },
   ];
 
   const medalIcons = ["🥇", "🥈", "🥉"];
@@ -195,9 +197,9 @@ if(userName){
   const handleAddActivity = () => {
     if (newActivityTitle.trim()) {
       const tasks = [];
-      if (selectedTasks.completion) tasks.push("Submit task (5 points)");
-      if (selectedTasks.photo) tasks.push("Upload photo (5 points)");
-      if (selectedTasks.video) tasks.push("Submit video (5 points)");
+      if (selectedTasks.completion) tasks.push(t('submitTaskCompletion'));
+      if (selectedTasks.photo) tasks.push(t('uploadPhotoOfWork'));
+      if (selectedTasks.video) tasks.push(t('submitVideoOfActivity'));
 
       setTodaysActivities([...todaysActivities, {
         title: newActivityTitle,
@@ -249,11 +251,11 @@ if(userName){
 
   // Add this new state for students list
   const [studentsList] = useState([
-    { id: 1, name: "Student A", parentName: "Parent A", attendance: "85%", rollNo: "001" },
-    { id: 2, name: "Student B", parentName: "Parent B", attendance: "90%", rollNo: "002" },
-    { id: 3, name: "Student C", parentName: "Parent C", attendance: "75%", rollNo: "003" },
-    { id: 4, name: "Student D", parentName: "Parent D", attendance: "95%", rollNo: "004" },
-    { id: 5, name: "Student E", parentName: "Parent E", attendance: "88%", rollNo: "005" },
+    { id: 1, name: t('studentA'), parentName: t('parentA'), attendance: "85%", rollNo: "001" },
+    { id: 2, name: t('studentB'), parentName: t('parentB'), attendance: "90%", rollNo: "002" },
+    { id: 3, name: t('studentC'), parentName: t('parentC'), attendance: "75%", rollNo: "003" },
+    { id: 4, name: t('studentD'), parentName: t('parentD'), attendance: "95%", rollNo: "004" },
+    { id: 5, name: t('studentE'), parentName: t('parentE'), attendance: "88%", rollNo: "005" },
     // Add more students as needed
   ]);
 
@@ -265,14 +267,34 @@ if(userName){
       {/* Top Navigation Bar */}
       <nav className="border-b relative bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
-          {/* Logo on the left */}
-          <div className="flex items-center flex-shrink-0">
-            <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
+          {/* Logo and Language Selector */}
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold text-[#00308F]">{t('parentO')}</h1>
+            <select
+              className="px-2 py-1 border rounded-md text-sm bg-white text-[#00308F]"
+              value={i18n.language}
+              onChange={(e) => {
+                i18n.changeLanguage(e.target.value);
+                localStorage.setItem('preferredLanguage', e.target.value);
+              }}
+            >
+              <option value="en">English</option>
+              <option value="hi">हिंदी</option>
+              <option value="kn">ಕನ್ನಡ</option>
+              <option value="te">తెలుగు</option>
+              <option value="ta">தமிழ்</option>
+              <option value="mr">मराठी</option>
+              <option value="bn">বাংলা</option>
+              <option value="bho">भोजपुरी</option>
+              <option value="ml">മലയാളം</option>
+              <option value="gu">ગુજરાતી</option>
+              <option value="pa">ਪੰਜਾਬੀ</option>
+            </select>
           </div>
 
           {/* Centered Dashboard Title */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">Teacher Dashboard</h1>
+            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">{t('teachersDashboard')}</h1>
           </div>
 
           {/* Avatar Dropdown on the right */}
@@ -285,20 +307,20 @@ if(userName){
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-lg">{t('myAccount')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                <DropdownMenuItem onClick={()=>navigate('/teacherProfile')} className="text-base">
                      <User className="mr-2 h-5 w-5" />
-                         Create Profile
+                         {t('createProfile')}
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-base">
                   <Settings className="mr-2 h-5 w-5" />
-                  Settings
+                  {t('settings')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600">
                   <LogOut className="mr-2 h-5 w-5" />
-                  Logout
+                  {t('logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -312,8 +334,8 @@ if(userName){
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Welcome Back!</h2>
-              <p className="opacity-90">Class: Grade 8-A</p>
+              <h2 className="text-2xl font-bold">{t('welcomeBack')}</h2>
+              <p className="opacity-90">{t('classGrade8A')}</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/teacher.png" alt="Teacher" />
@@ -331,11 +353,11 @@ if(userName){
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Today's Activities
+                  {t('todaysActivities')}
                 </CardTitle>
                 <Button onClick={() => setShowActivityForm(true)} variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Activity
+                  {t('addActivity')}
                 </Button>
               </CardHeader>
               <CardContent>
@@ -370,14 +392,14 @@ if(userName){
                       {expandedActivity === index && (
                         <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
                           <p className="mb-2">
-                            <span className="font-medium">Description:</span> {activity.description}
+                            <span className="font-medium">{t('description')}:</span> {activity.description}
                           </p>
                           <p className="mb-2">
-                            <span className="font-medium">Date:</span> {activity.date}
+                            <span className="font-medium">{t('date')}:</span> {activity.date}
                           </p>
                           {activity.tasks && activity.tasks.length > 0 && (
                             <div>
-                              <p className="font-medium mb-2">Completion Tasks:</p>
+                              <p className="font-medium mb-2">{t('completionTasks')}:</p>
                               <div className="flex flex-wrap gap-4">
                                 {activity.tasks.map((task, taskIndex) => (
                                   <div 
@@ -404,7 +426,7 @@ if(userName){
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Parent Progress
+                  {t('parentProgress')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -422,7 +444,7 @@ if(userName){
                           </div>
                           <div className="text-right">
                             <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
-                              {parent.points} Points
+                              {parent.points} {t('points')}
                             </Badge>
                           </div>
                         </div>
@@ -430,7 +452,7 @@ if(userName){
                         {/* Activities Progress */}
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Activities Completed</span>
+                            <span className="text-gray-600">{t('activitiesCompleted')}</span>
                             <span className="font-medium text-[#00308F]">
                               {parent.activitiesCompleted}/{parent.totalActivities}
                             </span>
@@ -459,7 +481,7 @@ if(userName){
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Parent Leaderboard
+                  {t('parentLeaderboard')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -480,7 +502,7 @@ if(userName){
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
-                        {parent.points} pts
+                        {parent.points} {t('points')}
                       </Badge>
                     </div>
                   ))}
@@ -489,7 +511,7 @@ if(userName){
                     className="w-full mt-2"
                     onClick={() => setShowLeaderboardOverlay(true)}
                   >
-                    View Full Leaderboard
+                    {t('viewFullLeaderboard')}
                   </Button>
                 </div>
               </CardContent>
@@ -500,7 +522,7 @@ if(userName){
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                  Announcements
+                  {t('announcements')}
                 </CardTitle>
                 <Button 
                   variant="outline" 
@@ -508,7 +530,7 @@ if(userName){
                   onClick={() => setShowAnnouncementForm(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add
+                  {t('addAnnouncement')}
                 </Button>
               </CardHeader>
               <CardContent>
@@ -525,7 +547,7 @@ if(userName){
                           {"   "}
                           <span>{announcement.description}</span>
                         </p>
-                        <Badge>New</Badge>
+                        <Badge>{t('new')}</Badge>
                       </div>
                     ))}
                   </div>
@@ -541,7 +563,7 @@ if(userName){
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Activity History
+                  {t('activityHistory')}
                 </CardTitle>
                 <div className="flex gap-2">
                   <select 
@@ -549,18 +571,18 @@ if(userName){
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                   >
-                    <option value="january">January</option>
-                    <option value="february">February</option>
-                    <option value="march">March</option>
-                    <option value="april">April</option>
-                    <option value="may">May</option>
-                    <option value="june">June</option>
-                    <option value="july">July</option>
-                    <option value="august">August</option>
-                    <option value="september">September</option>
-                    <option value="october">October</option>
-                    <option value="november">November</option>
-                    <option value="december">December</option>
+                    <option value="january">{t('january')}</option>
+                    <option value="february">{t('february')}</option>
+                    <option value="march">{t('march')}</option>
+                    <option value="april">{t('april')}</option>
+                    <option value="may">{t('may')}</option>
+                    <option value="june">{t('june')}</option>
+                    <option value="july">{t('july')}</option>
+                    <option value="august">{t('august')}</option>
+                    <option value="september">{t('september')}</option>
+                    <option value="october">{t('october')}</option>
+                    <option value="november">{t('november')}</option>
+                    <option value="december">{t('december')}</option>
                   </select>
                   <select 
                     className="px-2 py-1 border rounded-md text-sm"
@@ -588,7 +610,7 @@ if(userName){
                               })}
                             </h3>
                             <Badge variant="outline" className="text-[#00308F]">
-                              {day.activities.length} Activities
+                              {day.activities.length} {t('activities')}
                             </Badge>
                           </div>
                           <div className="space-y-3">
@@ -603,7 +625,7 @@ if(userName){
                                       {activity.title}
                                     </h4>
                                     <p className="text-sm text-gray-600">
-                                      Completion Rate: {Math.round((activity.completed / activity.total) * 100)}%
+                                      {t('completionRate')}: {Math.round((activity.completed / activity.total) * 100)}%
                                     </p>
                                   </div>
                                   <Badge 
@@ -641,7 +663,7 @@ if(userName){
                       ))
                     ) : (
                       <div className="text-center py-8 text-gray-500">
-                        No activities found for {selectedMonth} {selectedYear}
+                        {t('noActivitiesFound')} {selectedMonth} {selectedYear}
                       </div>
                     )}
                   </div>
@@ -654,7 +676,7 @@ if(userName){
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <BookOpen className="h-5 w-4 text-[#00308F] mr-2" />
-                  Class Students
+                  {t('classStudents')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -680,7 +702,7 @@ if(userName){
                               onClick={() => setShowProgressForm(true)}
                               className="bg-white hover:bg-gray-100"
                             >
-                              Update
+                              {t('update')}
                             </Button>
                           </div>
                         </div>
@@ -699,32 +721,32 @@ if(userName){
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle>Add New Activity</CardTitle>
+              <CardTitle>{t('addNewActivity')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Title</label>
+                  <label className="text-sm font-medium">{t('title')}</label>
                   <input
                     type="text"
                     value={newActivityTitle}
                     onChange={(e) => setNewActivityTitle(e.target.value)}
                     className="w-full p-2 border rounded-md mt-1"
-                    placeholder="Enter activity title"
+                    placeholder={t('enterActivityTitle')}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium">{t('description')}</label>
                   <input
                     type="text"
                     value={newActivityDescription}
                     onChange={(e) => setNewActivityDescription(e.target.value)}
                     className="w-full p-2 border rounded-md mt-1"
-                    placeholder="Enter activity description"
+                    placeholder={t('enterActivityDescription')}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Date</label>
+                  <label className="text-sm font-medium">{t('date')}</label>
                   <input
                     type="date"
                     value={newActivityDate}
@@ -733,7 +755,7 @@ if(userName){
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Task Completion Options</label>
+                  <label className="text-sm font-medium">{t('taskCompletionOptions')}</label>
                   <div className="space-y-2 mt-2">
                     <div className="flex items-center">
                       <input
@@ -742,7 +764,7 @@ if(userName){
                         onChange={(e) => setSelectedTasks({...selectedTasks, completion: e.target.checked})}
                         className="h-4 w-4 rounded border-gray-300 text-[#00308F] focus:ring-[#00308F]"
                       />
-                      <span className="ml-2 text-sm text-gray-600">Submit task completion (5 points)</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('submitTaskCompletion')}</span>
                     </div>
                     <div className="flex items-center">
                       <input
@@ -751,7 +773,7 @@ if(userName){
                         onChange={(e) => setSelectedTasks({...selectedTasks, photo: e.target.checked})}
                         className="h-4 w-4 rounded border-gray-300 text-[#00308F] focus:ring-[#00308F]"
                       />
-                      <span className="ml-2 text-sm text-gray-600">Upload photo of work (5 points)</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('uploadPhotoOfWork')}</span>
                     </div>
                     <div className="flex items-center">
                       <input
@@ -760,7 +782,7 @@ if(userName){
                         onChange={(e) => setSelectedTasks({...selectedTasks, video: e.target.checked})}
                         className="h-4 w-4 rounded border-gray-300 text-[#00308F] focus:ring-[#00308F]"
                       />
-                      <span className="ml-2 text-sm text-gray-600">Submit video of activity (5 points)</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('submitVideoOfActivity')}</span>
                     </div>
                   </div>
                 </div>
@@ -776,10 +798,10 @@ if(userName){
                       });
                     }}
                   >
-                    Cancel
+                    {t('cancel')}
                   </Button>
                   <Button onClick={handleAddActivity}>
-                    Add Activity
+                    {t('addActivity')}
                   </Button>
                 </div>
               </div>
@@ -793,28 +815,28 @@ if(userName){
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle>Add New Announcement</CardTitle>
+              <CardTitle>{t('addNewAnnouncement')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Title</label>
+                  <label className="text-sm font-medium">{t('title')}</label>
                   <input
                     type="text"
                     value={newAnnouncementTitle}
                     onChange={(e) => setNewAnnouncementTitle(e.target.value)}
                     className="w-full p-2 border rounded-md mt-1"
-                    placeholder="Enter announcement title"
+                    placeholder={t('enterAnnouncementTitle')}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium">{t('description')}</label>
                   <input
                     type="text"
                     value={newAnnouncementDescription}
                     onChange={(e) => setNewAnnouncementDescription(e.target.value)}
                     className="w-full p-2 border rounded-md mt-1"
-                    placeholder="Enter announcement description"
+                    placeholder={t('enterAnnouncementDescription')}
                   />
                 </div>
                 <div className="flex justify-end gap-2">
@@ -826,10 +848,10 @@ if(userName){
                       setNewAnnouncementDescription("");
                     }}
                   >
-                    Cancel
+                    {t('cancel')}
                   </Button>
                   <Button onClick={handleAddAnnouncement}>
-                    Add Announcement
+                    {t('addAnnouncement')}
                   </Button>
                 </div>
               </div>
@@ -853,7 +875,7 @@ if(userName){
               </Button>
               <CardTitle className="text-xl font-bold flex items-center">
                 <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                Full Leaderboard
+                {t('fullLeaderboard')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -874,7 +896,7 @@ if(userName){
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
-                        {parent.points} pts
+                        {parent.points} {t('points')}
                       </Badge>
                     </div>
                   ))}
@@ -892,7 +914,7 @@ if(userName){
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-xl font-bold flex items-center">
                 <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
-                Update Student Progress
+                {t('updateStudentProgress')}
               </CardTitle>
               <Button 
                 variant="ghost" 
@@ -909,7 +931,7 @@ if(userName){
                   {/* Student Info */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Student Name</label>
+                      <label className="text-sm font-medium text-gray-700">{t('studentName')}</label>
                       <input
                         type="text"
                         value="Student A"
@@ -918,7 +940,7 @@ if(userName){
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Roll Number</label>
+                      <label className="text-sm font-medium text-gray-700">{t('rollNumber')}</label>
                       <input
                         type="text"
                         value="001"
@@ -930,7 +952,7 @@ if(userName){
 
                   {/* Attendance */}
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Attendance (%)</label>
+                    <label className="text-sm font-medium text-gray-700">{t('attendance')} (%)</label>
                     <input
                       type="number"
                       defaultValue="85"
@@ -942,14 +964,14 @@ if(userName){
 
                   {/* Subject Marks */}
                   <div className="space-y-3">
-                    <h3 className="font-medium text-gray-800">Subject Marks</h3>
+                    <h3 className="font-medium text-gray-800">{t('subjectMarks')}</h3>
                     {['Mathematics', 'Science', 'English', 'History'].map((subject, index) => (
                       <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded-lg">
                         <span className="text-sm font-medium text-gray-700 w-24">{subject}</span>
                         <div className="flex items-center gap-2 flex-1">
                           <input
                             type="number"
-                            placeholder="Marks"
+                            placeholder={t('marks')}
                             className="w-20 p-2 border rounded-md"
                             min="0"
                             max="100"
@@ -973,7 +995,7 @@ if(userName){
                   onClick={() => setShowProgressForm(false)}
                   className="hover:bg-gray-100"
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button 
                   onClick={() => {
@@ -982,7 +1004,7 @@ if(userName){
                   }}
                   className="bg-[#00308F] hover:bg-[#00308F]/90"
                 >
-                  Save Progress
+                  {t('saveProgress')}
                 </Button>
               </div>
             </CardContent>
