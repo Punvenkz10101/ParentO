@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const Parent = require('../models/Parent');
 const router = express.Router();
 
+
+
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Parent Signup
@@ -15,7 +18,7 @@ router.post('/signup', async (req, res) => {
     const parent = await Parent.create({ name, email, password: hashedPassword });
     const token = jwt.sign(
       { id: parent._id, role: 'parent', name: parent.name , email: parent.email},
-      JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -37,7 +40,7 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign(
     { id: parent._id, role: 'parent',name:parent.name, email: parent.email}, 
-    JWT_SECRET, 
+    process.env.JWT_SECRET, 
     { expiresIn: '1h' });
     console.log(parent.name);
     console.log(parent.email);
