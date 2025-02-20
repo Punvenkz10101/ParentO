@@ -36,11 +36,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { IoClose } from "react-icons/io5";
 import { cn } from "@/lib/utils";
-import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from './LanguageSwitcher';
 
 export default function TeacherDashboard() {
-  const { t } = useTranslation();
   const navigate=useNavigate();
   const handleLogout=()=>{
     localStorage.removeItem("token");
@@ -377,12 +374,6 @@ if(userName){
             <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
           </div>
 
-          {/* Language Switcher */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">{t('dashboard')}</h1>
-            <LanguageSwitcher />
-          </div>
-
           {/* Avatar Dropdown on the right */}
           <div className="flex items-center flex-shrink-0 w-[48px]">
             <DropdownMenu>
@@ -420,8 +411,8 @@ if(userName){
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">{t('welcome')}</h2>
-              <p className="opacity-90">{t('welcome')}, {name}!</p>
+              <h2 className="text-2xl font-bold">Welcome</h2>
+              <p className="opacity-90">Welcome, {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/teacher.png" alt="Teacher" />
