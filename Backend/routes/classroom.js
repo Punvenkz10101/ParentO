@@ -11,6 +11,12 @@ router.post('/teacher/classroom', auth, async (req, res) => {
     const { name } = req.body;
     const teacherId = req.user.id;
 
+    // Check if teacher already has a classroom
+    const existingClassroom = await Classroom.findOne({ teacher: teacherId });
+    if (existingClassroom) {
+      return res.status(400).json({ message: 'You can only create one classroom' });
+    }
+
     // Get teacher details
     const teacher = await Teacher.findById(teacherId);
     if (!teacher) {
@@ -34,8 +40,8 @@ router.post('/teacher/classroom', auth, async (req, res) => {
         classCode += characters.charAt(Math.floor(Math.random() * characters.length));
       }
       
-      const existingClassroom = await Classroom.findOne({ classCode });
-      if (!existingClassroom) {
+      const existingClassroomWithCode = await Classroom.findOne({ classCode });
+      if (!existingClassroomWithCode) {
         isUnique = true;
       }
       attempts++;
@@ -50,7 +56,7 @@ router.post('/teacher/classroom', auth, async (req, res) => {
       name: name.trim(),
       classCode,
       teacher: teacherId,
-      teacherName: teacher.name, // Include teacher name
+      teacherName: teacher.name,
       students: []
     });
 

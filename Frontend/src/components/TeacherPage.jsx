@@ -267,6 +267,7 @@ if(userName){
   const [newClassroomName, setNewClassroomName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hasClassroom, setHasClassroom] = useState(false);
 
   const fetchClassrooms = async () => {
     try {
@@ -279,13 +280,11 @@ if(userName){
       }
 
       const response = await axios.get('http://localhost:5000/api/classroom/teacher/classrooms', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       setClassrooms(response.data);
+      setHasClassroom(response.data.length > 0);
     } catch (err) {
       console.error('Error fetching classrooms:', err);
       setError('Failed to load classrooms. Please try again.');
@@ -316,8 +315,10 @@ if(userName){
       );
 
       setClassrooms([...classrooms, response.data]);
+      setHasClassroom(true);
       setNewClassroomName('');
       setShowCreateClassroom(false);
+      toast.success('Classroom created successfully');
     } catch (err) {
       console.error('Error creating classroom:', err);
       setError('Failed to create classroom. Please try again.');
@@ -795,18 +796,20 @@ if(userName){
           <div className="space-y-4 mt-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">My Classrooms</h2>
-              <Button onClick={() => setShowCreateClassroom(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Classroom
-              </Button>
+              {!hasClassroom && (
+                <Button onClick={() => setShowCreateClassroom(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Classroom
+                </Button>
+              )}
             </div>
 
             {loading && <p className="text-gray-500">Loading classrooms...</p>}
             {error && <p className="text-red-500">{error}</p>}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {classrooms.map((classroom) => (
-                <Card key={classroom._id} className="p-6">
+                <Card key={classroom._id} className="p-6 hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle>{classroom.name}</CardTitle>
@@ -843,16 +846,18 @@ if(userName){
                 </Card>
               ))}
   
-              {/* Add New Classroom Card */}
-              <Card 
-                className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
-                onClick={() => setShowCreateClassroom(true)}
-              >
-                <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
-                  <Plus className="h-8 w-8 mb-2" />
-                  <p>Create New Classroom</p>
-                </div>
-              </Card>
+              {/* Only show the Create New Classroom card if teacher has no classroom */}
+              {!hasClassroom && (
+                <Card 
+                  className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
+                  onClick={() => setShowCreateClassroom(true)}
+                >
+                  <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
+                    <Plus className="h-8 w-8 mb-2" />
+                    <p>Create New Classroom</p>
+                  </div>
+                </Card>
+              )}
             </div>
           </div>
 
