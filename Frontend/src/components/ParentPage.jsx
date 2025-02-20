@@ -614,25 +614,16 @@ export default function ParentDashboard() {
                 <ScrollArea className="h-[280px]">
                   <div className="space-y-3">
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="text-sm">
-                        <span className="font-medium">Math Exam</span>
-                        <span className="mx-2">•</span>
-                        <span>Score: 85/100</span>
-                      </p>
+                      <p className="font-medium text-gray-800">Math Exam</p>
+                      <p className="text-sm text-gray-600">Score: 85/100</p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="text-sm">
-                        <span className="font-medium">Science Exam</span>
-                        <span className="mx-2">•</span>
-                        <span>Score: 90/100</span>
-                      </p>
+                      <p className="font-medium text-gray-800">Science Exam</p>
+                      <p className="text-sm text-gray-600">Score: 90/100</p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="text-sm">
-                        <span className="font-medium">English Exam</span>
-                        <span className="mx-2">•</span>
-                        <span>Score: 78/100</span>
-                      </p>
+                      <p className="font-medium text-gray-800">English Exam</p>
+                      <p className="text-sm text-gray-600">Score: 78/100</p>
                     </div>
                   </div>
                 </ScrollArea>
@@ -704,56 +695,28 @@ export default function ParentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Announcements */}
             <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl font-bold flex items-center">
-                    <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                    Announcements
-                  </CardTitle>
-                  {oldAnnouncements.length > 0 && (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowPreviousAnnouncements(true)}
-                      className="text-sm"
-                    >
-                      Previous Announcements
-                    </Button>
-                  )}
-                </div>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <Bell className="h-5 w-5 text-[#00308F] mr-2" />
+                  Announcements
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {recentAnnouncements.length > 0 ? (
-                      recentAnnouncements.map((announcement) => (
-                        <div 
-                          key={announcement._id} 
-                          className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                        >
-                          <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                          <div className="flex-1">
-                            <p className="text-gray-700">
-                              <span className="font-medium">{announcement.title}</span>
-                              <span className="mx-2">•</span>
-                              <span>{announcement.description}</span>
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
+                    {announcements.map((announcement, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">{announcement.title}</p>
+                          <p className="text-gray-600">{announcement.description}</p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        No recent announcements
+                        <Badge>New</Badge>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </ScrollArea>
               </CardContent>
