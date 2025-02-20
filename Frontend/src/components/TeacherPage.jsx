@@ -314,17 +314,71 @@ export default function TeacherDashboard() {
   const [expandedActivity, setExpandedActivity] = useState(null);
 
   // Add this new state for students list
-  const [studentsList] = useState([
-    { id: 1, name: t('studentA'), parentName: t('parentA'), attendance: "85%", rollNo: "001" },
-    { id: 2, name: t('studentB'), parentName: t('parentB'), attendance: "90%", rollNo: "002" },
-    { id: 3, name: t('studentC'), parentName: t('parentC'), attendance: "75%", rollNo: "003" },
-    { id: 4, name: t('studentD'), parentName: t('parentD'), attendance: "95%", rollNo: "004" },
-    { id: 5, name: t('studentE'), parentName: t('parentE'), attendance: "88%", rollNo: "005" },
+  const [studentsList, setStudentsList] = useState([
+    { id: 1, name: "Student A", parentName: "Parent A", attendance: "85%", rollNo: "001" },
+    { id: 2, name: "Student B", parentName: "Parent B", attendance: "90%", rollNo: "002" },
+    { id: 3, name: "Student C", parentName: "Parent C", attendance: "75%", rollNo: "003" },
+    { id: 4, name: "Student D", parentName: "Parent D", attendance: "95%", rollNo: "004" },
+    { id: 5, name: "Student E", parentName: "Parent E", attendance: "88%", rollNo: "005" },
     // Add more students as needed
   ]);
 
   // Add this new state for progress form
   const [showProgressForm, setShowProgressForm] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [progressForm, setProgressForm] = useState({
+    attendance: '',
+    academicPerformance: 'good',
+    behavior: 'good',
+    notes: ''
+  });
+
+  const handleProgressChange = (field, value) => {
+    setProgressForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleProgressUpdate = async () => {
+    try {
+      if (!selectedStudent) {
+        toast.error('No student selected');
+        return;
+      }
+
+      // Here you would typically make an API call to update the student's progress
+      // For now, we'll simulate an update
+      const updatedStudent = {
+        ...selectedStudent,
+        attendance: progressForm.attendance || selectedStudent.attendance,
+        academicPerformance: progressForm.academicPerformance,
+        behavior: progressForm.behavior,
+        notes: progressForm.notes
+      };
+
+      // Update the student in the list
+      const updatedList = studentsList.map(student =>
+        student.id === selectedStudent.id ? updatedStudent : student
+      );
+      
+      // Update the state
+      setStudentsList(updatedList);
+      
+      toast.success('Progress updated successfully');
+      setShowProgressForm(false);
+      setSelectedStudent(null);
+      setProgressForm({
+        attendance: '',
+        academicPerformance: 'good',
+        behavior: 'good',
+        notes: ''
+      });
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      toast.error('Failed to update progress');
+    }
+  };
 
   const [classrooms, setClassrooms] = useState([]);
   const [showCreateClassroom, setShowCreateClassroom] = useState(false);
@@ -912,6 +966,14 @@ export default function TeacherDashboard() {
                   <BookOpen className="h-5 w-4 text-[#00308F] mr-2" />
                   {t('classStudents')}
                 </CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowProgressForm(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Update Progress
+                </Button>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px]">
@@ -931,6 +993,18 @@ export default function TeacherDashboard() {
                               {student.attendance}
                             </Badge>
                           </div>
+                        </div>
+                        <div className="flex justify-end mt-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedStudent(student);
+                              setShowProgressForm(true);
+                            }}
+                          >
+                            Update Progress
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -1254,7 +1328,16 @@ export default function TeacherDashboard() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setShowProgressForm(false)}
+                onClick={() => {
+                  setShowProgressForm(false);
+                  setSelectedStudent(null);
+                  setProgressForm({
+                    attendance: '',
+                    academicPerformance: 'good',
+                    behavior: 'good',
+                    notes: ''
+                  });
+                }}
                 className="hover:bg-gray-100"
               >
                 <X className="h-4 w-4" />
@@ -1266,82 +1349,101 @@ export default function TeacherDashboard() {
                   {/* Student Info */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">{t('studentName')}</label>
+                      <label className="text-sm font-medium">Student Name</label>
                       <input
                         type="text"
-                        value="Student A"
-                        disabled
+                        value={selectedStudent?.name || ''}
                         className="w-full p-2 border rounded-md mt-1 bg-gray-50"
+                        disabled
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">{t('rollNumber')}</label>
+                      <label className="text-sm font-medium">Parent Name</label>
                       <input
                         type="text"
-                        value="001"
-                        disabled
+                        value={selectedStudent?.parentName || ''}
                         className="w-full p-2 border rounded-md mt-1 bg-gray-50"
+                        disabled
                       />
                     </div>
                   </div>
 
-                  {/* Attendance */}
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">{t('attendance')} (%)</label>
-                    <input
-                      type="number"
-                      defaultValue="85"
-                      className="w-full p-2 border rounded-md mt-1"
-                      min="0"
-                      max="100"
-                    />
+                  {/* Progress Update Form */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4">Update Progress</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">Attendance</label>
+                        <input
+                          type="text"
+                          value={progressForm.attendance}
+                          onChange={(e) => handleProgressChange('attendance', e.target.value)}
+                          className="w-full p-2 border rounded-md mt-1"
+                          placeholder="Enter attendance percentage"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Academic Performance</label>
+                        <select 
+                          className="w-full p-2 border rounded-md mt-1"
+                          value={progressForm.academicPerformance}
+                          onChange={(e) => handleProgressChange('academicPerformance', e.target.value)}
+                        >
+                          <option value="excellent">Excellent</option>
+                          <option value="good">Good</option>
+                          <option value="average">Average</option>
+                          <option value="needsImprovement">Needs Improvement</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Behavior</label>
+                        <select 
+                          className="w-full p-2 border rounded-md mt-1"
+                          value={progressForm.behavior}
+                          onChange={(e) => handleProgressChange('behavior', e.target.value)}
+                        >
+                          <option value="excellent">Excellent</option>
+                          <option value="good">Good</option>
+                          <option value="average">Average</option>
+                          <option value="needsImprovement">Needs Improvement</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Additional Notes</label>
+                        <textarea
+                          className="w-full p-2 border rounded-md mt-1"
+                          rows="3"
+                          value={progressForm.notes}
+                          onChange={(e) => handleProgressChange('notes', e.target.value)}
+                          placeholder="Enter any additional notes about the student's progress"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Subject Marks */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium text-gray-800">{t('subjectMarks')}</h3>
-                    {['Mathematics', 'Science', 'English', 'History'].map((subject, index) => (
-                      <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700 w-24">{subject}</span>
-                        <div className="flex items-center gap-2 flex-1">
-                          <input
-                            type="number"
-                            placeholder={t('marks')}
-                            className="w-20 p-2 border rounded-md"
-                            min="0"
-                            max="100"
-                          />
-                          <span className="text-gray-500">/</span>
-                          <input
-                            type="number"
-                            defaultValue="100"
-                            className="w-20 p-2 border rounded-md"
-                            min="0"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-2 mt-6">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowProgressForm(false);
+                        setSelectedStudent(null);
+                        setProgressForm({
+                          attendance: '',
+                          academicPerformance: 'good',
+                          behavior: 'good',
+                          notes: ''
+                        });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleProgressUpdate}>
+                      Update Progress
+                    </Button>
                   </div>
                 </div>
               </ScrollArea>
-              <div className="flex justify-end gap-2 mt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowProgressForm(false)}
-                  className="hover:bg-gray-100"
-                >
-                  {t('cancel')}
-                </Button>
-                <Button 
-                  onClick={() => {
-                    handleUpdateMarks();
-                    setShowProgressForm(false);
-                  }}
-                  className="bg-[#00308F] hover:bg-[#00308F]/90"
-                >
-                  {t('saveProgress')}
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </div>
