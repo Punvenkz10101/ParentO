@@ -62,6 +62,7 @@ export default function ParentDashboard() {
   const [studentParentDetails, setStudentParentDetails] = useState({});
   const [teacherDetails, setTeacherDetails] = useState(null);
   const [hasJoinedClassroom, setHasJoinedClassroom] = useState(false);
+  const [announcements, setAnnouncements] = useState([]);
 
   const navigate=useNavigate();
   const handleLogout=()=>{
@@ -70,21 +71,6 @@ export default function ParentDashboard() {
     navigate('/')
   }
   const teacherName = 'Mrs. Sharma';
-  const [announcements] = useState([
-    {
-      title: 'PTA Meeting',
-      description: 'Meeting on Monday at 10 AM'
-    },
-    {
-      title: 'Annual Sports Day',
-      description: 'Event on 15th Nov'
-    },
-    {
-      title: 'Fee Payment',
-      description: 'Deadline extended to 30th Oct'
-    }
-  ]);
-
   const [todaysActivities] = useState([
     {
       title: "Math Quiz",
@@ -268,6 +254,40 @@ export default function ParentDashboard() {
     setSelectedClassroom(classroom);
     setShowDetailsModal(true);
   };
+
+  const fetchAnnouncements = async (classCode) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classCode}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setAnnouncements(response.data);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      toast.error('Failed to fetch announcements');
+    }
+  };
+
+  useEffect(() => {
+    const fetchClassroomDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/classroom/parent/classrooms', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.data && response.data.length > 0) {
+          setClassrooms(response.data);
+          setHasJoinedClassroom(true);
+          // Fetch announcements for the joined classroom
+          await fetchAnnouncements(response.data[0].classCode);
+        }
+      } catch (error) {
+        console.error('Error fetching classroom details:', error);
+      }
+    };
+
+    fetchClassroomDetails();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -561,16 +581,25 @@ export default function ParentDashboard() {
                 <ScrollArea className="h-[280px]">
                   <div className="space-y-3">
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">Math Exam</p>
-                      <p className="text-sm text-gray-600">Score: 85/100</p>
+                      <p className="text-sm">
+                        <span className="font-medium">Math Exam</span>
+                        <span className="mx-2">•</span>
+                        <span>Score: 85/100</span>
+                      </p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">Science Exam</p>
-                      <p className="text-sm text-gray-600">Score: 90/100</p>
+                      <p className="text-sm">
+                        <span className="font-medium">Science Exam</span>
+                        <span className="mx-2">•</span>
+                        <span>Score: 90/100</span>
+                      </p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">English Exam</p>
-                      <p className="text-sm text-gray-600">Score: 78/100</p>
+                      <p className="text-sm">
+                        <span className="font-medium">English Exam</span>
+                        <span className="mx-2">•</span>
+                        <span>Score: 78/100</span>
+                      </p>
                     </div>
                   </div>
                 </ScrollArea>
@@ -642,7 +671,7 @@ export default function ParentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Announcements */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardHeader>
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Bell className="h-5 w-5 text-[#00308F] mr-2" />
                   Announcements
@@ -651,19 +680,35 @@ export default function ParentDashboard() {
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {announcements.map((announcement, index) => (
-                      <div
-                        key={index}
+                    {announcements.map((announcement) => (
+                      <div 
+                        key={announcement._id} 
                         className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
                         <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-800">{announcement.title}</p>
-                          <p className="text-gray-600">{announcement.description}</p>
+                          <p className="text-gray-700">
+                            <span className="font-medium">{announcement.title}</span>
+                            <span className="mx-2">•</span>
+                            <span>{announcement.description}</span>
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
                         </div>
-                        <Badge>New</Badge>
                       </div>
                     ))}
+                    {announcements.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        No announcements yet
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
