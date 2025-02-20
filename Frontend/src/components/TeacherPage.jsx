@@ -77,6 +77,9 @@ if(userName){
     video: false
   });
   const [announcements, setAnnouncements] = useState([]);
+  const [recentAnnouncements, setRecentAnnouncements] = useState([]);
+  const [oldAnnouncements, setOldAnnouncements] = useState([]);
+  const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState("");
   const [newAnnouncementDescription, setNewAnnouncementDescription] = useState("");
   const [parentsProgress] = useState([
@@ -215,7 +218,37 @@ if(userName){
       const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classCode}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setAnnouncements(response.data);
+
+      // Get today's date at midnight for accurate day comparison
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Calculate the date 7 days ago
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(today.getDate() - 7);
+
+      // Sort announcements by date (newest first) and categorize them
+      const sortedAnnouncements = response.data.sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      const recent = [];
+      const old = [];
+
+      sortedAnnouncements.forEach(announcement => {
+        const announcementDate = new Date(announcement.createdAt);
+        announcementDate.setHours(0, 0, 0, 0);
+        
+        if (announcementDate >= sevenDaysAgo) {
+          recent.push(announcement);
+        } else {
+          old.push(announcement);
+        }
+      });
+
+      setRecentAnnouncements(recent);
+      setOldAnnouncements(old);
+      setAnnouncements(sortedAnnouncements);
     } catch (error) {
       console.error('Error fetching announcements:', error);
       toast.error('Failed to fetch announcements');
@@ -672,50 +705,63 @@ if(userName){
 
             {/* Announcements */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                  Announcements
-                </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowAnnouncementForm(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl font-bold flex items-center">
+                    <Bell className="h-5 w-5 text-[#00308F] mr-2" />
+                    Announcements
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowAnnouncementForm(true)}
+                      className="text-sm"
+                    >
+                      Add Announcement
+                    </Button>
+                    {oldAnnouncements.length > 0 && (
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowPreviousAnnouncements(true)}
+                        className="text-sm"
+                      >
+                        Previous Announcements
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {announcements.map((announcement) => (
-                      <div 
-                        key={announcement._id} 
-                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                        <div className="flex-1">
-                          <p className="text-gray-700">
-                            <span className="font-medium">{announcement.title}</span>
-                            <span className="mx-2">•</span>
-                            <span>{announcement.description}</span>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
+                    {recentAnnouncements.length > 0 ? (
+                      recentAnnouncements.map((announcement) => (
+                        <div 
+                          key={announcement._id} 
+                          className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
+                          <div className="flex-1">
+                            <p className="text-gray-700">
+                              <span className="font-medium">{announcement.title}</span>
+                              <span className="mx-2">•</span>
+                              <span>{announcement.description}</span>
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    {announcements.length === 0 && (
+                      ))
+                    ) : (
                       <div className="text-center py-8 text-gray-500">
-                        No announcements yet
+                        No recent announcements
                       </div>
                     )}
                   </div>
@@ -1364,6 +1410,62 @@ if(userName){
                   })}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Previous Announcements Modal */}
+      {showPreviousAnnouncements && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Previous Announcements</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPreviousAnnouncements(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-auto">
+              <ScrollArea className="h-full pr-4">
+                <div className="space-y-4">
+                  {oldAnnouncements.length > 0 ? (
+                    oldAnnouncements.map((announcement) => (
+                      <div 
+                        key={announcement._id} 
+                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
+                        <div className="flex-1">
+                          <p className="text-gray-700">
+                            <span className="font-medium">{announcement.title}</span>
+                            <span className="mx-2">•</span>
+                            <span>{announcement.description}</span>
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No previous announcements
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
