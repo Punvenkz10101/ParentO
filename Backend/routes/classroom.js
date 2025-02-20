@@ -28,6 +28,7 @@ router.post('/teacher/classroom', auth, async (req, res) => {
       return res.status(400).json({ message: 'Classroom name is required' });
     }
 
+<<<<<<< HEAD
     // Generate a unique class code
     let classCode = '';
     let isUnique = false;
@@ -49,6 +50,14 @@ router.post('/teacher/classroom', auth, async (req, res) => {
 
     if (!isUnique) {
       return res.status(500).json({ message: 'Unable to generate unique class code. Please try again.' });
+=======
+    // Generate a unique class code using the model's static method
+    let classCode;
+    try {
+      classCode = await Classroom.generateClassCode();
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+>>>>>>> 855b10f55226d2add25be55afa78c341e121c792
     }
 
     // Create new classroom
