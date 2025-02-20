@@ -23,8 +23,27 @@ export default function ParentProfile() {
     const storedEmail = localStorage.getItem("userEmail");
     
     if (storedName) setUserName(storedName);
-    if (storedEmail) setUserEmail(storedEmail);
+    if (storedEmail) {
+      setUserEmail(storedEmail);
+      // Fetch existing profile data when email is available
+      fetchProfileData(storedEmail);
+    }
   }, []);
+
+  // Function to fetch existing profile data
+  const fetchProfileData = async (email) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/getChildDetails/${email}`);
+      const data = await response.json();
+      
+      if (response.ok && data.parentProfile) {
+        setChildName(data.parentProfile.childName || '');
+        setPhoneNumber(data.parentProfile.phoneNumber || '');
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
 
   // Function to save childName and phoneNumber to MongoDB
   const handleSave = async () => {
@@ -38,6 +57,8 @@ export default function ParentProfile() {
       const data = await response.json();
       if (response.ok) {
         alert(data.message);
+        // Refresh the profile data after saving
+        fetchProfileData(userEmail);
       } else {
         alert(data.message || "Error saving details.");
       }
