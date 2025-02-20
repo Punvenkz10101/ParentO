@@ -421,15 +421,6 @@ export default function ParentDashboard() {
                   </Card>
                 )
               ))}
-              <Card 
-                className="p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors"
-                onClick={() => setShowJoinForm(true)}
-              >
-                <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
-                  <Plus className="h-8 w-8 mb-2" />
-                  <p>Join New Classroom</p>
-                </div>
-              </Card>
             </div>
           )}
 
