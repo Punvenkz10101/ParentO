@@ -76,20 +76,9 @@ if(userName){
     photo: false,
     video: false
   });
-  const [announcements, setAnnouncements] = useState([
-    {
-      title: 'PTA Meeting',
-      description: 'Meeting on Monday at 10 AM'
-    },
-    {
-      title: 'Annual Sports Day',
-      description: 'Event on 15th Nov'
-    },
-    {
-      title: 'Fee Payment',
-      description: 'Deadline extended to 30th Oct'
-    }
-  ]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [newAnnouncementTitle, setNewAnnouncementTitle] = useState("");
+  const [newAnnouncementDescription, setNewAnnouncementDescription] = useState("");
   const [parentsProgress] = useState([
     { 
       name: 'Parent A', 
@@ -220,18 +209,60 @@ if(userName){
     }
   };
 
-  const [newAnnouncementTitle, setNewAnnouncementTitle] = useState("");
-  const [newAnnouncementDescription, setNewAnnouncementDescription] = useState("");
+  const fetchAnnouncements = async (classCode) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classCode}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setAnnouncements(response.data);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      toast.error('Failed to fetch announcements');
+    }
+  };
 
-  const handleAddAnnouncement = () => {
+  const handleAddAnnouncement = async () => {
+    if (!classroom?.classCode) {
+      toast.error('Please create a classroom first');
+      return;
+    }
+
     if (newAnnouncementTitle.trim() && newAnnouncementDescription.trim()) {
-      setAnnouncements([...announcements, {
-        title: newAnnouncementTitle,
-        description: newAnnouncementDescription
-      }]);
-      setNewAnnouncementTitle("");
-      setNewAnnouncementDescription("");
-      setShowAnnouncementForm(false);
+      try {
+        const token = localStorage.getItem('token');
+        await axios.post('http://localhost:5000/api/announcement/create', 
+          {
+            title: newAnnouncementTitle.trim(),
+            description: newAnnouncementDescription.trim(),
+            classCode: classroom.classCode
+          },
+          {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        // Fetch updated announcements
+        await fetchAnnouncements(classroom.classCode);
+        
+        setNewAnnouncementTitle("");
+        setNewAnnouncementDescription("");
+        setShowAnnouncementForm(false);
+        toast.success('Announcement added successfully');
+      } catch (error) {
+        console.error('Error adding announcement:', error);
+        if (error.response?.status === 401) {
+          toast.error('Session expired. Please login again.');
+          navigate('/');
+        } else {
+          toast.error('Failed to add announcement. Please try again.');
+        }
+      }
+    } else {
+      toast.error('Please fill in both title and description');
     }
   };
 
@@ -367,22 +398,34 @@ if(userName){
 
   const [classroom, setClassroom] = useState(null);
 
-  useEffect(() => {
-    const fetchClassroomDetails = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/teacher/classrooms', {
-          headers: { 'x-auth-token': token }
-        });
-        if (response.data && response.data.length > 0) {
-          setClassroom(response.data[0]); // Assuming one classroom per teacher
-        }
-      } catch (error) {
-        console.error('Error fetching classroom:', error);
-        toast.error('Failed to fetch classroom details');
+  const fetchClassroomDetails = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
       }
-    };
 
+      const response = await axios.get('http://localhost:5000/api/classroom/teacher/classrooms', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.data && response.data.length > 0) {
+        setClassroom(response.data[0]); // Assuming one classroom per teacher
+        setClassrooms(response.data);
+        setHasClassroom(true);
+      }
+    } catch (error) {
+      console.error('Error fetching classroom:', error);
+      setError('Failed to load classrooms. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchClassroomDetails();
 
     // Set up polling to check for new students
@@ -390,6 +433,12 @@ if(userName){
 
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
+
+  useEffect(() => {
+    if (classroom?.classCode) {
+      fetchAnnouncements(classroom.classCode);
+    }
+  }, [classroom]);
 
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
@@ -640,20 +689,35 @@ if(userName){
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {announcements.map((announcement, index) => (
+                    {announcements.map((announcement) => (
                       <div 
-                        key={index} 
+                        key={announcement._id} 
                         className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
                         <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                        <p className="text-gray-700 flex-1">
-                          <span className="font-medium">{announcement.title}</span>
-                          {"   "}
-                          <span>{announcement.description}</span>
-                        </p>
-                        <Badge>New</Badge>
+                        <div className="flex-1">
+                          <p className="text-gray-700">
+                            <span className="font-medium">{announcement.title}</span>
+                            <span className="mx-2">•</span>
+                            <span>{announcement.description}</span>
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
                       </div>
                     ))}
+                    {announcements.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        No announcements yet
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
