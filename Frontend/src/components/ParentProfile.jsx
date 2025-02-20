@@ -1,7 +1,7 @@
 'use client';
-import { useState, useRef,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -9,49 +9,46 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 
 export default function ParentProfile() {
-  const [profileImage, setProfileImage] = useState(null);
-    const [userName, setUserName] = useState(''); // State for user name
-    const [userEmail, setUserEmail] = useState('')
-
-  const fileInputRef = useRef(null);
-
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [childName, setChildName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const navigate = useNavigate();
+
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     const storedEmail = localStorage.getItem("userEmail");
-  
-    console.log('Stored Name:', storedName);
-    console.log('Stored Email:', storedEmail); // Log email to check if it's correct
-  
-    if (storedName) {
-      setUserName(storedName);
-    }
-    if (storedEmail) {
-      setUserEmail(storedEmail);
-    }
+    
+    if (storedName) setUserName(storedName);
+    if (storedEmail) setUserEmail(storedEmail);
   }, []);
-  
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
-  const handleUploadClick = () => {
-    fileInputRef.current.click();
+  // Function to save childName and phoneNumber to MongoDB
+  const handleSave = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/saveChildDetails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail, childName, phoneNumber }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+      } else {
+        alert(data.message || "Error saving details.");
+      }
+    } catch (error) {
+      console.error("Error saving details:", error);
+      alert("Server error. Please try again.");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 relative">
       {/* Back Button */}
       <button 
         className="absolute top-6 left-6 text-gray-700 hover:text-[#00308F] transition"
@@ -60,31 +57,51 @@ export default function ParentProfile() {
         <ArrowLeft size={28} />
       </button>
 
-      <Card className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        <CardHeader className="flex flex-col items-center justify-center mb-4">
+      <Card className="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg">
+        <CardHeader className="flex flex-col items-center mb-4">
           <CardTitle className="text-2xl font-bold text-[#00308F] mb-2">
             Parent Profile
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center">
-          <Avatar className="h-32 w-32 border-4 border-white/50 mb-4 cursor-pointer" onClick={handleUploadClick}>
-            {profileImage ? (
-              <AvatarImage src={profileImage} alt="Profile" />
-            ) : (
-              <AvatarFallback className="text-3xl">
-                {userName ? userName.charAt(0).toUpperCase() : "P"}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          <Input type="file" className="hidden" ref={fileInputRef} onChange={handleImageChange} accept="image/*" />
-          <Button onClick={handleUploadClick} className="bg-[#00308F] text-white hover:bg-[#1E40AF] focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
-            {profileImage ? "Change Profile Image" : "Upload Profile Image"}
-          </Button>
 
-          <div className="mt-4 text-center">
-            <p className="text-lg font-semibold">Name : {userName || "User Name"}</p> {/* Display userName */}
-          <p className="text-gray-600">Email : {userEmail || "User Email"}</p> {/* Display userEmail */}
-          </div>
+        <CardContent>
+          {/* Display Name & Email */}
+          <div className="mb-6 text-center">
+            <p className="text-lg font-semibold">Name: {userName || "User Name"}</p>
+            <p className="text-gray-600">Email: {userEmail || "User Email"}</p>
+          </div>
+
+          {/* Child Name Input */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Child's Name</label>
+            <Input 
+              type="text"
+              value={childName}
+              onChange={(e) => setChildName(e.target.value)}
+              placeholder="Enter child's name"
+              className="mt-1 p-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00308F]"
+            />
+          </div>
+
+          {/* Phone Number Input */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+            <Input 
+              type="text"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Enter phone number"
+              className="mt-1 p-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00308F]"
+            />
+          </div>
+
+          {/* Save Button */}
+          <Button 
+            className="w-full bg-[#00308F] text-white rounded-lg hover:bg-[#002366] flex items-center justify-center"
+            onClick={handleSave}
+          >
+            <Save className="mr-2" size={18} /> Save Details
+          </Button>
         </CardContent>
       </Card>
     </div>
