@@ -9,7 +9,7 @@ router.post('/saveChildDetails', async (req, res) => {
     // Find and update if exists, otherwise create new
     const updatedProfile = await ParentProfile.findOneAndUpdate(
       { userEmail },
-      { childName, phoneNumber },
+      { userEmail, childName, phoneNumber },
       { new: true, upsert: true }
     );
 
@@ -20,6 +20,19 @@ router.post('/saveChildDetails', async (req, res) => {
   } catch (error) {
     console.error('Error saving parent profile:', error);
     res.status(500).json({ message: "Error saving profile details" });
+  }
+});
+
+// New GET route to fetch profile data
+router.get('/getChildDetails/:email', async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const parentProfile = await ParentProfile.findOne({ userEmail });
+    
+    res.status(200).json({ parentProfile });
+  } catch (error) {
+    console.error('Error fetching details:', error);
+    res.status(500).json({ message: 'Error fetching details' });
   }
 });
 
