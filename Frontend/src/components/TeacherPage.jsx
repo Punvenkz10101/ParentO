@@ -365,6 +365,32 @@ export default function TeacherDashboard() {
     setStudentParentDetails(parentDetailsMap);
   };
 
+  const [classroom, setClassroom] = useState(null);
+
+  useEffect(() => {
+    const fetchClassroomDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/teacher/classrooms', {
+          headers: { 'x-auth-token': token }
+        });
+        if (response.data && response.data.length > 0) {
+          setClassroom(response.data[0]); // Assuming one classroom per teacher
+        }
+      } catch (error) {
+        console.error('Error fetching classroom:', error);
+        toast.error('Failed to fetch classroom details');
+      }
+    };
+
+    fetchClassroomDetails();
+
+    // Set up polling to check for new students
+    const interval = setInterval(fetchClassroomDetails, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
@@ -790,18 +816,10 @@ export default function TeacherDashboard() {
                             <p className="font-medium text-gray-800">{student.name}</p>
                             <p className="text-sm text-gray-600">{student.parentName}</p>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="text-right">
                             <Badge className="bg-white text-[#00308F]">
                               {student.attendance}
                             </Badge>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setShowProgressForm(true)}
-                              className="bg-white hover:bg-gray-100"
-                            >
-                              {t('update')}
-                            </Button>
                           </div>
                         </div>
                       </div>
