@@ -47,11 +47,8 @@ import {
 } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
 import { Mail, Users } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from './LanguageSwitcher';
 
 export default function ParentDashboard() {
-  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -298,13 +295,7 @@ export default function ParentDashboard() {
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
           {/* Logo on the left */}
           <div className="flex items-center flex-shrink-0">
-            <h1 className="text-2xl font-bold text-[#00308F]">{t('parentO')}</h1>
-          </div>
-
-          {/* Language Switcher */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-[#00308F] whitespace-nowrap">{t('parentDashboard')}</h1>
-            <LanguageSwitcher />
+            <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
           </div>
 
           {/* Avatar Dropdown on the right */}
@@ -312,28 +303,25 @@ export default function ParentDashboard() {
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src="/avatars/parent.png" alt={t('parent')} />
+                  <AvatarImage src="/avatars/parent.png" alt="Parent" />
                   <AvatarFallback className="text-l">{firstLetter}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="text-lg">{t('myAccount')}</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={()=>navigate('/parentProfile')} className="text-base">
                   <User className="mr-2 h-5 w-5" />
-                  {t('profile')}
+                  Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-base">
                   <Settings className="mr-2 h-5 w-5" />
-                  {t('settings')}
-                  {t('settings')}
+                  Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-5 w-5" />
-                  {t('logout')}
-                  <LogOut className="mr-2 h-5 w-5" />
-                  {t('logout')}
+                  Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -346,11 +334,11 @@ export default function ParentDashboard() {
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">{t('welcome')}</h2>
-              <p className="opacity-90">{t('welcomeMessage', { name })}</p>
+              <h2 className="text-2xl font-bold">Welcome</h2>
+              <p className="opacity-90">Welcome, {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
-              <AvatarImage src="/avatars/parent.png" alt={t('parent')} />
+              <AvatarImage src="/avatars/parent.png" alt="Parent" />
               <AvatarFallback>{firstLetter}</AvatarFallback>
             </Avatar>
           </CardContent>
@@ -359,33 +347,33 @@ export default function ParentDashboard() {
         {/* Classrooms Section */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">{t('myClassrooms')}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">My Classrooms</h2>
             {classrooms.length === 0 && !loading && (
               <Button onClick={() => setShowJoinForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('joinClassroom')}
+                Join Classroom
               </Button>
             )}
           </div>
 
           {loading ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">{t('loading')}</p>
+              <p className="text-gray-600">Loading...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-600">{error}</p>
               <Button onClick={fetchClassrooms} className="mt-4">
-                {t('retry')}
+                Retry
               </Button>
             </div>
           ) : classrooms.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('noClassrooms')}</h3>
-              <p className="text-gray-600 mb-4">{t('joinMessage')}</p>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Classrooms Found</h3>
+              <p className="text-gray-600 mb-4">Join a classroom to get started.</p>
               <Button onClick={() => setShowJoinForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('joinClassroom')}
+                Join Classroom
               </Button>
             </div>
           ) : (
@@ -421,7 +409,7 @@ export default function ParentDashboard() {
                         onClick={() => viewClassroomDetails(classroom)} 
                         className="mt-4 w-full bg-[#00308F] hover:bg-[#002266]"
                       >
-                        {t('viewDetails')}
+                        View Details
                       </Button>
                       <Button 
                         onClick={() => handleExitClassroom(classroom._id)}
@@ -439,7 +427,7 @@ export default function ParentDashboard() {
               >
                 <div className="h-full flex flex-col items-center justify-center text-gray-500 hover:text-gray-600">
                   <Plus className="h-8 w-8 mb-2" />
-                  <p>{t('joinNewClassroom')}</p>
+                  <p>Join New Classroom</p>
                 </div>
               </Card>
             </div>
@@ -451,7 +439,7 @@ export default function ParentDashboard() {
               <Card className="w-full max-w-md mx-4">
                 <CardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle>{t('joinClassroom')}</CardTitle>
+                    <CardTitle>Join Classroom</CardTitle>
                     {error && (
                       <p className="text-sm text-red-600 mt-2">{error}</p>
                     )}
@@ -460,30 +448,30 @@ export default function ParentDashboard() {
                 <CardContent>
                   <form onSubmit={handleJoinClassroom} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="classCode">{t('classCode')}</Label>
+                      <Label htmlFor="classCode">Class Code</Label>
                       <Input
                         id="classCode"
-                        placeholder={t('enterClassCode')}
+                        placeholder="Enter class code"
                         value={classCode}
                         onChange={(e) => setClassCode(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="studentName">{t('studentName')}</Label>
+                      <Label htmlFor="studentName">Student Name</Label>
                       <Input
                         id="studentName"
-                        placeholder={t('enterStudentName')}
+                        placeholder="Enter student name"
                         value={studentName}
                         onChange={(e) => setStudentName(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="parentName">{t('parentName')}</Label>
+                      <Label htmlFor="parentName">Parent Name</Label>
                       <Input
                         id="parentName"
-                        placeholder={t('enterParentName')}
+                        placeholder="Enter parent name"
                         value={parentName}
                         onChange={(e) => setParentName(e.target.value)}
                         required
@@ -495,10 +483,10 @@ export default function ParentDashboard() {
                         variant="outline"
                         onClick={() => setShowJoinForm(false)}
                       >
-                        {t('cancel')}
+                        Cancel
                       </Button>
                       <Button type="submit">
-                        {t('joinClassroom')}
+                        Join Classroom
                       </Button>
                     </div>
                   </form>
@@ -517,8 +505,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('todaysActivities')}
-                  {t('todaysActivities')}
+                  Today's Activities
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -541,15 +528,14 @@ export default function ParentDashboard() {
                         {expandedActivity === index && (
                           <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
                             <p className="mb-2">
-                              <span className="font-medium">{t('description')}:</span> {activity.description}
+                              <span className="font-medium">Description:</span> {activity.description}
                             </p>
                             <p className="mb-2">
-                              <span className="font-medium">{t('date')}:</span> {activity.date}
+                              <span className="font-medium">Date:</span> {activity.date}
                             </p>
                             {activity.tasks && activity.tasks.length > 0 && (
                               <div>
-                                <p className="font-medium mb-2">{t('requiredTasks')}:</p>
-                                <p className="font-medium mb-2">{t('requiredTasks')}:</p>
+                                <p className="font-medium mb-2">Required Tasks:</p>
                                 <div className="flex flex-wrap gap-4">
                                   {activity.tasks.map((task, taskIndex) => (
                                     <div
@@ -577,30 +563,23 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('studentProgress')}
-                  {t('studentProgress')}
+                  Student Progress
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px]">
                   <div className="space-y-3">
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">{t('mathExam')}</p>
-                      <p className="text-sm text-gray-600">{t('score')}: 85/100</p>
-                      <p className="font-medium text-gray-800">{t('mathExam')}</p>
-                      <p className="text-sm text-gray-600">{t('score')}: 85/100</p>
+                      <p className="font-medium text-gray-800">Math Exam</p>
+                      <p className="text-sm text-gray-600">Score: 85/100</p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">{t('scienceExam')}</p>
-                      <p className="text-sm text-gray-600">{t('score')}: 90/100</p>
-                      <p className="font-medium text-gray-800">{t('scienceExam')}</p>
-                      <p className="text-sm text-gray-600">{t('score')}: 90/100</p>
+                      <p className="font-medium text-gray-800">Science Exam</p>
+                      <p className="text-sm text-gray-600">Score: 90/100</p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="font-medium text-gray-800">{t('englishExam')}</p>
-                      <p className="text-sm text-gray-600">{t('score')}: 78/100</p>
-                      <p className="font-medium text-gray-800">{t('englishExam')}</p>
-                      <p className="text-sm text-gray-600">{t('score')}: 78/100</p>
+                      <p className="font-medium text-gray-800">English Exam</p>
+                      <p className="text-sm text-gray-600">Score: 78/100</p>
                     </div>
                   </div>
                 </ScrollArea>
@@ -615,8 +594,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('classLeaderboard')}
-                  {t('classLeaderboard')}
+                  Class Leaderboard
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -646,8 +624,7 @@ export default function ParentDashboard() {
                     className="w-full mt-2"
                     onClick={() => setShowLeaderboardModal(true)}
                   >
-                    {t('viewFullLeaderboard')}
-                    {t('viewFullLeaderboard')}
+                    View Full Leaderboard
                   </Button>
                 </div>
               </CardContent>
@@ -658,15 +635,13 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('pointsOverview')}
-                  {t('pointsOverview')}
+                  Points Overview
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col justify-center items-center h-full">
                 <div className="text-center">
                   <p className="text-9xl font-bold text-[#00308F]">85</p>
-                  <p className="text-gray-600 mt-2 text-xl">{t('totalPoints')}</p>
-                  <p className="text-gray-600 mt-2 text-xl">{t('totalPoints')}</p>
+                  <p className="text-gray-600 mt-2 text-xl">Total Points</p>
                 </div>
               </CardContent>
             </Card>
@@ -679,8 +654,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('announcements')}
-                  {t('announcements')}
+                  Announcements
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -696,8 +670,7 @@ export default function ParentDashboard() {
                           <p className="font-medium text-gray-800">{announcement.title}</p>
                           <p className="text-gray-600">{announcement.description}</p>
                         </div>
-                        <Badge>{t('new')}</Badge>
-                        <Badge>{t('new')}</Badge>
+                        <Badge>New</Badge>
                       </div>
                     ))}
                   </div>
@@ -710,8 +683,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('activityHistory')}
-                  {t('activityHistory')}
+                  Activity History
                 </CardTitle>
                 <div className="flex gap-2">
                   <select
@@ -753,8 +725,7 @@ export default function ParentDashboard() {
                               })}
                             </h3>
                             <Badge variant="outline" className="text-[#00308F]">
-                              {day.activities.length} {t('activities')}
-                              {day.activities.length} {t('activities')}
+                              {day.activities.length} Activities
                             </Badge>
                           </div>
                           <div className="space-y-3">
@@ -769,8 +740,7 @@ export default function ParentDashboard() {
                                       {activity.title}
                                     </h4>
                                     <p className="text-sm text-gray-600">
-                                      {t('pointsEarned')}: {activity.points}
-                                      {t('pointsEarned')}: {activity.points}
+                                      Points Earned: {activity.points}
                                     </p>
                                   </div>
                                   <Badge
@@ -790,7 +760,7 @@ export default function ParentDashboard() {
                       ))
                     ) : (
                       <div className="text-center py-8 text-gray-500">
-                        {t('noActivitiesFound', { month: selectedMonth, year: selectedYear })}
+                        No activities found for {selectedMonth} {selectedYear}
                       </div>
                     )}
                   </div>
@@ -816,8 +786,7 @@ export default function ParentDashboard() {
               </Button>
               <CardTitle className="text-xl font-bold flex items-center">
                 <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                {t('fullLeaderboard')}
-                {t('fullLeaderboard')}
+                Full Leaderboard
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -867,22 +836,22 @@ export default function ParentDashboard() {
               <div className="space-y-6">
                 {/* Teacher Details Section */}
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-3 text-blue-900">{t('teacherInformation')}</h3>
+                  <h3 className="text-lg font-semibold mb-3 text-blue-900">Teacher Information</h3>
                   <div className="space-y-2">
                     <p className="flex items-center text-gray-700">
                       <User className="h-4 w-4 mr-2 text-blue-600" />
-                      <span className="font-medium mr-2">{t('name')}:</span> 
-                      {selectedClassroom.teacher?.name || t('notAvailable')}
+                      <span className="font-medium mr-2">Name:</span> 
+                      {selectedClassroom.teacher?.name || 'Not Available'}
                     </p>
                     <p className="flex items-center text-gray-700">
                       <Mail className="h-4 w-4 mr-2 text-blue-600" />
-                      <span className="font-medium mr-2">{t('email')}:</span>
-                      {selectedClassroom.teacher?.email || t('notAvailable')}
+                      <span className="font-medium mr-2">Email:</span>
+                      {selectedClassroom.teacher?.email || 'Not Available'}
                       {selectedClassroom.teacher?.email && (
                         <a 
                           href={`mailto:${selectedClassroom.teacher.email}`}
                           className="ml-2 p-1 hover:bg-blue-100 rounded-full transition-colors"
-                          title={t('sendEmailToTeacher')}
+                          title="Send Email to Teacher"
                         >
                           <Mail className="h-4 w-4 text-blue-600" />
                         </a>
@@ -893,7 +862,7 @@ export default function ParentDashboard() {
 
                 {/* Student Information Section */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">{t('yourChildrenInThisClass')}</h3>
+                  <h3 className="text-lg font-semibold mb-3">Your Children in This Class</h3>
                   <div className="space-y-4">
                     {selectedClassroom.students
                       .filter(student => student && student.parent && student.parent._id === localStorage.getItem('userId'))
@@ -902,17 +871,17 @@ export default function ParentDashboard() {
                           <div className="space-y-2">
                             <p className="flex items-center">
                               <User className="h-4 w-4 mr-2 text-gray-600" />
-                              <span className="font-medium mr-2">{t('studentName')}:</span> 
+                              <span className="font-medium mr-2">Student:</span> 
                               {student.studentName}
                             </p>
                             <p className="flex items-center">
                               <Users className="h-4 w-4 mr-2 text-gray-600" />
-                              <span className="font-medium mr-2">{t('parentName')}:</span> 
+                              <span className="font-medium mr-2">Parent:</span> 
                               {student.parentName}
                             </p>
                             <p className="flex items-center text-sm text-gray-500">
                               <Calendar className="h-4 w-4 mr-2" />
-                              <span className="font-medium mr-2">{t('joined')}:</span>
+                              <span className="font-medium mr-2">Joined:</span>
                               {new Date(student.joinedAt).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
