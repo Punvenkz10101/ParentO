@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 import { socket } from '../lib/socket';
 import { useSocket } from '../context/SocketContext';
 import api from '../lib/axios';
+import axios from 'axios';
 
 export default function TeacherDashboard() {
   const navigate=useNavigate();
@@ -507,6 +508,35 @@ if(userName){
       fetchAnnouncements(classroom.classCode);
     }
   }, [classroom]);
+
+  const handleDeleteClassroom = async (classroomId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      await axios.delete(`http://localhost:5000/api/classroom/teacher/classroom/${classroomId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Remove classroom from state
+      setClassrooms(classrooms.filter(c => c._id !== classroomId));
+      setHasClassroom(false);
+      toast.success('Classroom deleted successfully');
+    } catch (error) {
+      console.error('Error deleting classroom:', error);
+      if (error.response?.status === 404) {
+        toast.error('Classroom not found');
+      } else {
+        toast.error('Failed to delete classroom');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
@@ -999,12 +1029,25 @@ if(userName){
                           Total Students: {classroom.students?.length || 0}
                         </p>
                       </div>
-                      <Button 
-                        onClick={() => viewClassroomDetails(classroom)} 
-                        className="w-full"
-                      >
-                        View Details
-                      </Button>
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={() => viewClassroomDetails(classroom)} 
+                          className="w-full"
+                        >
+                          View Details
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this classroom? This action cannot be undone.')) {
+                              handleDeleteClassroom(classroom._id);
+                            }
+                          }}
+                          variant="destructive"
+                          className="w-full"
+                        >
+                          Delete Classroom
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

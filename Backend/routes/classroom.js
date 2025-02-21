@@ -4,6 +4,7 @@ const Classroom = require('../models/Classroom');
 const auth = require('../middleware/auth');
 const Teacher = require('../models/Teacher');
 const Parent = require('../models/Parent');
+const Announcement = require('../models/Announcement');
 
 // Create a new classroom (Teacher only)
 router.post('/teacher/classroom', auth, async (req, res) => {
@@ -174,6 +175,31 @@ router.post('/parent/exit-classroom', auth, async (req, res) => {
   } catch (error) {
     console.error('Error exiting classroom:', error);
     res.status(500).json({ message: 'Server error while exiting classroom' });
+  }
+});
+
+// Add this new route before module.exports
+router.delete('/teacher/classroom/:id', auth, async (req, res) => {
+  try {
+    const classroomId = req.params.id;
+    const teacherId = req.user.id;
+
+    // Find and verify classroom belongs to teacher
+    const classroom = await Classroom.findOne({ _id: classroomId, teacher: teacherId });
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom not found or unauthorized' });
+    }
+
+    // Delete all announcements for this classroom
+    await Announcement.deleteMany({ classCode: classroom.classCode });
+
+    // Delete the classroom
+    await Classroom.findByIdAndDelete(classroomId);
+
+    res.json({ message: 'Classroom deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting classroom:', error);
+    res.status(500).json({ message: 'Server error while deleting classroom' });
   }
 });
 
