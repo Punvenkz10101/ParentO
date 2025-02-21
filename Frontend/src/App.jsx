@@ -45,11 +45,17 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/" />;
   }
 
-  if (userType === 'parent' && window.location.pathname === '/teacherDashboard') {
-    return <Navigate to="/parentDashboard" />;
+  // Check if user is trying to access the wrong dashboard
+  const currentPath = window.location.pathname;
+  const isParentPath = currentPath === '/parentDashboard';
+  const isTeacherPath = currentPath === '/teacherDashboard';
+
+  if (userType === 'parent' && isTeacherPath) {
+    return <Navigate to="/parentDashboard" replace />;
   }
-  if (userType === 'teacher' && window.location.pathname === '/parentDashboard') {
-    return <Navigate to="/teacherDashboard" />;
+
+  if (userType === 'teacher' && isParentPath) {
+    return <Navigate to="/teacherDashboard" replace />;
   }
 
   return children;

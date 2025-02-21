@@ -73,7 +73,23 @@ export default function ParentDashboard() {
   const [todaysActivities, setTodaysActivities] = useState([]);
   const [activityError, setActivityError] = useState(null);
 
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userType = localStorage.getItem('userType');
+    
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
+    if (userType !== 'parent') {
+      navigate('/teacherDashboard');
+      return;
+    }
+  }, [navigate]);
+
   const handleLogout=()=>{
     localStorage.removeItem("token");
     sessionStorage.clear();
@@ -205,6 +221,10 @@ export default function ParentDashboard() {
       setParentName('');
       setShowJoinForm(false);
       setError(null);
+
+      // Ensure userType remains as parent
+      localStorage.setItem('userType', 'parent');
+      
       toast.success('Successfully joined classroom');
     } catch (error) {
       console.error('Error joining classroom:', error);
@@ -386,45 +406,51 @@ export default function ParentDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
-      <nav className="border-b bg-white/75 backdrop-blur-lg fixed top-0 w-full z-50 h-20 min-h-[5rem]">
-        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto h-full relative">
-          {/* Logo on the left */}
-          <div className="flex items-center flex-shrink-0">
-            <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
-          </div>
-
-          {/* Avatar Dropdown on the right */}
-          <div className="flex items-center flex-shrink-0 w-[48px]">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src="/avatars/parent.png" alt="Parent" />
-                  <AvatarFallback className="text-l">{firstLetter}</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-base">
-                  <User className="mr-2 h-5 w-5" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-base">
-                  <Settings className="mr-2 h-5 w-5" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
-                  <LogOut className="mr-2 h-5 w-5" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      <nav className="bg-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <span className="text-2xl font-bold text-blue-600">ParentO</span>
+            </div>
+            
+            {/* Add this new div for the centered title */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <h1 className="text-2xl font-bold text-blue-600">Parent Dashboard</h1>
+            </div>
+            
+            {/* Rest of your navbar content */}
+            <div className="flex items-center">
+              {/* Avatar Dropdown on the right */}
+              <div className="flex items-center flex-shrink-0 w-[48px]">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="focus:outline-none">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src="/avatars/parent.png" alt="Parent" />
+                      <AvatarFallback className="text-l">{firstLetter}</AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64">
+                    <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-base">
+                      <User className="mr-2 h-5 w-5" />
+                      Profile
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
+                      <LogOut className="mr-2 h-5 w-5" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
       {/* Main Content */}
-      <main className="pt-20 p-4 max-w-7xl mx-auto overflow-y-auto">
+      <main className="p-4 max-w-7xl mx-auto overflow-y-auto">
         {/* Welcome Card */}
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">

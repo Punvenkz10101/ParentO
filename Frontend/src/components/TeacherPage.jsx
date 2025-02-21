@@ -548,6 +548,11 @@ if(userName){
             <h1 className="text-2xl font-bold text-[#00308F]">ParentO</h1>
           </div>
 
+          {/* Add this new div for the centered title */}
+          <div className="flex-1 flex justify-center">
+            <h1 className="text-2xl font-bold text-gray-800">Teacher Dashboard</h1>
+          </div>
+
           {/* Avatar Dropdown on the right */}
           <div className="flex items-center flex-shrink-0 w-[48px]">
             <DropdownMenu>
@@ -564,10 +569,7 @@ if(userName){
                   <User className="mr-2 h-5 w-5" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-base">
-                  <Settings className="mr-2 h-5 w-5" />
-                  Settings
-                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600">
                   <LogOut className="mr-2 h-5 w-5" />
