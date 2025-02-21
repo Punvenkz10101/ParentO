@@ -41,24 +41,22 @@ import api from '../lib/axios';
 import axios from 'axios';
 
 export default function TeacherDashboard() {
-  const navigate=useNavigate();
-  const handleLogout=()=>{
-    localStorage.removeItem("token");
-sessionStorage.clear();
-    navigate('/')
-  }
-  const [name,setName]=useState("");
-  useEffect(()=>{
-const userName=localStorage.getItem("userName");
-if(userName){
-  setName(userName);
-}
-  },[])
-
-  const firstLetter = name ? name.charAt(0).toUpperCase() : '';
-
+  const navigate = useNavigate();
+  
+  // Move all state declarations to the top
+  const [name, setName] = useState("");
+  const [classroom, setClassroom] = useState(null);  // Move this up
+  const [classrooms, setClassrooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [hasClassroom, setHasClassroom] = useState(false);
+  const [showCreateClassroom, setShowCreateClassroom] = useState(false);
+  const [newClassroomName, setNewClassroomName] = useState('');
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedClassroom, setSelectedClassroom] = useState(null);
+  const [studentParentDetails, setStudentParentDetails] = useState({});
   const [todaysActivities, setTodaysActivities] = useState([
     {
       title: "Math Quiz",
@@ -189,57 +187,106 @@ if(userName){
   const { isConnected } = useSocket();
   const [activityError, setActivityError] = useState(null);
 
+  const firstLetter = name ? name.charAt(0).toUpperCase() : '';
+
+  // First useEffect - Handle authentication and userType
   useEffect(() => {
-    if (!socket) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/', { replace: true });
+      return;
+    }
 
-    socket.on('activity_error', (error) => {
-      setActivityError(error);
-      toast.error(error);
-    });
+    // Set userType only if it's not already set to 'teacher'
+    const userType = localStorage.getItem('userType');
+    if (userType !== 'teacher') {
+      localStorage.setItem('userType', 'teacher');
+    }
 
-    socket.on('activity_created', (activity) => {
-      setTodaysActivities(prev => [...prev, activity]);
-      toast.success('Activity created successfully');
-    });
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      setName(userName);
+    }
+  }, []); // Remove navigate from dependencies to prevent loops
+
+  // Second useEffect - Handle socket connections
+  useEffect(() => {
+    if (!socket || !classroom?.classCode) return;
+
+    const handleSocketError = (error) => {
+      console.error('Socket connection error:', error);
+      toast.error('Connection error. Retrying...');
+    };
+
+    const handleNewActivity = (activity) => {
+      if (activity.classCode === classroom.classCode) {
+        setTodaysActivities(prev => [...prev, activity]);
+        toast.success('New activity received!');
+      }
+    };
+
+    socket.on('connect_error', handleSocketError);
+    socket.on('new_activity', handleNewActivity);
+    socket.on('activity_error', setActivityError);
 
     return () => {
-      socket.off('activity_error');
-      socket.off('activity_created');
+      socket.off('connect_error', handleSocketError);
+      socket.off('new_activity', handleNewActivity);
+      socket.off('activity_error', setActivityError);
+    };
+  }, [classroom]);
+
+  // Third useEffect - Fetch classroom details
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/api/classroom/teacher/classrooms');
+        
+        if (isMounted) {
+          if (response.data && response.data.length > 0) {
+            setClassroom(response.data[0]);
+            setClassrooms(response.data);
+            setHasClassroom(true);
+          }
+          setError('');
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching classroom:', error);
+          setError('Failed to load classrooms');
+          toast.error('Failed to load classrooms');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
     };
   }, []);
 
-  const handleAddActivity = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await api.post('/api/activities/create', {
-        title: newActivityTitle,
-        description: newActivityDescription,
-        date: newActivityDate,
-        tasks: [
-          ...(selectedTasks.completion ? ["Submit task (5 points)"] : []),
-          ...(selectedTasks.photo ? ["Upload photo (5 points)"] : []),
-          ...(selectedTasks.video ? ["Submit video (5 points)"] : [])
-        ],
-        classCode: classroom.classCode
-      });
-
-      if (response.data) {
-        setTodaysActivities(prev => [...prev, response.data]);
-        toast.success('Activity created successfully');
-        setShowActivityForm(false);
-        setNewActivityTitle("");
-        setNewActivityDescription("");
-        setNewActivityDate(new Date().toISOString().split('T')[0]);
-        setSelectedTasks({
-          completion: false,
-          photo: false,
-          video: false
-        });
-      }
-    } catch (error) {
-      console.error('Error creating activity:', error);
-      toast.error(error.response?.data?.message || 'Failed to create activity');
+  // Fourth useEffect - Handle announcements
+  useEffect(() => {
+    if (classroom?.classCode) {
+      fetchAnnouncements();
     }
+  }, [classroom]);
+
+  const handleLogout = () => {
+    const userType = localStorage.getItem('userType'); // Store userType before clearing
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem('userType', userType); // Restore userType
+    navigate('/', { replace: true });
   };
 
   const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
@@ -247,11 +294,10 @@ if(userName){
   const [oldAnnouncements, setOldAnnouncements] = useState([]);
 
   const fetchAnnouncements = async () => {
+    if (!classroom?.classCode) return;
+
     try {
-      const token = localStorage.getItem('token');
-      const response = await api.get(`/api/announcement/classroom/${classroom.classCode}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await api.get(`/api/announcement/classroom/${classroom.classCode}`);
       
       // Split announcements into recent (≤ 7 days) and previous (> 7 days)
       const sevenDaysAgo = new Date();
@@ -353,37 +399,6 @@ if(userName){
   // Add this new state for progress form
   const [showProgressForm, setShowProgressForm] = useState(false);
 
-  const [classrooms, setClassrooms] = useState([]);
-  const [showCreateClassroom, setShowCreateClassroom] = useState(false);
-  const [newClassroomName, setNewClassroomName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [hasClassroom, setHasClassroom] = useState(false);
-
-  const fetchClassrooms = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/');
-        return;
-      }
-
-      const response = await api.get('/api/classroom/teacher/classrooms', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setClassrooms(response.data);
-      setHasClassroom(response.data.length > 0);
-    } catch (err) {
-      console.error('Error fetching classrooms:', err);
-      setError('Failed to load classrooms. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCreateClassroom = async (e) => {
     e.preventDefault();
     try {
@@ -418,14 +433,6 @@ if(userName){
     }
   };
 
-  useEffect(() => {
-    fetchClassrooms();
-  }, []);
-
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedClassroom, setSelectedClassroom] = useState(null);
-  const [studentParentDetails, setStudentParentDetails] = useState({});
-
   const fetchParentDetails = async (parentId) => {
     try {
       const token = localStorage.getItem('token');
@@ -440,13 +447,15 @@ if(userName){
   };
 
   const viewClassroomDetails = async (classroom) => {
+    if (!classroom) return;
+    
     setSelectedClassroom(classroom);
     setShowDetailsModal(true);
     
     // Fetch parent details for each student
     const parentDetailsMap = {};
-    for (const student of classroom.students) {
-      if (student && student.parent) {
+    for (const student of classroom.students || []) {
+      if (student?.parent) {
         const parentDetails = await fetchParentDetails(student.parent._id);
         if (parentDetails) {
           parentDetailsMap[student.parent._id] = parentDetails;
@@ -456,60 +465,9 @@ if(userName){
     setStudentParentDetails(parentDetailsMap);
   };
 
-  const [classroom, setClassroom] = useState(null);
-
-  const fetchClassroomDetails = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/');
-        return;
-      }
-
-      const response = await api.get('/api/classroom/teacher/classrooms', {
-        timeout: 5000 // Add timeout
-      });
-
-      if (response.data && response.data.length > 0) {
-        setClassroom(response.data[0]);
-        setClassrooms(response.data);
-        setHasClassroom(true);
-      }
-    } catch (error) {
-      console.error('Error fetching classroom:', error);
-      if (error.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Please check your connection.');
-        toast.error('Server connection failed. Please try again later.');
-      } else {
-        setError('Failed to load classrooms. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchClassroomDetails();
-    const interval = setInterval(fetchClassroomDetails, 30000); // Poll every 30 seconds instead of 5
-
-    return () => {
-      clearInterval(interval);
-      // Cleanup any socket connections or subscriptions here
-      socket.off('connect_error');
-      socket.off('connect');
-      socket.off('disconnect');
-    };
-  }, []);
-
-  useEffect(() => {
-    if (classroom?.classCode) {
-      fetchAnnouncements(classroom.classCode);
-    }
-  }, [classroom]);
-
   const handleDeleteClassroom = async (classroomId) => {
+    if (!classroomId) return;
+    
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -525,16 +483,13 @@ if(userName){
       });
 
       // Remove classroom from state
-      setClassrooms(classrooms.filter(c => c._id !== classroomId));
+      setClassrooms(prev => prev.filter(c => c._id !== classroomId));
       setHasClassroom(false);
+      setClassroom(null);
       toast.success('Classroom deleted successfully');
     } catch (error) {
       console.error('Error deleting classroom:', error);
-      if (error.response?.status === 404) {
-        toast.error('Classroom not found');
-      } else {
-        toast.error('Failed to delete classroom');
-      }
+      toast.error(error.response?.data?.message || 'Failed to delete classroom');
     }
   };
 

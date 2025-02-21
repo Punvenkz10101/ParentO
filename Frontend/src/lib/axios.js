@@ -31,7 +31,7 @@ instance.interceptors.response.use(
     if (error.response?.status === 401) {
       const userType = localStorage.getItem('userType');
       localStorage.clear();
-      localStorage.setItem('userType', userType); // Preserve user type
+      localStorage.setItem('userType', userType);
       window.location.href = `/login/${userType}`;
       toast.error('Session expired. Please login again.');
     } else if (error.response?.data?.message) {

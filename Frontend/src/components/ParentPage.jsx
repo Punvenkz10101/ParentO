@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../lib/axios';
 import { toast } from 'react-hot-toast';
 import {
   Card,
@@ -77,24 +77,34 @@ export default function ParentDashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userType = localStorage.getItem('userType');
-    
     if (!token) {
-      navigate('/');
+      navigate('/', { replace: true });
       return;
     }
 
+    // Set userType only if it's not already set to 'parent'
+    const userType = localStorage.getItem('userType');
     if (userType !== 'parent') {
-      navigate('/teacherDashboard');
-      return;
+      localStorage.setItem('userType', 'parent');
     }
-  }, [navigate]);
 
-  const handleLogout=()=>{
-    localStorage.removeItem("token");
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      setName(userName);
+    }
+
+    // Fetch classrooms on component mount
+    fetchClassrooms();
+  }, []); // Empty dependency array
+
+  const handleLogout = () => {
+    const userType = localStorage.getItem('userType'); // Store userType before clearing
+    localStorage.clear();
     sessionStorage.clear();
-    navigate('/')
-  }
+    localStorage.setItem('userType', userType); // Restore userType
+    navigate('/', { replace: true });
+  };
+
   const teacherName = 'Mrs. Sharma';
   const [activityHistory] = useState([
     {
@@ -167,15 +177,22 @@ export default function ParentDashboard() {
   const fetchClassrooms = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/classroom/parent/classrooms', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setClassrooms(response.data);
       setError(null);
+      const response = await api.get('/api/classroom/parent/classrooms');
+      
+      if (response.data) {
+        setClassrooms(response.data);
+        setHasJoinedClassroom(response.data.length > 0);
+        
+        // If there are classrooms, fetch announcements for the first one
+        if (response.data.length > 0) {
+          await fetchAnnouncements(response.data[0].classCode);
+        }
+      }
     } catch (error) {
       console.error('Error fetching classrooms:', error);
-      setError('Failed to load classrooms. Please try again.');
+      setError('Failed to load classrooms');
+      toast.error('Failed to load classrooms');
     } finally {
       setLoading(false);
     }
@@ -188,58 +205,41 @@ export default function ParentDashboard() {
         return;
       }
 
-      if (!classCode.trim()) {
-        setError('Please enter a class code');
+      if (!classCode.trim() || !studentName.trim() || !parentName.trim()) {
+        setError('Please fill in all fields');
         return;
       }
 
-      if (!studentName.trim()) {
-        setError('Please enter student name');
-        return;
+      const response = await api.post('/api/classroom/parent/join-classroom', { 
+        classCode,
+        studentName: studentName.trim(),
+        parentName: parentName.trim()
+      });
+
+      if (response.data) {
+        setClassrooms([response.data]);
+        setHasJoinedClassroom(true);
+        setClassCode('');
+        setStudentName('');
+        setParentName('');
+        setShowJoinForm(false);
+        setError(null);
+        
+        // Fetch announcements for the newly joined classroom
+        await fetchAnnouncements(response.data.classCode);
+        
+        toast.success('Successfully joined classroom');
       }
-
-      if (!parentName.trim()) {
-        setError('Please enter parent name');
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        'http://localhost:5000/api/classroom/parent/join-classroom',
-        { 
-          classCode,
-          studentName: studentName.trim(),
-          parentName: parentName.trim()
-        },
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
-
-      setClassrooms([response.data]);
-      setHasJoinedClassroom(true);
-      setClassCode('');
-      setStudentName('');
-      setParentName('');
-      setShowJoinForm(false);
-      setError(null);
-
-      // Ensure userType remains as parent
-      localStorage.setItem('userType', 'parent');
-      
-      toast.success('Successfully joined classroom');
     } catch (error) {
       console.error('Error joining classroom:', error);
       setError(error.response?.data?.message || 'Error joining classroom');
+      toast.error(error.response?.data?.message || 'Error joining classroom');
     }
   };
 
   const handleExitClassroom = async (classroomId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        'http://localhost:5000/api/classroom/parent/exit-classroom',
-        {},
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
+      await api.post('/api/classroom/parent/exit-classroom');
       
       // Reset all related states
       setClassrooms([]);
@@ -247,7 +247,6 @@ export default function ParentDashboard() {
       setSelectedClassroom(null);
       setShowDetailsModal(false);
       
-      // Show success message
       toast.success('Successfully exited classroom');
       
       // Refresh classrooms list
@@ -264,11 +263,10 @@ export default function ParentDashboard() {
   };
 
   const fetchAnnouncements = async (classCode) => {
+    if (!classCode) return;
+    
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classCode}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await api.get(`/api/announcement/classroom/${classCode}`);
       
       // Split announcements into recent (≤ 7 days) and previous (> 7 days)
       const sevenDaysAgo = new Date();
@@ -286,10 +284,6 @@ export default function ParentDashboard() {
         }
       });
       
-      // Sort announcements by date (newest first)
-      recent.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      old.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      
       setRecentAnnouncements(recent);
       setOldAnnouncements(old);
     } catch (error) {
@@ -299,48 +293,9 @@ export default function ParentDashboard() {
   };
 
   useEffect(() => {
-    const fetchClassroomDetails = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/classroom/parent/classrooms', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.data && response.data.length > 0) {
-          setClassrooms(response.data);
-          setHasJoinedClassroom(true);
-          // Fetch announcements for the joined classroom
-          await fetchAnnouncements(response.data[0].classCode);
-        }
-      } catch (error) {
-        console.error('Error fetching classroom details:', error);
-      }
-    };
-
-    fetchClassroomDetails();
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    const userName = localStorage.getItem("userName");
-    if (userName) {
-      setName(userName);
-    }
-    
-    fetchClassrooms().then(() => {
-      setHasJoinedClassroom(classrooms.length > 0);
-    });
-  }, [navigate]);
-
-  useEffect(() => {
     if (classrooms.length > 0) {
-      classrooms.forEach(classroom => {
-        fetchAnnouncements(classroom.classCode);
-      });
+      const classroom = classrooms[0]; // Get the first classroom
+      fetchAnnouncements(classroom.classCode);
     }
   }, [classrooms]);
 
@@ -350,8 +305,8 @@ export default function ParentDashboard() {
     const fetchActivities = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(
-          `http://localhost:5000/api/activities/classroom/${classrooms[0]?.classCode}`,
+        const response = await api.get(
+          `/api/activities/classroom/${classrooms[0]?.classCode}`,
           {
             headers: { 
               'Authorization': `Bearer ${token}`,

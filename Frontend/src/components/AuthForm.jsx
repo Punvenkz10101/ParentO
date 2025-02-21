@@ -24,12 +24,11 @@ export default function AuthForm({ type }) {
         localStorage.setItem('userName', response.data.name);
         localStorage.setItem('userType', userType);
         
-        // Navigate to appropriate dashboard
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
-        navigate(dashboardPath);
+        navigate(dashboardPath, { replace: true });
       } else if (type === "signup") {
         toast.success('Signup successful! Please login.');
-        navigate(`/login/${userType}`);
+        navigate(`/login/${userType}`, { replace: true });
       }
     } catch (error) {
       console.error('Auth error:', error);

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { SocketProvider } from './context/SocketContext';
 import Hero from './components/Hero';
 import AuthForm from './components/AuthForm';
@@ -40,22 +40,31 @@ function App() {
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const userType = localStorage.getItem('userType');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!token) {
-    return <Navigate to="/" />;
-  }
+  useEffect(() => {
+    if (!token) {
+      navigate('/', { replace: true });
+      return;
+    }
 
-  // Check if user is trying to access the wrong dashboard
-  const currentPath = window.location.pathname;
-  const isParentPath = currentPath === '/parentDashboard';
-  const isTeacherPath = currentPath === '/teacherDashboard';
+    const currentPath = location.pathname;
+    
+    // Define the correct path for each user type
+    const correctPath = userType === 'parent' ? '/parentDashboard' : '/teacherDashboard';
+    
+    // Only redirect if we're on the wrong path
+    if (currentPath !== correctPath) {
+      navigate(correctPath, { replace: true });
+    }
+    
+    setIsLoading(false);
+  }, [token, userType]);
 
-  if (userType === 'parent' && isTeacherPath) {
-    return <Navigate to="/parentDashboard" replace />;
-  }
-
-  if (userType === 'teacher' && isParentPath) {
-    return <Navigate to="/teacherDashboard" replace />;
+  if (isLoading || !token) {
+    return null;
   }
 
   return children;
