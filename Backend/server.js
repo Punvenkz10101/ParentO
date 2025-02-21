@@ -74,18 +74,61 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
+// Register routes once
 app.use('/api/parent', parentAuthRoutes);
 app.use('/api/teacher', teacherAuthRoutes);
 app.use('/api/classroom', classroomRoutes);
 app.use('/api/announcement', announcementRoutes);
+app.use('/api/activities', activitiesRoutes);
 
 // Make Socket.IO instance available to routes
 app.set('io', io);
 
-// Routes
-app.use('/api/activities', activitiesRoutes);
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something broke!' });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Add error handling for the server
+server.on('error', (error) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  switch (error.code) {
+    case 'EACCES':
+      console.error('Port 5000 requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error('Port 5000 is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});
+
+// Add proper shutdown handling
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Server terminated');
+  });
+});
+
+process.on('SIGINT', () => {
+  server.close(() => {
+    console.log('Server terminated');
+  });
 });

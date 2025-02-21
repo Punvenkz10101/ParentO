@@ -468,17 +468,22 @@ if(userName){
       }
 
       const response = await api.get('/api/classroom/teacher/classrooms', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        timeout: 5000 // Add timeout
       });
 
       if (response.data && response.data.length > 0) {
-        setClassroom(response.data[0]); // Assuming one classroom per teacher
+        setClassroom(response.data[0]);
         setClassrooms(response.data);
         setHasClassroom(true);
       }
     } catch (error) {
       console.error('Error fetching classroom:', error);
-      setError('Failed to load classrooms. Please try again.');
+      if (error.code === 'ERR_NETWORK') {
+        setError('Cannot connect to server. Please check your connection.');
+        toast.error('Server connection failed. Please try again later.');
+      } else {
+        setError('Failed to load classrooms. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -486,11 +491,15 @@ if(userName){
 
   useEffect(() => {
     fetchClassroomDetails();
+    const interval = setInterval(fetchClassroomDetails, 30000); // Poll every 30 seconds instead of 5
 
-    // Set up polling to check for new students
-    const interval = setInterval(fetchClassroomDetails, 5000); // Poll every 5 seconds
-
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    return () => {
+      clearInterval(interval);
+      // Cleanup any socket connections or subscriptions here
+      socket.off('connect_error');
+      socket.off('connect');
+      socket.off('disconnect');
+    };
   }, []);
 
   useEffect(() => {
