@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function Hero({ onParentLogin, onTeacherLogin }) {
+export default function Hero() {
+  const navigate = useNavigate();
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   const languages = [
@@ -22,19 +24,11 @@ export default function Hero({ onParentLogin, onTeacherLogin }) {
   };
 
   const handleParentLogin = () => {
-    if (typeof onParentLogin === 'function') {
-      onParentLogin();
-    } else {
-      window.location.href = '/login/parent';
-    }
+    navigate('/login/parent');
   };
 
   const handleTeacherLogin = () => {
-    if (typeof onTeacherLogin === 'function') {
-      onTeacherLogin();
-    } else {
-      window.location.href = '/login/teacher';
-    }
+    navigate('/login/teacher');
   };
 
   return (

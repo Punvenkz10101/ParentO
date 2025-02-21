@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import {
   Bell, 
@@ -36,6 +35,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { IoClose } from "react-icons/io5";
 import { cn } from "@/lib/utils";
+import { socket } from '../lib/socket';
+import { useSocket } from '../context/SocketContext';
+import api from '../lib/axios';
 
 export default function TeacherDashboard() {
   const navigate=useNavigate();
@@ -183,29 +185,59 @@ if(userName){
     }).join('');
   };
 
-  const handleAddActivity = () => {
-    if (newActivityTitle.trim()) {
-      const tasks = [];
-      if (selectedTasks.completion) tasks.push("Submit task (5 points)");
-      if (selectedTasks.photo) tasks.push("Upload photo (5 points)");
-      if (selectedTasks.video) tasks.push("Submit video (5 points)");
+  const { isConnected } = useSocket();
+  const [activityError, setActivityError] = useState(null);
 
-      setTodaysActivities([...todaysActivities, {
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('activity_error', (error) => {
+      setActivityError(error);
+      toast.error(error);
+    });
+
+    socket.on('activity_created', (activity) => {
+      setTodaysActivities(prev => [...prev, activity]);
+      toast.success('Activity created successfully');
+    });
+
+    return () => {
+      socket.off('activity_error');
+      socket.off('activity_created');
+    };
+  }, []);
+
+  const handleAddActivity = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/api/activities/create', {
         title: newActivityTitle,
         description: newActivityDescription,
         date: newActivityDate,
-        tasks: tasks
-      }]);
-      
-      setNewActivityTitle("");
-      setNewActivityDescription("");
-      setNewActivityDate(new Date().toISOString().split('T')[0]);
-      setSelectedTasks({
-        completion: false,
-        photo: false,
-        video: false
+        tasks: [
+          ...(selectedTasks.completion ? ["Submit task (5 points)"] : []),
+          ...(selectedTasks.photo ? ["Upload photo (5 points)"] : []),
+          ...(selectedTasks.video ? ["Submit video (5 points)"] : [])
+        ],
+        classCode: classroom.classCode
       });
-      setShowActivityForm(false);
+
+      if (response.data) {
+        setTodaysActivities(prev => [...prev, response.data]);
+        toast.success('Activity created successfully');
+        setShowActivityForm(false);
+        setNewActivityTitle("");
+        setNewActivityDescription("");
+        setNewActivityDate(new Date().toISOString().split('T')[0]);
+        setSelectedTasks({
+          completion: false,
+          photo: false,
+          video: false
+        });
+      }
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      toast.error(error.response?.data?.message || 'Failed to create activity');
     }
   };
 
@@ -216,7 +248,7 @@ if(userName){
   const fetchAnnouncements = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classroom.classCode}`, {
+      const response = await api.get(`/api/announcement/classroom/${classroom.classCode}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -257,7 +289,7 @@ if(userName){
     if (newAnnouncementTitle.trim() && newAnnouncementDescription.trim()) {
       try {
         const token = localStorage.getItem('token');
-        await axios.post('http://localhost:5000/api/announcement/create', 
+        await api.post('/api/announcement/create', 
           {
             title: newAnnouncementTitle.trim(),
             description: newAnnouncementDescription.trim(),
@@ -337,7 +369,7 @@ if(userName){
         return;
       }
 
-      const response = await axios.get('http://localhost:5000/api/classroom/teacher/classrooms', {
+      const response = await api.get('/api/classroom/teacher/classrooms', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -362,7 +394,7 @@ if(userName){
         return;
       }
 
-      const response = await axios.post('http://localhost:5000/api/classroom/teacher/classroom', 
+      const response = await api.post('/api/classroom/teacher/classroom', 
         { name: newClassroomName },
         {
           headers: {
@@ -396,7 +428,7 @@ if(userName){
   const fetchParentDetails = async (parentId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/parent/${parentId}`, {
+      const response = await api.get(`/api/parent/${parentId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
@@ -435,7 +467,7 @@ if(userName){
         return;
       }
 
-      const response = await axios.get('http://localhost:5000/api/classroom/teacher/classrooms', {
+      const response = await api.get('/api/classroom/teacher/classrooms', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

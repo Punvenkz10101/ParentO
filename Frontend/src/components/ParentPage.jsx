@@ -47,6 +47,8 @@ import {
 } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
 import { Mail, Users, Clock } from 'lucide-react';
+import { socket } from '../lib/socket';
+import { useSocket } from '../context/SocketContext';
 
 export default function ParentDashboard() {
   const [name, setName] = useState("");
@@ -66,6 +68,10 @@ export default function ParentDashboard() {
   const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
   const [recentAnnouncements, setRecentAnnouncements] = useState([]);
   const [oldAnnouncements, setOldAnnouncements] = useState([]);
+  const { isConnected } = useSocket();
+  const [activities, setActivities] = useState([]);
+  const [todaysActivities, setTodaysActivities] = useState([]);
+  const [activityError, setActivityError] = useState(null);
 
   const navigate=useNavigate();
   const handleLogout=()=>{
@@ -74,27 +80,6 @@ export default function ParentDashboard() {
     navigate('/')
   }
   const teacherName = 'Mrs. Sharma';
-  const [todaysActivities] = useState([
-    {
-      title: "Math Quiz",
-      description: "Weekly mathematics assessment covering algebra",
-      date: new Date().toISOString().split('T')[0],
-      tasks: [
-        "Submit task (5 points)",
-        "Upload photo (5 points)"
-      ]
-    },
-    {
-      title: "Science Experiment",
-      description: "Chemical reactions demonstration",
-      date: new Date().toISOString().split('T')[0],
-      tasks: [
-        "Submit task (5 points)",
-        "Submit video (5 points)"
-      ]
-    }
-  ]);
-
   const [activityHistory] = useState([
     {
       date: '2024-02-20',
@@ -338,6 +323,63 @@ export default function ParentDashboard() {
       });
     }
   }, [classrooms]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const fetchActivities = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+          `http://localhost:5000/api/activities/classroom/${classrooms[0]?.classCode}`,
+          {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        setActivities(response.data);
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+        setActivityError('Failed to fetch activities');
+        toast.error('Failed to fetch activities');
+      }
+    };
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      toast.error('Connection error. Retrying...');
+    });
+
+    socket.on('new_activity', (activity) => {
+      setActivities(prev => [...prev, activity]);
+      toast.success('New activity received!');
+    });
+
+    socket.on('activity_error', (error) => {
+      setActivityError(error);
+      toast.error(error);
+    });
+
+    if (classrooms.length > 0) {
+      fetchActivities();
+    }
+
+    return () => {
+      socket.off('connect_error');
+      socket.off('new_activity');
+      socket.off('activity_error');
+    };
+  }, [classrooms]);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayActivities = activities.filter(activity => 
+      new Date(activity.date).toISOString().split('T')[0] === today
+    );
+    setTodaysActivities(todayActivities);
+  }, [activities]);
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 

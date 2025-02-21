@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+import api from '../lib/axios';
+import { toast } from "react-hot-toast";
 
 export default function AuthForm({ type }) {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -13,24 +14,26 @@ export default function AuthForm({ type }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = type === "login" ? "login" : "signup";
-    const url = `http://localhost:5000/api/${userType}/${endpoint}`;
-
     try {
-      const res = await axios.post(url, formData);
-      if (type === "login") {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("userType", userType);
-        localStorage.setItem("userName", res.data.name);
-        console.log(res.data.name)
+      const endpoint = type === "login" ? "login" : "signup";
+      const response = await api.post(`/api/${userType}/${endpoint}`, formData);
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.userId);
+        localStorage.setItem('userName', response.data.name);
+        localStorage.setItem('userType', userType);
+        
+        // Navigate to appropriate dashboard
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
         navigate(dashboardPath);
-      } else {
+      } else if (type === "signup") {
+        toast.success('Signup successful! Please login.');
         navigate(`/login/${userType}`);
       }
-    } catch (err) {
-      console.error("Error:", err);
-      alert(err.response?.data?.error || err.message || "An error occurred");
+    } catch (error) {
+      console.error('Auth error:', error);
+      toast.error(error.response?.data?.message || `${type} failed`);
     }
   };
 
