@@ -46,7 +46,7 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
-import { Mail, Users } from 'lucide-react';
+import { Mail, Users, Clock } from 'lucide-react';
 
 export default function ParentDashboard() {
   const [name, setName] = useState("");
@@ -63,9 +63,9 @@ export default function ParentDashboard() {
   const [teacherDetails, setTeacherDetails] = useState(null);
   const [hasJoinedClassroom, setHasJoinedClassroom] = useState(false);
   const [announcements, setAnnouncements] = useState([]);
+  const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
   const [recentAnnouncements, setRecentAnnouncements] = useState([]);
   const [oldAnnouncements, setOldAnnouncements] = useState([]);
-  const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
 
   const navigate=useNavigate();
   const handleLogout=()=>{
@@ -264,37 +264,29 @@ export default function ParentDashboard() {
       const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classCode}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      // Get today's date at midnight for accurate day comparison
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      // Calculate the date 7 days ago
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(today.getDate() - 7);
-
-      // Sort announcements by date (newest first) and categorize them
-      const sortedAnnouncements = response.data.sort((a, b) => 
-        new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
+      
+      // Split announcements into recent (≤ 7 days) and previous (> 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
       const recent = [];
       const old = [];
-
-      sortedAnnouncements.forEach(announcement => {
+      
+      response.data.forEach(announcement => {
         const announcementDate = new Date(announcement.createdAt);
-        announcementDate.setHours(0, 0, 0, 0);
-        
         if (announcementDate >= sevenDaysAgo) {
           recent.push(announcement);
         } else {
           old.push(announcement);
         }
       });
-
+      
+      // Sort announcements by date (newest first)
+      recent.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      old.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
       setRecentAnnouncements(recent);
       setOldAnnouncements(old);
-      setAnnouncements(sortedAnnouncements);
     } catch (error) {
       console.error('Error fetching announcements:', error);
       toast.error('Failed to fetch announcements');
@@ -338,6 +330,14 @@ export default function ParentDashboard() {
       setHasJoinedClassroom(classrooms.length > 0);
     });
   }, [navigate]);
+
+  useEffect(() => {
+    if (classrooms.length > 0) {
+      classrooms.forEach(classroom => {
+        fetchAnnouncements(classroom.classCode);
+      });
+    }
+  }, [classrooms]);
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
@@ -713,10 +713,15 @@ export default function ParentDashboard() {
                   {oldAnnouncements.length > 0 && (
                     <Button 
                       variant="outline" 
+                      size="sm"
                       onClick={() => setShowPreviousAnnouncements(true)}
-                      className="text-sm"
+                      className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
                     >
+                      <Clock className="h-4 w-4" />
                       Previous Announcements
+                      <Badge variant="secondary" className="ml-1">
+                        {oldAnnouncements.length}
+                      </Badge>
                     </Button>
                   )}
                 </div>
@@ -724,32 +729,31 @@ export default function ParentDashboard() {
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {recentAnnouncements.length > 0 ? (
-                      recentAnnouncements.map((announcement) => (
-                        <div 
-                          key={announcement._id} 
-                          className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                        >
-                          <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                          <div className="flex-1">
-                            <p className="text-gray-700">
-                              <span className="font-medium">{announcement.title}</span>
-                              <span className="mx-2">•</span>
-                              <span>{announcement.description}</span>
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
+                    {recentAnnouncements.map((announcement) => (
+                      <div 
+                        key={announcement._id} 
+                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
+                        <div className="flex-1">
+                          <p className="text-gray-700">
+                            <span className="font-medium">{announcement.title}</span>
+                            <span className="mx-2">•</span>
+                            <span>{announcement.description}</span>
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
                         </div>
-                      ))
-                    ) : (
+                      </div>
+                    ))}
+                    {recentAnnouncements.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
                         No recent announcements
                       </div>
@@ -899,51 +903,52 @@ export default function ParentDashboard() {
         </div>
       )}
 
-      {/* Previous Announcements Modal */}
+      {/* Previous Announcements Overlay */}
       {showPreviousAnnouncements && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Previous Announcements</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPreviousAnnouncements(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+          <Card className="w-full max-w-3xl mx-4 max-h-[80vh] flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xl font-bold flex items-center">
+                <Clock className="h-5 w-5 text-[#00308F] mr-2" />
+                Previous Announcements
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowPreviousAnnouncements(false)}
+                className="rounded-full hover:bg-gray-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </CardHeader>
-            <CardContent className="flex-1 overflow-auto">
+            <CardContent className="flex-1 overflow-hidden">
               <ScrollArea className="h-full pr-4">
                 <div className="space-y-4">
-                  {oldAnnouncements.length > 0 ? (
-                    oldAnnouncements.map((announcement) => (
-                      <div 
-                        key={announcement._id} 
-                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                        <div className="flex-1">
-                          <p className="text-gray-700">
-                            <span className="font-medium">{announcement.title}</span>
-                            <span className="mx-2">•</span>
-                            <span>{announcement.description}</span>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
+                  {oldAnnouncements.map((announcement) => (
+                    <div 
+                      key={announcement._id} 
+                      className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
+                      <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-gray-700">
+                          <span className="font-medium">{announcement.title}</span>
+                          <span className="mx-2">•</span>
+                          <span>{announcement.description}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
                       </div>
-                    ))
-                  ) : (
+                    </div>
+                  ))}
+                  {oldAnnouncements.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       No previous announcements
                     </div>

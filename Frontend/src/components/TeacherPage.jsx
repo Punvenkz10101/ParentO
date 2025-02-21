@@ -77,9 +77,6 @@ if(userName){
     video: false
   });
   const [announcements, setAnnouncements] = useState([]);
-  const [recentAnnouncements, setRecentAnnouncements] = useState([]);
-  const [oldAnnouncements, setOldAnnouncements] = useState([]);
-  const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState("");
   const [newAnnouncementDescription, setNewAnnouncementDescription] = useState("");
   const [parentsProgress] = useState([
@@ -212,43 +209,39 @@ if(userName){
     }
   };
 
-  const fetchAnnouncements = async (classCode) => {
+  const [showPreviousAnnouncements, setShowPreviousAnnouncements] = useState(false);
+  const [recentAnnouncements, setRecentAnnouncements] = useState([]);
+  const [oldAnnouncements, setOldAnnouncements] = useState([]);
+
+  const fetchAnnouncements = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classCode}`, {
+      const response = await axios.get(`http://localhost:5000/api/announcement/classroom/${classroom.classCode}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      // Get today's date at midnight for accurate day comparison
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      // Calculate the date 7 days ago
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(today.getDate() - 7);
-
-      // Sort announcements by date (newest first) and categorize them
-      const sortedAnnouncements = response.data.sort((a, b) => 
-        new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
+      
+      // Split announcements into recent (≤ 7 days) and previous (> 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
       const recent = [];
       const old = [];
-
-      sortedAnnouncements.forEach(announcement => {
+      
+      response.data.forEach(announcement => {
         const announcementDate = new Date(announcement.createdAt);
-        announcementDate.setHours(0, 0, 0, 0);
-        
         if (announcementDate >= sevenDaysAgo) {
           recent.push(announcement);
         } else {
           old.push(announcement);
         }
       });
-
+      
+      // Sort announcements by date (newest first)
+      recent.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      old.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
       setRecentAnnouncements(recent);
       setOldAnnouncements(old);
-      setAnnouncements(sortedAnnouncements);
     } catch (error) {
       console.error('Error fetching announcements:', error);
       toast.error('Failed to fetch announcements');
@@ -268,7 +261,8 @@ if(userName){
           {
             title: newAnnouncementTitle.trim(),
             description: newAnnouncementDescription.trim(),
-            classCode: classroom.classCode
+            classCode: classroom.classCode,
+            createdAt: new Date().toISOString()
           },
           {
             headers: { 
@@ -279,7 +273,7 @@ if(userName){
         );
 
         // Fetch updated announcements
-        await fetchAnnouncements(classroom.classCode);
+        await fetchAnnouncements();
         
         setNewAnnouncementTitle("");
         setNewAnnouncementDescription("");
@@ -314,7 +308,7 @@ if(userName){
   const [expandedActivity, setExpandedActivity] = useState(null);
 
   // Add this new state for students list
-  const [studentsList, setStudentsList] = useState([
+  const [studentsList] = useState([
     { id: 1, name: "Student A", parentName: "Parent A", attendance: "85%", rollNo: "001" },
     { id: 2, name: "Student B", parentName: "Parent B", attendance: "90%", rollNo: "002" },
     { id: 3, name: "Student C", parentName: "Parent C", attendance: "75%", rollNo: "003" },
@@ -325,60 +319,6 @@ if(userName){
 
   // Add this new state for progress form
   const [showProgressForm, setShowProgressForm] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [progressForm, setProgressForm] = useState({
-    attendance: '',
-    academicPerformance: 'good',
-    behavior: 'good',
-    notes: ''
-  });
-
-  const handleProgressChange = (field, value) => {
-    setProgressForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleProgressUpdate = async () => {
-    try {
-      if (!selectedStudent) {
-        toast.error('No student selected');
-        return;
-      }
-
-      // Here you would typically make an API call to update the student's progress
-      // For now, we'll simulate an update
-      const updatedStudent = {
-        ...selectedStudent,
-        attendance: progressForm.attendance || selectedStudent.attendance,
-        academicPerformance: progressForm.academicPerformance,
-        behavior: progressForm.behavior,
-        notes: progressForm.notes
-      };
-
-      // Update the student in the list
-      const updatedList = studentsList.map(student =>
-        student.id === selectedStudent.id ? updatedStudent : student
-      );
-      
-      // Update the state
-      setStudentsList(updatedList);
-      
-      toast.success('Progress updated successfully');
-      setShowProgressForm(false);
-      setSelectedStudent(null);
-      setProgressForm({
-        attendance: '',
-        academicPerformance: 'good',
-        behavior: 'good',
-        notes: ''
-      });
-    } catch (error) {
-      console.error('Error updating progress:', error);
-      toast.error('Failed to update progress');
-    }
-  };
 
   const [classrooms, setClassrooms] = useState([]);
   const [showCreateClassroom, setShowCreateClassroom] = useState(false);
@@ -759,61 +699,62 @@ if(userName){
 
             {/* Announcements */}
             <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl font-bold flex items-center">
-                    <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                    Announcements
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowAnnouncementForm(true)}
-                      className="text-sm"
-                    >
-                      Add Announcement
-                    </Button>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <Bell className="h-5 w-5 text-[#00308F] mr-2" />
+                  Announcements
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowPreviousAnnouncements(true)}
+                    className="flex items-center"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Previous Announcements
                     {oldAnnouncements.length > 0 && (
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setShowPreviousAnnouncements(true)}
-                        className="text-sm"
-                      >
-                        Previous Announcements
-                      </Button>
+                      <Badge className="ml-2 bg-gray-500">{oldAnnouncements.length}</Badge>
                     )}
-                  </div>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowAnnouncementForm(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {recentAnnouncements.length > 0 ? (
-                      recentAnnouncements.map((announcement) => (
-                        <div 
-                          key={announcement._id} 
-                          className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                        >
-                          <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                          <div className="flex-1">
-                            <p className="text-gray-700">
-                              <span className="font-medium">{announcement.title}</span>
-                              <span className="mx-2">•</span>
-                              <span>{announcement.description}</span>
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
+                    {recentAnnouncements.map((announcement) => (
+                      <div 
+                        key={announcement._id} 
+                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
+                        <div className="flex-1">
+                          <p className="text-gray-700">
+                            <span className="font-medium">{announcement.title}</span>
+                            <span className="mx-2">•</span>
+                            <span>{announcement.description}</span>
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
                         </div>
-                      ))
-                    ) : (
+                      </div>
+                    ))}
+                    {recentAnnouncements.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
                         No recent announcements
                       </div>
@@ -946,14 +887,6 @@ if(userName){
                   <BookOpen className="h-5 w-4 text-[#00308F] mr-2" />
                   Class Students
                 </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowProgressForm(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Update Progress
-                </Button>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px]">
@@ -973,18 +906,6 @@ if(userName){
                               {student.attendance}
                             </Badge>
                           </div>
-                        </div>
-                        <div className="flex justify-end mt-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => {
-                              setSelectedStudent(student);
-                              setShowProgressForm(true);
-                            }}
-                          >
-                            Update Progress
-                          </Button>
                         </div>
                       </div>
                     ))}
@@ -1308,16 +1229,7 @@ if(userName){
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => {
-                  setShowProgressForm(false);
-                  setSelectedStudent(null);
-                  setProgressForm({
-                    attendance: '',
-                    academicPerformance: 'good',
-                    behavior: 'good',
-                    notes: ''
-                  });
-                }}
+                onClick={() => setShowProgressForm(false)}
                 className="hover:bg-gray-100"
               >
                 <X className="h-4 w-4" />
@@ -1329,101 +1241,82 @@ if(userName){
                   {/* Student Info */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Student Name</label>
+                      <label className="text-sm font-medium text-gray-700">Student Name</label>
                       <input
                         type="text"
-                        value={selectedStudent?.name || ''}
-                        className="w-full p-2 border rounded-md mt-1 bg-gray-50"
+                        value="Student A"
                         disabled
+                        className="w-full p-2 border rounded-md mt-1 bg-gray-50"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Parent Name</label>
+                      <label className="text-sm font-medium text-gray-700">Roll Number</label>
                       <input
                         type="text"
-                        value={selectedStudent?.parentName || ''}
-                        className="w-full p-2 border rounded-md mt-1 bg-gray-50"
+                        value="001"
                         disabled
+                        className="w-full p-2 border rounded-md mt-1 bg-gray-50"
                       />
                     </div>
                   </div>
 
-                  {/* Progress Update Form */}
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-4">Update Progress</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Attendance</label>
-                        <input
-                          type="text"
-                          value={progressForm.attendance}
-                          onChange={(e) => handleProgressChange('attendance', e.target.value)}
-                          className="w-full p-2 border rounded-md mt-1"
-                          placeholder="Enter attendance percentage"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Academic Performance</label>
-                        <select 
-                          className="w-full p-2 border rounded-md mt-1"
-                          value={progressForm.academicPerformance}
-                          onChange={(e) => handleProgressChange('academicPerformance', e.target.value)}
-                        >
-                          <option value="excellent">Excellent</option>
-                          <option value="good">Good</option>
-                          <option value="average">Average</option>
-                          <option value="needsImprovement">Needs Improvement</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Behavior</label>
-                        <select 
-                          className="w-full p-2 border rounded-md mt-1"
-                          value={progressForm.behavior}
-                          onChange={(e) => handleProgressChange('behavior', e.target.value)}
-                        >
-                          <option value="excellent">Excellent</option>
-                          <option value="good">Good</option>
-                          <option value="average">Average</option>
-                          <option value="needsImprovement">Needs Improvement</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Additional Notes</label>
-                        <textarea
-                          className="w-full p-2 border rounded-md mt-1"
-                          rows="3"
-                          value={progressForm.notes}
-                          onChange={(e) => handleProgressChange('notes', e.target.value)}
-                          placeholder="Enter any additional notes about the student's progress"
-                        />
-                      </div>
-                    </div>
+                  {/* Attendance */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Attendance (%)</label>
+                    <input
+                      type="number"
+                      defaultValue="85"
+                      className="w-full p-2 border rounded-md mt-1"
+                      min="0"
+                      max="100"
+                    />
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-end gap-2 mt-6">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        setShowProgressForm(false);
-                        setSelectedStudent(null);
-                        setProgressForm({
-                          attendance: '',
-                          academicPerformance: 'good',
-                          behavior: 'good',
-                          notes: ''
-                        });
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleProgressUpdate}>
-                      Update Progress
-                    </Button>
+                  {/* Subject Marks */}
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-gray-800">Subject Marks</h3>
+                    {['Mathematics', 'Science', 'English', 'History'].map((subject, index) => (
+                      <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-700 w-24">{subject}</span>
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="number"
+                            placeholder="Marks"
+                            className="w-20 p-2 border rounded-md"
+                            min="0"
+                            max="100"
+                          />
+                          <span className="text-gray-500">/</span>
+                          <input
+                            type="number"
+                            defaultValue="100"
+                            className="w-20 p-2 border rounded-md"
+                            min="0"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </ScrollArea>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowProgressForm(false)}
+                  className="hover:bg-gray-100"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    handleUpdateMarks();
+                    setShowProgressForm(false);
+                  }}
+                  className="bg-[#00308F] hover:bg-[#00308F]/90"
+                >
+                  Save Progress
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -1517,51 +1410,51 @@ if(userName){
         </div>
       )}
 
-      {/* Previous Announcements Modal */}
+      {/* Previous Announcements Overlay */}
       {showPreviousAnnouncements && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Previous Announcements</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPreviousAnnouncements(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+          <Card className="w-full max-w-3xl mx-4 max-h-[80vh] flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xl font-bold flex items-center">
+                <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
+                Previous Announcements
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowPreviousAnnouncements(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </CardHeader>
-            <CardContent className="flex-1 overflow-auto">
+            <CardContent className="flex-1 overflow-hidden">
               <ScrollArea className="h-full pr-4">
                 <div className="space-y-4">
-                  {oldAnnouncements.length > 0 ? (
-                    oldAnnouncements.map((announcement) => (
-                      <div 
-                        key={announcement._id} 
-                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                        <div className="flex-1">
-                          <p className="text-gray-700">
-                            <span className="font-medium">{announcement.title}</span>
-                            <span className="mx-2">•</span>
-                            <span>{announcement.description}</span>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
+                  {oldAnnouncements.map((announcement) => (
+                    <div 
+                      key={announcement._id} 
+                      className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
+                      <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-gray-700">
+                          <span className="font-medium">{announcement.title}</span>
+                          <span className="mx-2">•</span>
+                          <span>{announcement.description}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
                       </div>
-                    ))
-                  ) : (
+                    </div>
+                  ))}
+                  {oldAnnouncements.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       No previous announcements
                     </div>
