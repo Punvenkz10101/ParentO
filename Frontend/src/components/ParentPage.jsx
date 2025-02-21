@@ -72,6 +72,7 @@ export default function ParentDashboard() {
   const [activities, setActivities] = useState([]);
   const [todaysActivities, setTodaysActivities] = useState([]);
   const [activityError, setActivityError] = useState(null);
+  const [mobileNumber, setMobileNumber] = useState('');
 
   const navigate = useNavigate();
 
@@ -200,20 +201,16 @@ export default function ParentDashboard() {
 
   const handleJoinClassroom = async () => {
     try {
-      if (hasJoinedClassroom) {
-        setError('You can only join one classroom at a time');
-        return;
-      }
-
-      if (!classCode.trim() || !studentName.trim() || !parentName.trim()) {
+      if (!classCode.trim() || !studentName.trim() || !parentName.trim() || !mobileNumber.trim()) {
         setError('Please fill in all fields');
         return;
       }
 
       const response = await api.post('/api/classroom/parent/join-classroom', { 
-        classCode,
+        classCode: classCode.trim(),
         studentName: studentName.trim(),
-        parentName: parentName.trim()
+        parentName: parentName.trim(),
+        mobileNumber: mobileNumber.trim()
       });
 
       if (response.data) {
@@ -222,16 +219,12 @@ export default function ParentDashboard() {
         setClassCode('');
         setStudentName('');
         setParentName('');
+        setMobileNumber('');
         setShowJoinForm(false);
         setError(null);
-        
-        // Fetch announcements for the newly joined classroom
-        await fetchAnnouncements(response.data.classCode);
-        
         toast.success('Successfully joined classroom');
       }
     } catch (error) {
-      console.error('Error joining classroom:', error);
       setError(error.response?.data?.message || 'Error joining classroom');
       toast.error(error.response?.data?.message || 'Error joining classroom');
     }
@@ -541,6 +534,17 @@ export default function ParentDashboard() {
                         placeholder="Enter parent name"
                         value={parentName}
                         onChange={(e) => setParentName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mobileNumber">Mobile Number</Label>
+                      <Input
+                        id="mobileNumber"
+                        type="tel"
+                        placeholder="Enter mobile number"
+                        value={mobileNumber}
+                        onChange={(e) => setMobileNumber(e.target.value)}
                         required
                       />
                     </div>

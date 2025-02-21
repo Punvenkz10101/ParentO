@@ -34,6 +34,10 @@ const classroomSchema = new mongoose.Schema({
       ref: 'Parent',
       required: true,
     },
+    mobileNumber: {
+      type: String,
+      required: true,
+    },
     joinedAt: {
       type: Date,
       default: Date.now,

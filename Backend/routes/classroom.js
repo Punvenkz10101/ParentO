@@ -95,48 +95,38 @@ router.get('/teacher/classrooms', auth, async (req, res) => {
 // Join classroom (Parent only)
 router.post('/parent/join-classroom', auth, async (req, res) => {
   try {
-    const { classCode, studentName, parentName } = req.body;
+    const { classCode, studentName, parentName, mobileNumber } = req.body;
     const parentId = req.user.id;
 
-    // Check if parent is already in a classroom
-    const existingClassroom = await Classroom.findOne({ 'students.parent': parentId });
-    if (existingClassroom) {
-      return res.status(400).json({ message: 'You can only join one classroom at a time' });
+    if (!classCode || !studentName || !parentName || !mobileNumber) {
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Validate input
-    if (!classCode || !studentName || !parentName) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
-    }
-
-    // Find classroom by class code
     const classroom = await Classroom.findOne({ classCode: classCode.trim() });
     if (!classroom) {
-      return res.status(404).json({ message: 'Invalid class code. Please check and try again.' });
+      return res.status(404).json({ message: 'Classroom not found' });
     }
 
-    // Check if parent has already joined this classroom
     const existingStudent = classroom.students.find(
       student => student.parent.toString() === parentId
     );
     if (existingStudent) {
-      return res.status(400).json({ message: 'You have already joined this classroom' });
+      return res.status(400).json({ message: 'Already joined this classroom' });
     }
 
-    // Add student to classroom
     classroom.students.push({
-      studentName,
-      parentName,
+      studentName: studentName.trim(),
+      parentName: parentName.trim(),
       parent: parentId,
+      mobileNumber: mobileNumber.trim(),
       joinedAt: new Date()
     });
 
     await classroom.save();
-
     res.json(classroom);
   } catch (error) {
     console.error('Error joining classroom:', error);
-    res.status(500).json({ message: 'Server error while joining classroom' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

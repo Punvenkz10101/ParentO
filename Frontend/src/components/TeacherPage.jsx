@@ -493,6 +493,41 @@ export default function TeacherDashboard() {
     }
   };
 
+  const handleAddActivity = async () => {
+    try {
+      if (!newActivityTitle.trim()) {
+        toast.error('Please enter activity name');
+        return;
+      }
+
+      if (!classroom?.classCode) {
+        toast.error('No classroom selected');
+        return;
+      }
+
+      const response = await api.post('/api/activities/create', {
+        title: newActivityTitle.trim(),
+        description: newActivityDescription.trim(),
+        date: newActivityDate,
+        classCode: classroom.classCode
+      });
+
+      // Update activities state
+      setTodaysActivities(prev => [...prev, response.data]);
+      
+      // Clear form
+      setNewActivityTitle('');
+      setNewActivityDescription('');
+      setNewActivityDate(new Date().toISOString().split('T')[0]);
+      setShowActivityForm(false);
+      
+      toast.success('Activity added successfully');
+    } catch (error) {
+      console.error('Error adding activity:', error);
+      toast.error(error.response?.data?.message || 'Failed to add activity');
+    }
+  };
+
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
