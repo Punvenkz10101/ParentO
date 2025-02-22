@@ -9,13 +9,20 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
-    debug: false,
+    debug: true, // Enable debug temporarily to help identify issues
     supportedLngs: ['en', 'hi', 'kn', 'te', 'ta', 'bn', 'mr', 'ml'],
     interpolation: {
       escapeValue: false,
     },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+    },
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath: '/locales/{{lng}}/translation.json',
+    },
+    react: {
+      useSuspense: true,
     }
   });
 

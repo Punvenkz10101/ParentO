@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from '../lib/axios';
 import { toast } from "react-hot-toast";
 
 export default function AuthForm({ type }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const { userType } = useParams();
   const navigate = useNavigate();
+
+  // Reset form when language changes
+  useEffect(() => {
+    setFormData({ name: "", email: "", password: "" });
+  }, [i18n.language]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,6 +64,7 @@ export default function AuthForm({ type }) {
           <input
             type="text"
             name="name"
+            value={formData.name}
             placeholder={t('auth.namePlaceholder')}
             onChange={handleChange}
             required
@@ -69,6 +75,7 @@ export default function AuthForm({ type }) {
         <input
           type="email"
           name="email"
+          value={formData.email}
           placeholder={t('auth.emailPlaceholder')}
           onChange={handleChange}
           required
@@ -78,6 +85,7 @@ export default function AuthForm({ type }) {
         <input
           type="password"
           name="password"
+          value={formData.password}
           placeholder={t('auth.passwordPlaceholder')}
           onChange={handleChange}
           required

@@ -4,7 +4,7 @@
     "subtitle": "सक्षमीकरण",
     "students": "विद्यार्थ्यांचे",
     "through": "द्वारे",
-    "parents": "पालकांच्या"
+    "parents": "पालकांचे"
   },
   "auth": {
     "login": "लॉगिन",
@@ -21,11 +21,18 @@
     "loginFailed": "लॉगिन अयशस्वी",
     "signupFailed": "साइन अप अयशस्वी"
   },
+  "login": {
+    "parent": "पालक लॉगिन",
+    "teacher": "शिक्षक लॉगिन",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "submit": "सबमिट करा"
+  },
   "dashboard": {
     "title": "डॅशबोर्ड",
     "attendance": "उपस्थिती",
     "performance": "कामगिरी",
-    "activities": "क्रियाकलाप",
+    "activities": "उपक्रम",
     "notifications": "सूचना"
   },
   "profile": {
@@ -34,7 +41,56 @@
     "save": "बदल जतन करा"
   },
   "tutorial": {
-    "title": "कसे वापरायचे - व्हिडिओ ट्युटोरियल",
+    "title": "कसे वापरावे - व्हिडिओ ट्युटोरियल",
     "languages": "5 भाषा"
+  },
+  "parentPage": {
+    "dashboard": "डॅशबोर्ड",
+    "classroom": {
+      "title": "वर्गखोली",
+      "schedule": "वेळापत्रक",
+      "homework": "गृहपाठ",
+      "progress": "प्रगती"
+    },
+    "activities": {
+      "title": "उपक्रम",
+      "upcoming": "येणारे",
+      "past": "मागील",
+      "register": "नोंदणी"
+    },
+    "announcements": {
+      "title": "घोषणा",
+      "new": "नवीन",
+      "all": "सर्व"
+    },
+    "profile": {
+      "settings": "सेटिंग्ज",
+      "children": "मुले",
+      "logout": "लॉग आउट"
+    }
+  },
+  "teacherPage": {
+    "dashboard": "डॅशबोर्ड",
+    "classroom": {
+      "title": "वर्गखोली व्यवस्थापन",
+      "students": "विद्यार्थी",
+      "attendance": "उपस्थिती",
+      "assignments": "कार्यनियुक्ती"
+    },
+    "activities": {
+      "title": "उपक्रम",
+      "create": "नवीन उपक्रम",
+      "manage": "व्यवस्थापन"
+    },
+    "announcements": {
+      "title": "घोषणा",
+      "create": "नवीन घोषणा",
+      "manage": "व्यवस्थापन"
+    },
+    "profile": {
+      "settings": "सेटिंग्ज",
+      "classes": "वर्ग",
+      "logout": "लॉग आउट"
+    }
   }
 }

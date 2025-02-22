@@ -43,5 +43,54 @@
   "tutorial": {
     "title": "ಹೇಗೆ ಬಳಸುವುದು - ವೀಡಿಯೊ ಟ್ಯುಟೋರಿಯಲ್",
     "languages": "5 ಭಾಷೆಗಳು"
+  },
+  "parentPage": {
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "classroom": {
+      "title": "ತರಗತಿ ಕೋಣೆ",
+      "schedule": "ವೇಳಾಪಟ್ಟಿ",
+      "homework": "ಮನೆಕೆಲಸ",
+      "progress": "ಪ್ರಗತಿ"
+    },
+    "activities": {
+      "title": "ಚಟುವಟಿಕೆಗಳು",
+      "upcoming": "ಮುಂಬರುವ",
+      "past": "ಹಿಂದಿನ",
+      "register": "ನೋಂದಣಿ"
+    },
+    "announcements": {
+      "title": "ಪ್ರಕಟಣೆಗಳು",
+      "new": "ಹೊಸ",
+      "all": "ಎಲ್ಲಾ"
+    },
+    "profile": {
+      "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+      "children": "ಮಕ್ಕಳು",
+      "logout": "ಲಾಗ್ ಔಟ್"
+    }
+  },
+  "teacherPage": {
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "classroom": {
+      "title": "ತರಗತಿ ನಿರ್ವಹಣೆ",
+      "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "attendance": "ಹಾಜರಾತಿ",
+      "assignments": "ಕಾರ್ಯನಿಯೋಜನೆಗಳು"
+    },
+    "activities": {
+      "title": "ಚಟುವಟಿಕೆಗಳು",
+      "create": "ಹೊಸ ಚಟುವಟಿಕೆ",
+      "manage": "ನಿರ್ವಹಿಸಿ"
+    },
+    "announcements": {
+      "title": "ಪ್ರಕಟಣೆಗಳು",
+      "create": "ಹೊಸ ಪ್ರಕಟಣೆ",
+      "manage": "ನಿರ್ವಹಿಸಿ"
+    },
+    "profile": {
+      "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+      "classes": "ತರಗತಿಗಳು",
+      "logout": "ಲಾಗ್ ಔಟ್"
+    }
   }
 }

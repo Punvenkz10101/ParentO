@@ -38,10 +38,59 @@
   "profile": {
     "title": "ప్రొఫైల్",
     "edit": "ప్రొఫైల్ సవరించు",
-    "save": "మార్పులను సేవ్ చేయి"
+    "save": "మార్పులను భద్రపరచు"
   },
   "tutorial": {
     "title": "ఎలా ఉపయోగించాలి - వీడియో ట్యుటోరియల్",
     "languages": "5 భాషలు"
+  },
+  "parentPage": {
+    "dashboard": "డాష్‌బోర్డ్",
+    "classroom": {
+      "title": "తరగతి గది",
+      "schedule": "షెడ్యూల్",
+      "homework": "ఇంటి పని",
+      "progress": "పురోగతి"
+    },
+    "activities": {
+      "title": "కార్యకలాపాలు",
+      "upcoming": "రాబోయే",
+      "past": "గత",
+      "register": "నమోదు"
+    },
+    "announcements": {
+      "title": "ప్రకటనలు",
+      "new": "కొత్త",
+      "all": "అన్నీ"
+    },
+    "profile": {
+      "settings": "సెట్టింగ్స్",
+      "children": "పిల్లలు",
+      "logout": "లాగ్ అవుట్"
+    }
+  },
+  "teacherPage": {
+    "dashboard": "డాష్‌బోర్డ్",
+    "classroom": {
+      "title": "తరగతి గది నిర్వహణ",
+      "students": "విద్యార్థులు",
+      "attendance": "హాజరు",
+      "assignments": "అసైన్‌మెంట్లు"
+    },
+    "activities": {
+      "title": "కార్యకలాపాలు",
+      "create": "కొత్త కార్యకలాపం",
+      "manage": "నిర్వహించు"
+    },
+    "announcements": {
+      "title": "ప్రకటనలు",
+      "create": "కొత్త ప్రకటన",
+      "manage": "నిర్వహించు"
+    },
+    "profile": {
+      "settings": "సెట్టింగ్స్",
+      "classes": "తరగతులు",
+      "logout": "లాగ్ అవుట్"
+    }
   }
 }
