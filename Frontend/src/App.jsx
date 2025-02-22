@@ -5,6 +5,8 @@ import Hero from './components/Hero';
 import AuthForm from './components/AuthForm';
 import ParentDashboard from './components/ParentPage';
 import TeacherDashboard from './components/TeacherPage';
+import ParentProfile from './components/ParentProfile';
+import TeacherProfile from './components/TeacherProfile';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -24,10 +26,26 @@ function App() {
           }
         />
         <Route 
+          path="/parent/profile" 
+          element={
+            <ProtectedRoute>
+              <ParentProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
           path="/teacherDashboard" 
           element={
             <ProtectedRoute>
               <TeacherDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/teacher/profile" 
+          element={
+            <ProtectedRoute>
+              <TeacherProfile />
             </ProtectedRoute>
           }
         />

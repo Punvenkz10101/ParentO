@@ -30,11 +30,37 @@ router.post('/login', async (req, res) => {
   if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
   const token = jwt.sign(
-    { id: teacher._id, role: 'teacher',name:teacher.name },
-     JWT_SECRET, 
-     { expiresIn: '1h' });
-     console.log(teacher.name)
-  res.json({ token ,name:teacher.name});
+    { id: teacher._id, role: 'teacher', name: teacher.name, email: teacher.email },
+    JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  res.json({
+    token,
+    name: teacher.name,
+    email: teacher.email,
+    userId: teacher._id
+  });
+});
+
+// Add profile update route
+router.put('/profile/:id', async (req, res) => {
+  try {
+    const { phone } = req.body;
+    const teacher = await Teacher.findByIdAndUpdate(
+      req.params.id,
+      { phone },
+      { new: true }
+    );
+    
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher not found' });
+    }
+    
+    res.json(teacher);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating profile' });
+  }
 });
 
 module.exports = router;

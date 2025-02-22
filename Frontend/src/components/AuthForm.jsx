@@ -21,6 +21,7 @@ export default function AuthForm({ type }) {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId', response.data.userId);
+        localStorage.setItem('userEmail', response.data.email);
         localStorage.setItem('userName', response.data.name);
         localStorage.setItem('userType', userType);
         

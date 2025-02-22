@@ -555,13 +555,16 @@ export default function TeacherDashboard() {
               <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-base">
+                <DropdownMenuItem 
+                  className="text-base cursor-pointer"
+                  onClick={() => navigate('/teacher/profile')}
+                >
                   <User className="mr-2 h-5 w-5" />
                   Profile
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600">
+                <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-5 w-5" />
                   Logout
                 </DropdownMenuItem>

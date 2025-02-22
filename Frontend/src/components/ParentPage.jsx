@@ -380,7 +380,10 @@ export default function ParentDashboard() {
                   <DropdownMenuContent align="end" className="w-64">
                     <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-base">
+                    <DropdownMenuItem 
+                      className="text-base cursor-pointer"
+                      onClick={() => navigate('/parent/profile')}
+                    >
                       <User className="mr-2 h-5 w-5" />
                       Profile
                     </DropdownMenuItem>

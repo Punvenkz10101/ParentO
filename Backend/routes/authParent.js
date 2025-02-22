@@ -30,12 +30,37 @@ router.post('/login', async (req, res) => {
   if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
   const token = jwt.sign(
-    { id: parent._id, role: 'parent',name:parent.name}, 
+    { id: parent._id, role: 'parent', name: parent.name, email: parent.email }, 
     JWT_SECRET, 
-    { expiresIn: '1h' });
-    console.log(parent.name);
-  res.json({ token ,name:parent.name});
- 
+    { expiresIn: '1h' }
+  );
+
+  res.json({ 
+    token,
+    name: parent.name,
+    email: parent.email,
+    userId: parent._id
+  });
+});
+
+// Add this route to handle profile updates
+router.put('/profile/:id', async (req, res) => {
+  try {
+    const { phone, studentName } = req.body;
+    const parent = await Parent.findByIdAndUpdate(
+      req.params.id,
+      { phone, studentName },
+      { new: true }
+    );
+    
+    if (!parent) {
+      return res.status(404).json({ message: 'Parent not found' });
+    }
+    
+    res.json(parent);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating profile' });
+  }
 });
 
 module.exports = router;
