@@ -63,4 +63,20 @@ router.put('/profile/:id', async (req, res) => {
   }
 });
 
+// Add GET route for fetching profile
+router.get('/profile/:id', async (req, res) => {
+  try {
+    const parent = await Parent.findById(req.params.id);
+    if (!parent) {
+      return res.status(404).json({ message: 'Parent not found' });
+    }
+    res.json({
+      phone: parent.phone,
+      studentName: parent.studentName
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching profile' });
+  }
+});
+
 module.exports = router;
