@@ -6,6 +6,21 @@
     "through": "के माध्यम से",
     "parents": "अभिभावकों"
   },
+  "auth": {
+    "login": "लॉगिन",
+    "signup": "साइन अप",
+    "as": "के रूप में",
+    "parent": "अभिभावक",
+    "teacher": "शिक्षक",
+    "namePlaceholder": "नाम",
+    "emailPlaceholder": "ईमेल",
+    "passwordPlaceholder": "पासवर्ड",
+    "noAccount": "खाता नहीं है?",
+    "haveAccount": "पहले से खाता है?",
+    "signupSuccess": "साइन अप सफल! कृपया लॉगिन करें।",
+    "loginFailed": "लॉगिन विफल",
+    "signupFailed": "साइन अप विफल"
+  },
   "login": {
     "parent": "अभिभावक लॉगिन",
     "teacher": "शिक्षक लॉगिन",

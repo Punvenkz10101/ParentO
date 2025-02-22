@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from '../lib/axios';
 import { toast } from "react-hot-toast";
 
 export default function AuthForm({ type }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const { userType } = useParams();
   const navigate = useNavigate();
@@ -28,12 +30,12 @@ export default function AuthForm({ type }) {
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
         navigate(dashboardPath, { replace: true });
       } else if (type === "signup") {
-        toast.success('Signup successful! Please login.');
+        toast.success(t('auth.signupSuccess'));
         navigate(`/login/${userType}`, { replace: true });
       }
     } catch (error) {
       console.error('Auth error:', error);
-      toast.error(error.response?.data?.message || `${type} failed`);
+      toast.error(error.response?.data?.message || t(`auth.${type}Failed`));
     }
   };
 
@@ -50,14 +52,14 @@ export default function AuthForm({ type }) {
         className="relative bg-white p-8 shadow-lg rounded-lg w-96"
       >
         <h2 className="text-xl font-bold text-center mb-4">
-          {type === "login" ? "Login" : "Signup"} as {userType}
+          {t(`auth.${type}`)} {t('auth.as')} {t(`auth.${userType}`)}
         </h2>
 
         {type === "signup" && (
           <input
             type="text"
             name="name"
-            placeholder="Name"
+            placeholder={t('auth.namePlaceholder')}
             onChange={handleChange}
             required
             className="w-full p-2 border rounded mb-2"
@@ -67,7 +69,7 @@ export default function AuthForm({ type }) {
         <input
           type="email"
           name="email"
-          placeholder="Email"
+          placeholder={t('auth.emailPlaceholder')}
           onChange={handleChange}
           required
           className="w-full p-2 border rounded mb-2"
@@ -76,29 +78,29 @@ export default function AuthForm({ type }) {
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder={t('auth.passwordPlaceholder')}
           onChange={handleChange}
           required
           className="w-full p-2 border rounded mb-4"
         />
 
         <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded">
-          {type === "login" ? "Login" : "Signup"}
+          {t(`auth.${type}`)}
         </button>
 
         <p className="mt-4 text-center">
           {type === "login" ? (
             <>
-              Don't have an account?{" "}
+              {t('auth.noAccount')}{" "}
               <Link to={`/signup/${userType}`} className="text-blue-500 underline">
-                Sign up
+                {t('auth.signup')}
               </Link>
             </>
           ) : (
             <>
-              Already have an account?{" "}
+              {t('auth.haveAccount')}{" "}
               <Link to={`/login/${userType}`} className="text-blue-500 underline">
-                Log in
+                {t('auth.login')}
               </Link>
             </>
           )}

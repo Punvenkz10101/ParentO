@@ -2,9 +2,24 @@
   "welcome": "ಪೇರೆಂಟ್‌ಓಗೆ ಸ್ವಾಗತ",
   "hero": {
     "subtitle": "ಸಬಲೀಕರಣ",
-    "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "students": "ವಿದ್ಯಾರ್ಥಿಗಳ",
     "through": "ಮೂಲಕ",
-    "parents": "ಪೋಷಕರು"
+    "parents": "ಪೋಷಕರ"
+  },
+  "auth": {
+    "login": "ಲಾಗಿನ್",
+    "signup": "ಸೈನ್ ಅಪ್",
+    "as": "ಆಗಿ",
+    "parent": "ಪೋಷಕ",
+    "teacher": "ಶಿಕ್ಷಕ",
+    "namePlaceholder": "ಹೆಸರು",
+    "emailPlaceholder": "ಇಮೇಲ್",
+    "passwordPlaceholder": "ಪಾಸ್‌ವರ್ಡ್",
+    "noAccount": "ಖಾತೆ ಇಲ್ಲವೇ?",
+    "haveAccount": "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?",
+    "signupSuccess": "ಸೈನ್ ಅಪ್ ಯಶಸ್ವಿ! ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಮಾಡಿ.",
+    "loginFailed": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ",
+    "signupFailed": "ಸೈನ್ ಅಪ್ ವಿಫಲವಾಗಿದೆ"
   },
   "login": {
     "parent": "ಪೋಷಕರ ಲಾಗಿನ್",
@@ -18,7 +33,7 @@
     "attendance": "ಹಾಜರಾತಿ",
     "performance": "ಕಾರ್ಯಕ್ಷಮತೆ",
     "activities": "ಚಟುವಟಿಕೆಗಳು",
-    "notifications": "ಸೂಚನೆಗಳು"
+    "notifications": "ಅಧಿಸೂಚನೆಗಳು"
   },
   "profile": {
     "title": "ಪ್ರೊಫೈಲ್",
@@ -26,7 +41,7 @@
     "save": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ"
   },
   "tutorial": {
-    "title": "ಬಳಸುವ ವಿಧಾನ - ವೀಡಿಯೊ ಟ್ಯುಟೋರಿಯಲ್",
+    "title": "ಹೇಗೆ ಬಳಸುವುದು - ವೀಡಿಯೊ ಟ್ಯುಟೋರಿಯಲ್",
     "languages": "5 ಭಾಷೆಗಳು"
   }
 }

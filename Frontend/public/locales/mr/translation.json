@@ -4,20 +4,28 @@
     "subtitle": "सक्षमीकरण",
     "students": "विद्यार्थ्यांचे",
     "through": "द्वारे",
-    "parents": "पालकांचे"
+    "parents": "पालकांच्या"
   },
-  "login": {
-    "parent": "पालक लॉगिन",
-    "teacher": "शिक्षक लॉगिन",
-    "email": "ईमेल",
-    "password": "पासवर्ड",
-    "submit": "सबमिट करा"
+  "auth": {
+    "login": "लॉगिन",
+    "signup": "साइन अप",
+    "as": "म्हणून",
+    "parent": "पालक",
+    "teacher": "शिक्षक",
+    "namePlaceholder": "नाव",
+    "emailPlaceholder": "ईमेल",
+    "passwordPlaceholder": "पासवर्ड",
+    "noAccount": "खाते नाही?",
+    "haveAccount": "आधीपासून खाते आहे?",
+    "signupSuccess": "साइन अप यशस्वी! कृपया लॉगिन करा.",
+    "loginFailed": "लॉगिन अयशस्वी",
+    "signupFailed": "साइन अप अयशस्वी"
   },
   "dashboard": {
     "title": "डॅशबोर्ड",
     "attendance": "उपस्थिती",
     "performance": "कामगिरी",
-    "activities": "उपक्रम",
+    "activities": "क्रियाकलाप",
     "notifications": "सूचना"
   },
   "profile": {
@@ -26,7 +34,7 @@
     "save": "बदल जतन करा"
   },
   "tutorial": {
-    "title": "कसे वापरायचे - व्हिडिओ ट्युटोरिअल",
+    "title": "कसे वापरायचे - व्हिडिओ ट्युटोरियल",
     "languages": "5 भाषा"
   }
 }

@@ -6,12 +6,20 @@
     "through": "through",
     "parents": "parents"
   },
-  "login": {
-    "parent": "Parent Login",
-    "teacher": "Teacher Login",
-    "email": "Email",
-    "password": "Password",
-    "submit": "Submit"
+  "auth": {
+    "login": "Login",
+    "signup": "Sign up",
+    "as": "as",
+    "parent": "Parent",
+    "teacher": "Teacher",
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signupSuccess": "Signup successful! Please login.",
+    "loginFailed": "Login failed",
+    "signupFailed": "Signup failed"
   },
   "dashboard": {
     "title": "Dashboard",

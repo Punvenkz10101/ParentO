@@ -6,6 +6,21 @@
     "through": "വഴി",
     "parents": "രക്ഷിതാക്കളുടെ"
   },
+  "auth": {
+    "login": "ലോഗിൻ",
+    "signup": "സൈൻ അപ്പ്",
+    "as": "ആയി",
+    "parent": "രക്ഷിതാവ്",
+    "teacher": "അധ്യാപകൻ",
+    "namePlaceholder": "പേര്",
+    "emailPlaceholder": "ഇമെയിൽ",
+    "passwordPlaceholder": "പാസ്‌വേഡ്",
+    "noAccount": "അക്കൗണ്ട് ഇല്ലേ?",
+    "haveAccount": "നേരത്തെ അക്കൗണ്ട് ഉണ്ടോ?",
+    "signupSuccess": "സൈൻ അപ്പ് വിജയകരം! ദയവായി ലോഗിൻ ചെയ്യുക.",
+    "loginFailed": "ലോഗിൻ പരാജയപ്പെട്ടു",
+    "signupFailed": "സൈൻ അപ്പ് പരാജയപ്പെട്ടു"
+  },
   "login": {
     "parent": "രക്ഷിതാവ് ലോഗിൻ",
     "teacher": "അധ്യാപക ലോഗിൻ",
