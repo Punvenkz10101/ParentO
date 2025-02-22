@@ -1,0 +1,32 @@
+{
+  "welcome": "पैरेंटओ में आपका स्वागत है",
+  "hero": {
+    "subtitle": "सशक्तिकरण",
+    "students": "छात्रों",
+    "through": "के माध्यम से",
+    "parents": "अभिभावकों"
+  },
+  "login": {
+    "parent": "अभिभावक लॉगिन",
+    "teacher": "शिक्षक लॉगिन",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "submit": "सबमिट करें"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "attendance": "उपस्थिति",
+    "performance": "प्रदर्शन",
+    "activities": "गतिविधियाँ",
+    "notifications": "सूचनाएं"
+  },
+  "profile": {
+    "title": "प्रोफ़ाइल",
+    "edit": "प्रोफ़ाइल संपादित करें",
+    "save": "परिवर्तन सहेजें"
+  },
+  "tutorial": {
+    "title": "कैसे उपयोग करें - वीडियो ट्यूटोरियल",
+    "languages": "5 भाषाएँ"
+  }
+}

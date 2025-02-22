@@ -1,0 +1,32 @@
+{
+  "welcome": "पॅरेंटओ मध्ये आपले स्वागत आहे",
+  "hero": {
+    "subtitle": "सक्षमीकरण",
+    "students": "विद्यार्थ्यांचे",
+    "through": "द्वारे",
+    "parents": "पालकांचे"
+  },
+  "login": {
+    "parent": "पालक लॉगिन",
+    "teacher": "शिक्षक लॉगिन",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "submit": "सबमिट करा"
+  },
+  "dashboard": {
+    "title": "डॅशबोर्ड",
+    "attendance": "उपस्थिती",
+    "performance": "कामगिरी",
+    "activities": "उपक्रम",
+    "notifications": "सूचना"
+  },
+  "profile": {
+    "title": "प्रोफाइल",
+    "edit": "प्रोफाइल संपादित करा",
+    "save": "बदल जतन करा"
+  },
+  "tutorial": {
+    "title": "कसे वापरायचे - व्हिडिओ ट्युटोरिअल",
+    "languages": "5 भाषा"
+  }
+}

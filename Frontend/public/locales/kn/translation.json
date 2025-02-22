@@ -1,0 +1,32 @@
+{
+  "welcome": "ಪೇರೆಂಟ್‌ಓಗೆ ಸ್ವಾಗತ",
+  "hero": {
+    "subtitle": "ಸಬಲೀಕರಣ",
+    "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "through": "ಮೂಲಕ",
+    "parents": "ಪೋಷಕರು"
+  },
+  "login": {
+    "parent": "ಪೋಷಕರ ಲಾಗಿನ್",
+    "teacher": "ಶಿಕ್ಷಕರ ಲಾಗಿನ್",
+    "email": "ಇಮೇಲ್",
+    "password": "ಪಾಸ್‌ವರ್ಡ್",
+    "submit": "ಸಲ್ಲಿಸು"
+  },
+  "dashboard": {
+    "title": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "attendance": "ಹಾಜರಾತಿ",
+    "performance": "ಕಾರ್ಯಕ್ಷಮತೆ",
+    "activities": "ಚಟುವಟಿಕೆಗಳು",
+    "notifications": "ಸೂಚನೆಗಳು"
+  },
+  "profile": {
+    "title": "ಪ್ರೊಫೈಲ್",
+    "edit": "ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ",
+    "save": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ"
+  },
+  "tutorial": {
+    "title": "ಬಳಸುವ ವಿಧಾನ - ವೀಡಿಯೊ ಟ್ಯುಟೋರಿಯಲ್",
+    "languages": "5 ಭಾಷೆಗಳು"
+  }
+}

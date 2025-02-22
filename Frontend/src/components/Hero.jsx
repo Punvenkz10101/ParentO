@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Hero() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   const languages = [
@@ -42,11 +44,11 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl">
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-wide drop-shadow-lg animate-fade-in text-white leading-tight mt-4 md:mt-0">
-          Welcome to <span className="text-white">ParentO</span>
+          {t('welcome')}
         </h1>
 
         <p className="text-xl sm:text-2xl md:text-3xl mt-4 sm:mt-6 opacity-90 animate-slide-up">
-          Empowering <span className="font-semibold text-white">students</span> through <span className="font-semibold text-white">parents</span>
+          {t('hero.subtitle')} <span className="font-semibold text-white">{t('hero.students')}</span> {t('hero.through')} <span className="font-semibold text-white">{t('hero.parents')}</span>
         </p>
 
         {/* Login Buttons Container */}
@@ -55,19 +57,19 @@ export default function Hero() {
             onClick={handleParentLogin} 
             className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
-            Parent Login
+            {t('login.parent')}
           </button>
           <button 
             onClick={handleTeacherLogin} 
             className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
-            Teacher Login
+            {t('login.teacher')}
           </button>
         </div>
 
         {/* Video Tutorials Section */}
         <h2 className="mt-12 sm:mt-16 text-2xl sm:text-3xl md:text-4xl font-bold text-white animate-fade-in">
-          How to Use - Video Tutorial <span className="text-white">(5 Languages)</span>
+          {t('tutorial.title')} <span className="text-white">({t('tutorial.languages')})</span>
         </h2>
 
         {/* Language Buttons Container */}

@@ -1,0 +1,32 @@
+{
+  "welcome": "Welcome to ParentO",
+  "hero": {
+    "subtitle": "Empowering",
+    "students": "students",
+    "through": "through",
+    "parents": "parents"
+  },
+  "login": {
+    "parent": "Parent Login",
+    "teacher": "Teacher Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Submit"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "attendance": "Attendance",
+    "performance": "Performance",
+    "activities": "Activities",
+    "notifications": "Notifications"
+  },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit Profile",
+    "save": "Save Changes"
+  },
+  "tutorial": {
+    "title": "How to Use - Video Tutorial",
+    "languages": "5 Languages"
+  }
+}

@@ -7,50 +7,54 @@ import ParentDashboard from './components/ParentPage';
 import TeacherDashboard from './components/TeacherPage';
 import ParentProfile from './components/ParentProfile';
 import TeacherProfile from './components/TeacherProfile';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <SocketProvider>
-      <Toaster position="top-right" />
-      <Routes>
-        <Route path="/" element={<Hero />} />
-        <Route path="/login/:userType" element={<AuthForm type="login" />} />
-        <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
-        <Route 
-          path="/parentDashboard" 
-          element={
-            <ProtectedRoute>
-              <ParentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/parent/profile" 
-          element={
-            <ProtectedRoute>
-              <ParentProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/teacherDashboard" 
-          element={
-            <ProtectedRoute>
-              <TeacherDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/teacher/profile" 
-          element={
-            <ProtectedRoute>
-              <TeacherProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <div className="min-h-screen bg-gray-100">
+        <LanguageSwitcher />
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/" element={<Hero />} />
+          <Route path="/login/:userType" element={<AuthForm type="login" />} />
+          <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
+          <Route 
+            path="/parentDashboard" 
+            element={
+              <ProtectedRoute>
+                <ParentDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/parent/profile" 
+            element={
+              <ProtectedRoute>
+                <ParentProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/teacherDashboard" 
+            element={
+              <ProtectedRoute>
+                <TeacherDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/teacher/profile" 
+            element={
+              <ProtectedRoute>
+                <TeacherProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
     </SocketProvider>
   );
 }
