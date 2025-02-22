@@ -57,13 +57,13 @@ export default function Hero() {
             onClick={handleParentLogin} 
             className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
-            {t('login.parent')}
+            {t('auth.login')} {t('auth.as')} {t('auth.parent')}
           </button>
           <button 
             onClick={handleTeacherLogin} 
             className="w-full px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
-            {t('login.teacher')}
+            {t('auth.login')} {t('auth.as')} {t('auth.teacher')}
           </button>
         </div>
 
