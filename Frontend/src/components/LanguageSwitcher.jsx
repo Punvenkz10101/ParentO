@@ -35,7 +35,7 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <div className="language-switcher fixed top-4 right-4 z-50">
+    <div className="language-switcher fixed top-20 right-4 z-50">
       <select
         onChange={(e) => changeLanguage(e.target.value)}
         value={i18n.language}
