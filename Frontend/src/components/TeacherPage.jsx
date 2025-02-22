@@ -455,7 +455,7 @@ export default function TeacherDashboard() {
     // Fetch parent details for each student
     const parentDetailsMap = {};
     for (const student of classroom.students || []) {
-      if (student?.parent) {
+      if (student?.parent && student.parent._id) {  
         const parentDetails = await fetchParentDetails(student.parent._id);
         if (parentDetails) {
           parentDetailsMap[student.parent._id] = parentDetails;
