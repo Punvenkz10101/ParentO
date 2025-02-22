@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../lib/axios';
 import { toast } from 'react-hot-toast';
 import {
@@ -51,6 +52,7 @@ import { socket } from '../lib/socket';
 import { useSocket } from '../context/SocketContext';
 
 export default function ParentDashboard() {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,15 +113,15 @@ export default function ParentDashboard() {
     {
       date: '2024-02-20',
       activities: [
-        { title: 'Math Quiz', status: 'completed', points: 10 },
-        { title: 'Science Experiment', status: 'completed', points: 15 }
+        { title: t('activities.mathQuiz'), status: 'completed', points: 10 },
+        { title: t('activities.scienceExperiment'), status: 'completed', points: 15 }
       ]
     },
     {
       date: '2024-02-19',
       activities: [
-        { title: 'English Essay', status: 'completed', points: 10 },
-        { title: 'History Test', status: 'completed', points: 10 }
+        { title: t('activities.englishEssay'), status: 'completed', points: 10 },
+        { title: t('activities.historyTest'), status: 'completed', points: 10 }
       ]
     }
   ]);
@@ -199,7 +201,8 @@ export default function ParentDashboard() {
     }
   };
 
-  const handleJoinClassroom = async () => {
+  const handleJoinClassroom = async (e) => {
+    e.preventDefault();
     try {
       if (!classCode.trim() || !studentName.trim() || !parentName.trim() || !mobileNumber.trim()) {
         setError('Please fill in all fields');
@@ -222,7 +225,7 @@ export default function ParentDashboard() {
         setMobileNumber('');
         setShowJoinForm(false);
         setError(null);
-        toast.success('Successfully joined classroom');
+        toast.success(t('classroom.joinSuccess'));
       }
     } catch (error) {
       setError(error.response?.data?.message || 'Error joining classroom');
@@ -240,7 +243,7 @@ export default function ParentDashboard() {
       setSelectedClassroom(null);
       setShowDetailsModal(false);
       
-      toast.success('Successfully exited classroom');
+      toast.success(t('classroom.exitSuccess'));
       
       // Refresh classrooms list
       await fetchClassrooms();
@@ -358,12 +361,12 @@ export default function ParentDashboard() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-blue-600">ParentO</span>
+              <span className="text-2xl font-bold text-blue-600">{t('welcome')}</span>
             </div>
             
             {/* Add this new div for the centered title */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
-              <h1 className="text-2xl font-bold text-blue-600">Parent Dashboard</h1>
+              <h1 className="text-2xl font-bold text-blue-600">{t('dashboard.title')}</h1>
             </div>
             
             {/* Rest of your navbar content */}
@@ -378,20 +381,20 @@ export default function ParentDashboard() {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64">
-                    <DropdownMenuLabel className="text-lg">My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-lg">{t('dashboard.welcomeMessage')}, {name}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-base cursor-pointer"
                       onClick={() => navigate('/parent/profile')}
                     >
                       <User className="mr-2 h-5 w-5" />
-                      Profile
+                      {t('profile.title')}
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-base text-red-600 cursor-pointer">
                       <LogOut className="mr-2 h-5 w-5" />
-                      Logout
+                      {t('dashboard.logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -406,8 +409,8 @@ export default function ParentDashboard() {
         <Card className="mb-6 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] text-white">
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Welcome</h2>
-              <p className="opacity-90">Welcome, {name}!</p>
+              <h2 className="text-2xl font-bold">{t('dashboard.welcome')}</h2>
+              <p className="opacity-90">{t('dashboard.welcomeMessage')}, {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/parent.png" alt="Parent" />
@@ -419,33 +422,33 @@ export default function ParentDashboard() {
         {/* Classrooms Section */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">My Classrooms</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{t('classroom.title')}</h2>
             {classrooms.length === 0 && !loading && (
               <Button onClick={() => setShowJoinForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Join Classroom
+                {t('classroom.join')}
               </Button>
             )}
           </div>
 
           {loading ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">Loading...</p>
+              <p className="text-gray-600">{t('classroom.loading')}</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-600">{error}</p>
               <Button onClick={fetchClassrooms} className="mt-4">
-                Retry
+                {t('classroom.retry')}
               </Button>
             </div>
           ) : classrooms.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Classrooms Found</h3>
-              <p className="text-gray-600 mb-4">Join a classroom to get started.</p>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('classroom.noClassrooms')}</h3>
+              <p className="text-gray-600 mb-4">{t('classroom.joinMessage')}</p>
               <Button onClick={() => setShowJoinForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Join Classroom
+                {t('classroom.join')}
               </Button>
             </div>
           ) : (
@@ -459,20 +462,20 @@ export default function ParentDashboard() {
                     <CardContent>
                       <div className="space-y-2">
                         <p className="text-sm text-gray-600">
-                          <span className="font-medium">Teacher:</span> {classroom.teacher.name}
+                          <span className="font-medium">{t('classroom.teacher')}: </span> {classroom.teacher.name}
                         </p>
                         {classroom.students && classroom.students
                           .filter(student => student && student.parent && student.parent._id === localStorage.getItem('userId'))
                           .map((student, index) => (
                             <div key={index} className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                               <p className="text-sm">
-                                <span className="font-medium">Student:</span> {student.studentName}
+                                <span className="font-medium">{t('classroom.student')}: </span> {student.studentName}
                               </p>
                               <p className="text-sm">
-                                <span className="font-medium">Parent:</span> {student.parentName}
+                                <span className="font-medium">{t('classroom.parent')}: </span> {student.parentName}
                               </p>
                               <p className="text-sm text-gray-500">
-                                Joined: {new Date(student.joinedAt).toLocaleDateString()}
+                                {t('classroom.joined')}: {new Date(student.joinedAt).toLocaleDateString()}
                               </p>
                             </div>
                           ))}
@@ -481,13 +484,13 @@ export default function ParentDashboard() {
                         onClick={() => viewClassroomDetails(classroom)} 
                         className="mt-4 w-full bg-[#00308F] hover:bg-[#002266]"
                       >
-                        View Details
+                        {t('classroom.viewDetails')}
                       </Button>
                       <Button 
                         onClick={() => handleExitClassroom(classroom._id)}
                         className="mt-4 w-full bg-red-600 hover:bg-red-700"
                       >
-                        Exit Classroom
+                        {t('classroom.exit')}
                       </Button>
                     </CardContent>
                   </Card>
@@ -502,7 +505,7 @@ export default function ParentDashboard() {
               <Card className="w-full max-w-md mx-4">
                 <CardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle>Join Classroom</CardTitle>
+                    <CardTitle>{t('classroom.join')}</CardTitle>
                     {error && (
                       <p className="text-sm text-red-600 mt-2">{error}</p>
                     )}
@@ -511,41 +514,41 @@ export default function ParentDashboard() {
                 <CardContent>
                   <form onSubmit={handleJoinClassroom} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="classCode">Class Code</Label>
+                      <Label htmlFor="classCode">{t('classroom.code')}</Label>
                       <Input
                         id="classCode"
-                        placeholder="Enter class code"
+                        placeholder={t('classroom.codePlaceholder')}
                         value={classCode}
                         onChange={(e) => setClassCode(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="studentName">Student Name</Label>
+                      <Label htmlFor="studentName">{t('profile.studentName')}</Label>
                       <Input
                         id="studentName"
-                        placeholder="Enter student name"
+                        placeholder={t('profile.studentNamePlaceholder')}
                         value={studentName}
                         onChange={(e) => setStudentName(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="parentName">Parent Name</Label>
+                      <Label htmlFor="parentName">{t('profile.parentName')}</Label>
                       <Input
                         id="parentName"
-                        placeholder="Enter parent name"
+                        placeholder={t('profile.parentNamePlaceholder')}
                         value={parentName}
                         onChange={(e) => setParentName(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mobileNumber">Mobile Number</Label>
+                      <Label htmlFor="mobileNumber">{t('profile.mobile')}</Label>
                       <Input
                         id="mobileNumber"
                         type="tel"
-                        placeholder="Enter mobile number"
+                        placeholder={t('profile.mobilePlaceholder')}
                         value={mobileNumber}
                         onChange={(e) => setMobileNumber(e.target.value)}
                         required
@@ -557,10 +560,10 @@ export default function ParentDashboard() {
                         variant="outline"
                         onClick={() => setShowJoinForm(false)}
                       >
-                        Cancel
+                        {t('activity.cancel')}
                       </Button>
                       <Button type="submit">
-                        Join Classroom
+                        {t('classroom.join')}
                       </Button>
                     </div>
                   </form>
@@ -579,7 +582,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Today's Activities
+                  {t('activities.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -602,14 +605,14 @@ export default function ParentDashboard() {
                         {expandedActivity === index && (
                           <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
                             <p className="mb-2">
-                              <span className="font-medium">Description:</span> {activity.description}
+                              <span className="font-medium">{t('activity.description')}: </span> {activity.description}
                             </p>
                             <p className="mb-2">
-                              <span className="font-medium">Date:</span> {activity.date}
+                              <span className="font-medium">{t('activity.date')}: </span> {activity.date}
                             </p>
                             {activity.tasks && activity.tasks.length > 0 && (
                               <div>
-                                <p className="font-medium mb-2">Required Tasks:</p>
+                                <p className="font-medium mb-2">{t('activity.tasks')}</p>
                                 <div className="flex flex-wrap gap-4">
                                   {activity.tasks.map((task, taskIndex) => (
                                     <div
@@ -637,7 +640,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <BookOpen className="h-5 w-5 text-[#00308F] mr-2" />
-                  Student Progress
+                  {t('dashboard.studentProgress')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -645,21 +648,21 @@ export default function ParentDashboard() {
                   <div className="space-y-3">
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
                       <p className="text-sm">
-                        <span className="font-medium">Math Exam</span>
+                        <span className="font-medium">{t('dashboard.mathExam')}: </span>
                         <span className="mx-2">•</span>
                         <span>Score: 85/100</span>
                       </p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
                       <p className="text-sm">
-                        <span className="font-medium">Science Exam</span>
+                        <span className="font-medium">{t('dashboard.scienceExam')}: </span>
                         <span className="mx-2">•</span>
                         <span>Score: 90/100</span>
                       </p>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
                       <p className="text-sm">
-                        <span className="font-medium">English Exam</span>
+                        <span className="font-medium">{t('dashboard.englishExam')}: </span>
                         <span className="mx-2">•</span>
                         <span>Score: 78/100</span>
                       </p>
@@ -677,7 +680,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Class Leaderboard
+                  {t('dashboard.leaderboard')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -707,7 +710,7 @@ export default function ParentDashboard() {
                     className="w-full mt-2"
                     onClick={() => setShowLeaderboardModal(true)}
                   >
-                    View Full Leaderboard
+                    {t('dashboard.viewAllLeaderboard')}
                   </Button>
                 </div>
               </CardContent>
@@ -718,13 +721,13 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Points Overview
+                  {t('dashboard.pointsOverview')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col justify-center items-center h-full">
                 <div className="text-center">
                   <p className="text-9xl font-bold text-[#00308F]">85</p>
-                  <p className="text-gray-600 mt-2 text-xl">Total Points</p>
+                  <p className="text-gray-600 mt-2 text-xl">{t('dashboard.totalPoints')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -738,7 +741,7 @@ export default function ParentDashboard() {
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-xl font-bold flex items-center">
                     <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                    Announcements
+                    {t('announcements.title')}
                   </CardTitle>
                   {oldAnnouncements.length > 0 && (
                     <Button 
@@ -748,7 +751,7 @@ export default function ParentDashboard() {
                       className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
                     >
                       <Clock className="h-4 w-4" />
-                      Previous Announcements
+                      {t('announcements.viewPrevious')}
                       <Badge variant="secondary" className="ml-1">
                         {oldAnnouncements.length}
                       </Badge>
@@ -759,34 +762,37 @@ export default function ParentDashboard() {
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {recentAnnouncements.map((announcement) => (
-                      <div 
-                        key={announcement._id} 
-                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                        <div className="flex-1">
-                          <p className="text-gray-700">
-                            <span className="font-medium">{announcement.title}</span>
-                            <span className="mx-2">•</span>
-                            <span>{announcement.description}</span>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
+                    {showPreviousAnnouncements ? (
+                      <>
+                        <div>
+                          <h3 className="mb-2 text-sm font-medium">{t('announcements.recent')}</h3>
+                          {recentAnnouncements.map((announcement, index) => (
+                            <div key={index} className="mb-4">
+                              <p className="text-sm font-medium">{announcement.title}</p>
+                              <p className="text-sm text-gray-500">{announcement.description}</p>
+                              <p className="text-xs text-gray-400">{announcement.date}</p>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    ))}
-                    {recentAnnouncements.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        No recent announcements
-                      </div>
+                        <div>
+                          <h3 className="mb-2 text-sm font-medium">{t('announcements.previous')}</h3>
+                          {oldAnnouncements.map((announcement, index) => (
+                            <div key={index} className="mb-4">
+                              <p className="text-sm font-medium">{announcement.title}</p>
+                              <p className="text-sm text-gray-500">{announcement.description}</p>
+                              <p className="text-xs text-gray-400">{announcement.date}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      announcements.map((announcement, index) => (
+                        <div key={index} className="space-y-1">
+                          <p className="text-sm font-medium">{announcement.title}</p>
+                          <p className="text-sm text-gray-500">{announcement.description}</p>
+                          <p className="text-xs text-gray-400">{announcement.date}</p>
+                        </div>
+                      ))
                     )}
                   </div>
                 </ScrollArea>
@@ -798,7 +804,7 @@ export default function ParentDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Activity History
+                  {t('dashboard.activityHistory')}
                 </CardTitle>
                 <div className="flex gap-2">
                   <select
@@ -840,7 +846,7 @@ export default function ParentDashboard() {
                               })}
                             </h3>
                             <Badge variant="outline" className="text-[#00308F]">
-                              {day.activities.length} Activities
+                              {day.activities.length} {t('dashboard.activities')}
                             </Badge>
                           </div>
                           <div className="space-y-3">
@@ -855,7 +861,7 @@ export default function ParentDashboard() {
                                       {activity.title}
                                     </h4>
                                     <p className="text-sm text-gray-600">
-                                      Points Earned: {activity.points}
+                                      {t('dashboard.pointsEarned')}: {activity.points}
                                     </p>
                                   </div>
                                   <Badge
@@ -875,7 +881,7 @@ export default function ParentDashboard() {
                       ))
                     ) : (
                       <div className="text-center py-8 text-gray-500">
-                        No activities found for {selectedMonth} {selectedYear}
+                        {t('dashboard.noActivitiesFound')} {selectedMonth} {selectedYear}
                       </div>
                     )}
                   </div>
@@ -901,7 +907,7 @@ export default function ParentDashboard() {
               </Button>
               <CardTitle className="text-xl font-bold flex items-center">
                 <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                Full Leaderboard
+                {t('dashboard.leaderboard')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -940,7 +946,7 @@ export default function ParentDashboard() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-xl font-bold flex items-center">
                 <Clock className="h-5 w-5 text-[#00308F] mr-2" />
-                Previous Announcements
+                {t('announcements.previous')}
               </CardTitle>
               <Button 
                 variant="ghost" 
@@ -980,7 +986,7 @@ export default function ParentDashboard() {
                   ))}
                   {oldAnnouncements.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
-                      No previous announcements
+                      {t('announcements.noPreviousAnnouncements')}
                     </div>
                   )}
                 </div>
@@ -1008,22 +1014,22 @@ export default function ParentDashboard() {
               <div className="space-y-6">
                 {/* Teacher Details Section */}
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-3 text-blue-900">Teacher Information</h3>
+                  <h3 className="text-lg font-semibold mb-3 text-blue-900">{t('classroom.teacherInformation')}</h3>
                   <div className="space-y-2">
                     <p className="flex items-center text-gray-700">
                       <User className="h-4 w-4 mr-2 text-blue-600" />
-                      <span className="font-medium mr-2">Name:</span> 
+                      <span className="font-medium mr-2">{t('classroom.teacherName')}: </span> 
                       {selectedClassroom.teacher?.name || 'Not Available'}
                     </p>
                     <p className="flex items-center text-gray-700">
                       <Mail className="h-4 w-4 mr-2 text-blue-600" />
-                      <span className="font-medium mr-2">Email:</span>
+                      <span className="font-medium mr-2">{t('classroom.teacherEmail')}: </span>
                       {selectedClassroom.teacher?.email || 'Not Available'}
                       {selectedClassroom.teacher?.email && (
                         <a 
                           href={`mailto:${selectedClassroom.teacher.email}`}
                           className="ml-2 p-1 hover:bg-blue-100 rounded-full transition-colors"
-                          title="Send Email to Teacher"
+                          title={t('classroom.sendEmailToTeacher')}
                         >
                           <Mail className="h-4 w-4 text-blue-600" />
                         </a>
@@ -1034,7 +1040,7 @@ export default function ParentDashboard() {
 
                 {/* Student Information Section */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Your Children in This Class</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t('classroom.yourChildrenInThisClass')}</h3>
                   <div className="space-y-4">
                     {selectedClassroom.students
                       .filter(student => student && student.parent && student.parent._id === localStorage.getItem('userId'))
@@ -1043,17 +1049,17 @@ export default function ParentDashboard() {
                           <div className="space-y-2">
                             <p className="flex items-center">
                               <User className="h-4 w-4 mr-2 text-gray-600" />
-                              <span className="font-medium mr-2">Student:</span> 
+                              <span className="font-medium mr-2">{t('classroom.student')}: </span> 
                               {student.studentName}
                             </p>
                             <p className="flex items-center">
                               <Users className="h-4 w-4 mr-2 text-gray-600" />
-                              <span className="font-medium mr-2">Parent:</span> 
+                              <span className="font-medium mr-2">{t('classroom.parent')}: </span> 
                               {student.parentName}
                             </p>
                             <p className="flex items-center text-sm text-gray-500">
                               <Calendar className="h-4 w-4 mr-2" />
-                              <span className="font-medium mr-2">Joined:</span>
+                              <span className="font-medium mr-2">{t('classroom.joined')}: </span>
                               {new Date(student.joinedAt).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',

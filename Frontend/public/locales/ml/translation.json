@@ -16,20 +16,20 @@
     "emailPlaceholder": "ഇമെയിൽ",
     "passwordPlaceholder": "പാസ്‌വേഡ്",
     "noAccount": "അക്കൗണ്ട് ഇല്ലേ?",
-    "haveAccount": "നേരത്തെ അക്കൗണ്ട് ഉണ്ടോ?",
+    "haveAccount": "ഇതിനകം അക്കൗണ്ട് ഉണ്ടോ?",
     "signupSuccess": "സൈൻ അപ്പ് വിജയകരം! ദയവായി ലോഗിൻ ചെയ്യുക.",
     "loginFailed": "ലോഗിൻ പരാജയപ്പെട്ടു",
     "signupFailed": "സൈൻ അപ്പ് പരാജയപ്പെട്ടു"
   },
   "login": {
-    "parent": "രക്ഷിതാവ് ലോഗിൻ",
-    "teacher": "അധ്യാപക ലോഗിൻ",
+    "parent": "രക്ഷിതാവിന്റെ ലോഗിൻ",
+    "teacher": "അധ്യാപകന്റെ ലോഗിൻ",
     "email": "ഇമെയിൽ",
     "password": "പാസ്‌വേഡ്",
     "submit": "സമർപ്പിക്കുക"
   },
   "dashboard": {
-    "title": "ഡാഷ്ബോർഡ്",
+    "title": "ഡാഷ്‌ബോർഡ്",
     "attendance": "ഹാജർ",
     "performance": "പ്രകടനം",
     "activities": "പ്രവർത്തനങ്ങൾ",
@@ -43,5 +43,54 @@
   "tutorial": {
     "title": "എങ്ങനെ ഉപയോഗിക്കാം - വീഡിയോ ട്യൂട്ടോറിയൽ",
     "languages": "5 ഭാഷകൾ"
+  },
+  "parentPage": {
+    "dashboard": "ഡാഷ്‌ബോർഡ്",
+    "classroom": {
+      "title": "ക്ലാസ്‌റൂം",
+      "schedule": "ഷെഡ്യൂൾ",
+      "homework": "ഹോംവർക്ക്",
+      "progress": "പുരോഗതി"
+    },
+    "activities": {
+      "title": "പ്രവർത്തനങ്ങൾ",
+      "upcoming": "വരാനിരിക്കുന്നവ",
+      "past": "കഴിഞ്ഞവ",
+      "register": "രജിസ്റ്റർ"
+    },
+    "announcements": {
+      "title": "പ്രഖ്യാപനങ്ങൾ",
+      "new": "പുതിയത്",
+      "all": "എല്ലാം"
+    },
+    "profile": {
+      "settings": "ക്രമീകരണങ്ങൾ",
+      "children": "കുട്ടികൾ",
+      "logout": "ലോഗ് ഔട്ട്"
+    }
+  },
+  "teacherPage": {
+    "dashboard": "ഡാഷ്‌ബോർഡ്",
+    "classroom": {
+      "title": "ക്ലാസ്‌റൂം മാനേജ്മെന്റ്",
+      "students": "വിദ്യാർത്ഥികൾ",
+      "attendance": "ഹാജർ",
+      "assignments": "അസൈൻമെന്റുകൾ"
+    },
+    "activities": {
+      "title": "പ്രവർത്തനങ്ങൾ",
+      "create": "പുതിയ പ്രവർത്തനം",
+      "manage": "മാനേജ് ചെയ്യുക"
+    },
+    "announcements": {
+      "title": "പ്രഖ്യാപനങ്ങൾ",
+      "create": "പുതിയ പ്രഖ്യാപനം",
+      "manage": "മാനേജ് ചെയ്യുക"
+    },
+    "profile": {
+      "settings": "ക്രമീകരണങ്ങൾ",
+      "classes": "ക്ലാസുകൾ",
+      "logout": "ലോഗ് ഔട്ട്"
+    }
   }
 }

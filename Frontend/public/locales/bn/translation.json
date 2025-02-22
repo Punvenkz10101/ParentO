@@ -43,5 +43,54 @@
   "tutorial": {
     "title": "কিভাবে ব্যবহার করবেন - ভিডিও টিউটোরিয়াল",
     "languages": "৫টি ভাষা"
+  },
+  "parentPage": {
+    "dashboard": "ড্যাশবোর্ড",
+    "classroom": {
+      "title": "শ্রেণীকক্ষ",
+      "schedule": "সময়সূচী",
+      "homework": "বাড়ির কাজ",
+      "progress": "অগ্রগতি"
+    },
+    "activities": {
+      "title": "কার্যক্রম",
+      "upcoming": "আসন্ন",
+      "past": "অতীত",
+      "register": "নিবন্ধন"
+    },
+    "announcements": {
+      "title": "ঘোষণা",
+      "new": "নতুন",
+      "all": "সব"
+    },
+    "profile": {
+      "settings": "সেটিংস",
+      "children": "সন্তানরা",
+      "logout": "লগ আউট"
+    }
+  },
+  "teacherPage": {
+    "dashboard": "ড্যাশবোর্ড",
+    "classroom": {
+      "title": "শ্রেণীকক্ষ ব্যবস্থাপনা",
+      "students": "শিক্ষার্থীরা",
+      "attendance": "উপস্থিতি",
+      "assignments": "অ্যাসাইনমেন্ট"
+    },
+    "activities": {
+      "title": "কার্যক্রম",
+      "create": "নতুন কার্যক্রম",
+      "manage": "ব্যবস্থাপনা"
+    },
+    "announcements": {
+      "title": "ঘোষণা",
+      "create": "নতুন ঘোষণা",
+      "manage": "ব্যবস্থাপনা"
+    },
+    "profile": {
+      "settings": "সেটিংস",
+      "classes": "শ্রেণী",
+      "logout": "লগ আউট"
+    }
   }
 }

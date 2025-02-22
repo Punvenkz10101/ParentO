@@ -1,10 +1,10 @@
 {
-  "welcome": "पैरेंटओ में आपका स्वागत है",
+  "welcome": "पेरेंटओ में आपका स्वागत है",
   "hero": {
     "subtitle": "सशक्तिकरण",
-    "students": "छात्रों",
+    "students": "छात्रों का",
     "through": "के माध्यम से",
-    "parents": "अभिभावकों"
+    "parents": "अभिभावकों का"
   },
   "auth": {
     "login": "लॉगिन",
@@ -26,22 +26,75 @@
     "teacher": "शिक्षक लॉगिन",
     "email": "ईमेल",
     "password": "पासवर्ड",
-    "submit": "सबमिट करें"
+    "submit": "जमा करें"
   },
   "dashboard": {
     "title": "डैशबोर्ड",
+    "welcome": "स्वागत है",
+    "welcomeMessage": "स्वागत है",
     "attendance": "उपस्थिति",
     "performance": "प्रदर्शन",
     "activities": "गतिविधियाँ",
-    "notifications": "सूचनाएं"
+    "notifications": "सूचनाएं",
+    "logout": "लॉग आउट",
+    "studentProgress": "छात्र की प्रगति",
+    "mathExam": "गणित परीक्षा",
+    "scienceExam": "विज्ञान परीक्षा",
+    "englishExam": "अंग्रेजी परीक्षा",
+    "leaderboard": "लीडरबोर्ड",
+    "viewAllLeaderboard": "सभी लीडरबोर्ड देखें",
+    "pointsOverview": "अंक समीक्षा",
+    "totalPoints": "कुल अंक",
+    "activityHistory": "गतिविधि इतिहास",
+    "pointsEarned": "अर्जित अंक",
+    "score": "अंक",
+    "todayActivities": "आज की गतिविधियाँ",
+    "classrooms": "कक्षाएं",
+    "joinClassroom": "कक्षा में शामिल हों",
+    "noClassrooms": "कोई कक्षा नहीं मिली"
+  },
+  "classroom": {
+    "title": "कक्षाएं",
+    "schedule": "समय-सारणी",
+    "homework": "गृहकार्य",
+    "progress": "प्रगति",
+    "viewDetails": "विवरण देखें",
+    "exit": "कक्षा छोड़ें",
+    "joinSuccess": "कक्षा में सफलतापूर्वक शामिल हुए",
+    "exitSuccess": "कक्षा से सफलतापूर्वक बाहर निकले",
+    "teacher": "शिक्षक",
+    "testClass": "परीक्षण कक्षा"
+  },
+  "activities": {
+    "title": "गतिविधियाँ",
+    "upcoming": "आगामी",
+    "past": "पिछली",
+    "register": "पंजीकरण",
+    "completed": "पूर्ण",
+    "mathQuiz": "गणित क्विज़",
+    "scienceExperiment": "विज्ञान प्रयोग",
+    "englishEssay": "अंग्रेजी निबंध",
+    "historyTest": "इतिहास परीक्षा",
+    "today": "आज की गतिविधियाँ",
+    "count": "{{count}} गतिविधियाँ"
+  },
+  "announcements": {
+    "title": "घोषणाएं",
+    "new": "नई",
+    "all": "सभी",
+    "viewAll": "सभी देखें",
+    "noAnnouncements": "कोई घोषणाएं नहीं"
   },
   "profile": {
     "title": "प्रोफ़ाइल",
     "edit": "प्रोफ़ाइल संपादित करें",
-    "save": "परिवर्तन सहेजें"
+    "save": "परिवर्तन सहेजें",
+    "settings": "सेटिंग्स",
+    "children": "बच्चे",
+    "logout": "लॉग आउट"
   },
   "tutorial": {
     "title": "कैसे उपयोग करें - वीडियो ट्यूटोरियल",
-    "languages": "5 भाषाएँ"
+    "languages": "5 भाषाएं"
   }
 }

@@ -26,12 +26,67 @@
     "attendance": "Attendance",
     "performance": "Performance",
     "activities": "Activities",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "welcome": "Welcome",
+    "classrooms": "Classrooms",
+    "joinClass": "Join Class",
+    "createClass": "Create Class",
+    "todayActivities": "Today's Activities",
+    "announcements": "Announcements",
+    "viewAll": "View All",
+    "progress": "Progress",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "classroom": {
+    "code": "Class Code",
+    "name": "Class Name",
+    "join": "Join",
+    "create": "Create",
+    "details": "Class Details",
+    "students": "Students",
+    "teacher": "Teacher",
+    "noClassrooms": "No classrooms found",
+    "joinSuccess": "Successfully joined the classroom",
+    "joinError": "Failed to join classroom",
+    "createSuccess": "Classroom created successfully",
+    "createError": "Failed to create classroom"
+  },
+  "activity": {
+    "new": "New Activity",
+    "title": "Title",
+    "description": "Description",
+    "date": "Date",
+    "tasks": {
+      "completion": "Completion",
+      "photo": "Photo",
+      "video": "Video"
+    },
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "addSuccess": "Activity added successfully",
+    "addError": "Failed to add activity"
+  },
+  "announcement": {
+    "new": "New Announcement",
+    "title": "Title",
+    "description": "Description",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "recent": "Recent Announcements",
+    "previous": "Previous Announcements",
+    "addSuccess": "Announcement added successfully",
+    "addError": "Failed to add announcement"
   },
   "profile": {
     "title": "Profile",
     "edit": "Edit Profile",
-    "save": "Save Changes"
+    "save": "Save Changes",
+    "studentName": "Student Name",
+    "parentName": "Parent Name",
+    "mobile": "Mobile Number",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Failed to update profile"
   },
   "tutorial": {
     "title": "How to Use - Video Tutorial",

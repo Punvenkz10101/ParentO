@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const LanguageSwitcher = () => {
@@ -15,8 +15,23 @@ const LanguageSwitcher = () => {
     { code: 'ml', name: 'മലയാളം' }
   ];
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
+  useEffect(() => {
+    // Load saved language preference or default to 'en'
+    const savedLang = localStorage.getItem('i18nextLng') || 'en';
+    if (i18n.language !== savedLang) {
+      i18n.changeLanguage(savedLang);
+    }
+  }, [i18n]);
+
+  const changeLanguage = async (lng) => {
+    try {
+      await i18n.changeLanguage(lng);
+      localStorage.setItem('i18nextLng', lng);
+      // Force a reload to ensure all components update
+      window.location.reload();
+    } catch (error) {
+      console.error('Language change failed:', error);
+    }
   };
 
   return (
