@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../lib/axios';
 import { toast } from 'react-hot-toast';
 
@@ -8,6 +8,25 @@ export default function TeacherProfile() {
     email: localStorage.getItem('userEmail') || '',
     phone: ''
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const response = await api.get(`/api/teacher/profile/${userId}`);
+        if (response.data) {
+          setProfile(prev => ({
+            ...prev,
+            phone: response.data.phone || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChange = (e) => {
     setProfile({

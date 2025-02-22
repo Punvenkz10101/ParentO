@@ -10,6 +10,26 @@ export default function ParentProfile() {
     studentName: ''
   });
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const response = await api.get(`/api/parent/profile/${userId}`);
+        if (response.data) {
+          setProfile(prev => ({
+            ...prev,
+            phone: response.data.phone || '',
+            studentName: response.data.studentName || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const handleChange = (e) => {
     setProfile({
       ...profile,
