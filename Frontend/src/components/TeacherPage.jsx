@@ -57,18 +57,7 @@ export default function TeacherDashboard() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [studentParentDetails, setStudentParentDetails] = useState({});
-  const [todaysActivities, setTodaysActivities] = useState([
-    {
-      title: "Math Quiz",
-      description: "Weekly mathematics assessment covering algebra",
-      date: new Date().toISOString().split('T')[0]
-    },
-    {
-      title: "Science Experiment",
-      description: "Chemical reactions demonstration",
-      date: new Date().toISOString().split('T')[0]
-    }
-  ]);
+  const [todaysActivities, setTodaysActivities] = useState([]);
   const [newActivityTitle, setNewActivityTitle] = useState("");
   const [newActivityDescription, setNewActivityDescription] = useState("");
   const [newActivityDate, setNewActivityDate] = useState(new Date().toISOString().split('T')[0]);
