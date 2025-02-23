@@ -75,6 +75,7 @@ export default function ParentDashboard() {
   const [todaysActivities, setTodaysActivities] = useState([]);
   const [activityError, setActivityError] = useState(null);
   const [mobileNumber, setMobileNumber] = useState('');
+  const [expandedActivity, setExpandedActivity] = useState(null);
 
   const navigate = useNavigate();
 
@@ -109,37 +110,6 @@ export default function ParentDashboard() {
   };
 
   const teacherName = 'Mrs. Sharma';
-  const [activityHistory] = useState([
-    {
-      date: '2024-02-20',
-      activities: [
-        { title: t('activities.mathQuiz'), status: 'completed', points: 10 },
-        { title: t('activities.scienceExperiment'), status: 'completed', points: 15 }
-      ]
-    },
-    {
-      date: '2024-02-19',
-      activities: [
-        { title: t('activities.englishEssay'), status: 'completed', points: 10 },
-        { title: t('activities.historyTest'), status: 'completed', points: 10 }
-      ]
-    }
-  ]);
-
-  const [expandedActivity, setExpandedActivity] = useState(null);
-  const [selectedYear, setSelectedYear] = useState('2024');
-  const [selectedMonth, setSelectedMonth] = useState('february');
-  const [showAllLeaderboard, setShowAllLeaderboard] = useState(false);
-  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
-
-  const getFilteredActivities = () => {
-    return activityHistory.filter(day => {
-      const date = new Date(day.date);
-      const monthName = date.toLocaleString('default', { month: 'long' }).toLowerCase();
-      return date.getFullYear().toString() === selectedYear &&
-        monthName === selectedMonth.toLowerCase();
-    });
-  };
 
   const leaderboardData = [
     { name: "Parent A", points: 100, studentName: "Student A" },
@@ -295,62 +265,111 @@ export default function ParentDashboard() {
     }
   }, [classrooms]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    const fetchActivities = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await api.get(
-          `/api/activities/classroom/${classrooms[0]?.classCode}`,
-          {
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
+  const fetchActivities = async (classCode) => {
+    if (!classCode) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await api.get(
+        `/api/activities/classroom/${classCode}`,
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
-        );
+        }
+      );
+      
+      if (response.data) {
+        // Get today's date at midnight for consistent comparison
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const todayActs = response.data.filter(activity => {
+          const activityDate = new Date(activity.date);
+          activityDate.setHours(0, 0, 0, 0);
+          return activityDate.getTime() === today.getTime();
+        });
+        
+        setTodaysActivities(todayActs);
         setActivities(response.data);
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-        setActivityError('Failed to fetch activities');
-        toast.error('Failed to fetch activities');
+        setActivityError(null);
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setActivityError('Failed to fetch activities');
+      toast.error('Failed to fetch activities');
+    }
+  };
+
+  useEffect(() => {
+    if (classrooms.length > 0 && classrooms[0]?.classCode) {
+      fetchActivities(classrooms[0].classCode);
+    }
+  }, [classrooms]);
+
+  useEffect(() => {
+    if (!socket || !classrooms.length) return;
+
+    const handleNewActivity = (activity) => {
+      if (activity.classCode === classrooms[0]?.classCode) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const activityDate = new Date(activity.date);
+        activityDate.setHours(0, 0, 0, 0);
+        
+        if (activityDate.getTime() === today.getTime()) {
+          setTodaysActivities(prev => {
+            const exists = prev.some(a => a._id === activity._id);
+            if (!exists) {
+              return [...prev, activity];
+            }
+            return prev.map(a => a._id === activity._id ? activity : a);
+          });
+        }
+        
+        setActivities(prev => {
+          const exists = prev.some(a => a._id === activity._id);
+          if (!exists) {
+            return [...prev, activity];
+          }
+          return prev.map(a => a._id === activity._id ? activity : a);
+        });
       }
     };
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-      toast.error('Connection error. Retrying...');
-    });
+    const handleActivityDeleted = (activityId) => {
+      setTodaysActivities(prev => prev.filter(activity => activity._id !== activityId));
+      setActivities(prev => prev.filter(activity => activity._id !== activityId));
+    };
 
-    socket.on('new_activity', (activity) => {
-      setActivities(prev => [...prev, activity]);
-      toast.success('New activity received!');
-    });
+    const handleClassroomDeleted = (classCode) => {
+      if (classCode === classrooms[0]?.classCode) {
+        setClassrooms([]);
+        setHasJoinedClassroom(false);
+        setTodaysActivities([]);
+        setActivities([]);
+        setAnnouncements([]);
+        toast.info('Classroom has been deleted by the teacher');
+      }
+    };
 
+    socket.on('new_activity', handleNewActivity);
+    socket.on('activity_deleted', handleActivityDeleted);
+    socket.on('classroom_deleted', handleClassroomDeleted);
     socket.on('activity_error', (error) => {
       setActivityError(error);
       toast.error(error);
     });
 
-    if (classrooms.length > 0) {
-      fetchActivities();
-    }
-
     return () => {
-      socket.off('connect_error');
       socket.off('new_activity');
+      socket.off('activity_deleted');
+      socket.off('classroom_deleted');
       socket.off('activity_error');
     };
-  }, [classrooms]);
-
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const todayActivities = activities.filter(activity => 
-      new Date(activity.date).toISOString().split('T')[0] === today
-    );
-    setTodaysActivities(todayActivities);
-  }, [activities]);
+  }, [socket, classrooms]);
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
@@ -590,14 +609,15 @@ export default function ParentDashboard() {
                   <div className="space-y-3">
                     {todaysActivities.map((activity, index) => (
                       <div key={index} className="space-y-2">
-                        <div
+                        <div 
                           className="flex items-center justify-between p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                           onClick={() => setExpandedActivity(expandedActivity === index ? null : index)}
                         >
                           <div className="flex items-center space-x-2 text-gray-700">
                             <ChevronRight
-                              className={`h-4 w-4 text-[#00308F] transition-transform ${expandedActivity === index ? "transform rotate-90" : ""
-                                }`}
+                              className={`h-4 w-4 text-[#00308F] transition-transform ${
+                                expandedActivity === index ? "transform rotate-90" : ""
+                              }`}
                             />
                             <span>{activity.title}</span>
                           </div>
@@ -605,14 +625,16 @@ export default function ParentDashboard() {
                         {expandedActivity === index && (
                           <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
                             <p className="mb-2">
-                              <span className="font-medium">{t('activity.description')}: </span> {activity.description}
+                              <span className="font-medium">Description: </span> 
+                              {activity.description}
                             </p>
                             <p className="mb-2">
-                              <span className="font-medium">{t('activity.date')}: </span> {activity.date}
+                              <span className="font-medium">Date: </span> 
+                              {new Date(activity.date).toLocaleDateString()}
                             </p>
                             {activity.tasks && activity.tasks.length > 0 && (
                               <div>
-                                <p className="font-medium mb-2">{t('activity.tasks')}</p>
+                                <p className="font-medium mb-2">Tasks:</p>
                                 <div className="flex flex-wrap gap-4">
                                   {activity.tasks.map((task, taskIndex) => (
                                     <div
@@ -689,7 +711,6 @@ export default function ParentDashboard() {
                     <div
                       key={index}
                       className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors"
-                      onClick={() => setShowLeaderboardModal(true)}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl min-w-[2rem]">
@@ -708,7 +729,6 @@ export default function ParentDashboard() {
                   <Button
                     variant="outline"
                     className="w-full mt-2"
-                    onClick={() => setShowLeaderboardModal(true)}
                   >
                     {t('dashboard.viewAllLeaderboard')}
                   </Button>
@@ -798,203 +818,9 @@ export default function ParentDashboard() {
                 </ScrollArea>
               </CardContent>
             </Card>
-
-            {/* Activity History */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  {t('dashboard.activityHistory')}
-                </CardTitle>
-                <div className="flex gap-2">
-                  <select
-                    className="px-2 py-1 border rounded-md text-sm"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                  >
-                    {['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'
-                    ].map(month => (
-                      <option key={month.toLowerCase()} value={month.toLowerCase()}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    className="px-2 py-1 border rounded-md text-sm"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                  >
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                  </select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-6">
-                    {getFilteredActivities().length > 0 ? (
-                      getFilteredActivities().map((day, dayIndex) => (
-                        <div key={dayIndex} className="border-b pb-4 last:border-0">
-                          <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-semibold text-gray-800">
-                              {new Date(day.date).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </h3>
-                            <Badge variant="outline" className="text-[#00308F]">
-                              {day.activities.length} {t('dashboard.activities')}
-                            </Badge>
-                          </div>
-                          <div className="space-y-3">
-                            {day.activities.map((activity, actIndex) => (
-                              <div
-                                key={actIndex}
-                                className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
-                              >
-                                <div className="flex justify-between items-center">
-                                  <div>
-                                    <h4 className="font-medium text-gray-800">
-                                      {activity.title}
-                                    </h4>
-                                    <p className="text-sm text-gray-600">
-                                      {t('dashboard.pointsEarned')}: {activity.points}
-                                    </p>
-                                  </div>
-                                  <Badge
-                                    className={
-                                      activity.status === 'completed'
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-yellow-100 text-yellow-800"
-                                    }
-                                  >
-                                    {activity.status}
-                                  </Badge>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        {t('dashboard.noActivitiesFound')} {selectedMonth} {selectedYear}
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
-
-      {/* Leaderboard Modal */}
-      {showLeaderboardModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-2"
-                onClick={() => setShowLeaderboardModal(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-              <CardTitle className="text-xl font-bold flex items-center">
-                <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                {t('dashboard.leaderboard')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-3">
-                  {leaderboardData.map((parent, index) => (
-                    <div
-                      key={index}
-                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl min-w-[2rem]">
-                          {formatNumberToEmoji(index + 1)}
-                        </span>
-                        <div>
-                          <p className="font-medium text-gray-800">{parent.name}</p>
-                          <p className="text-sm text-gray-600">{parent.studentName}</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-white text-[#00308F]">
-                        {parent.points} pts
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Previous Announcements Overlay */}
-      {showPreviousAnnouncements && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-3xl mx-4 max-h-[80vh] flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xl font-bold flex items-center">
-                <Clock className="h-5 w-5 text-[#00308F] mr-2" />
-                {t('announcements.previous')}
-              </CardTitle>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => setShowPreviousAnnouncements(false)}
-                className="rounded-full hover:bg-gray-100"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full pr-4">
-                <div className="space-y-4">
-                  {oldAnnouncements.map((announcement) => (
-                    <div 
-                      key={announcement._id} 
-                      className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-gray-700">
-                          <span className="font-medium">{announcement.title}</span>
-                          <span className="mx-2">•</span>
-                          <span>{announcement.description}</span>
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {oldAnnouncements.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      {t('announcements.noPreviousAnnouncements')}
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Classroom Details Modal */}
       {showDetailsModal && selectedClassroom && (

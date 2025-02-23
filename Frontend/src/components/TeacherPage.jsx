@@ -16,7 +16,8 @@ import {
   Plus,
   Trash2,
   LogOut, 
-  User
+  User,
+  Users
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,30 +113,8 @@ export default function TeacherDashboard() {
     }
   ]);
   const [showLeaderboardOverlay, setShowLeaderboardOverlay] = useState(false);
-  const [activityHistory] = useState([
-    {
-      date: '2024-02-20',
-      activities: [
-        { title: 'Math Quiz', completed: 15, total: 20 },
-        { title: 'Science Experiment', completed: 18, total: 20 }
-      ]
-    },
-    {
-      date: '2024-02-19',
-      activities: [
-        { title: 'English Essay', completed: 16, total: 20 },
-        { title: 'History Test', completed: 19, total: 20 }
-      ]
-    },
-    {
-      date: '2024-02-18',
-      activities: [
-        { title: 'Geography Project', completed: 17, total: 20 },
-        { title: 'Art Assignment', completed: 20, total: 20 }
-      ]
-    },
-    // Add more historical data...
-  ]);
+  const [activities, setActivities] = useState([]);
+  const [expandedActivity, setExpandedActivity] = useState(null);
 
   const leaderboardData = [
     { name: "Parent A", points: 100, studentName: "Student A" },
@@ -209,21 +188,62 @@ export default function TeacherDashboard() {
 
     const handleNewActivity = (activity) => {
       if (activity.classCode === classroom.classCode) {
-        setTodaysActivities(prev => [...prev, activity]);
-        toast.success('New activity received!');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const activityDate = new Date(activity.date);
+        activityDate.setHours(0, 0, 0, 0);
+        
+        if (activityDate.getTime() === today.getTime()) {
+          setTodaysActivities(prev => {
+            const exists = prev.some(a => a._id === activity._id);
+            if (!exists) {
+              return [...prev, activity];
+            }
+            return prev.map(a => a._id === activity._id ? activity : a);
+          });
+        }
+        
+        setActivities(prev => {
+          const exists = prev.some(a => a._id === activity._id);
+          if (!exists) {
+            return [...prev, activity];
+          }
+          return prev.map(a => a._id === activity._id ? activity : a);
+        });
+      }
+    };
+
+    const handleActivityDeleted = (activityId) => {
+      setTodaysActivities(prev => prev.filter(activity => activity._id !== activityId));
+      setActivities(prev => prev.filter(activity => activity._id !== activityId));
+    };
+
+    const handleClassroomDeleted = (classCode) => {
+      if (classCode === classroom.classCode) {
+        setClassroom(null);
+        setHasClassroom(false);
+        setTodaysActivities([]);
+        setActivities([]);
+        setAnnouncements([]);
+        toast.info('Classroom has been deleted');
       }
     };
 
     socket.on('connect_error', handleSocketError);
     socket.on('new_activity', handleNewActivity);
+    socket.on('activity_deleted', handleActivityDeleted);
+    socket.on('classroom_deleted', handleClassroomDeleted);
     socket.on('activity_error', setActivityError);
 
     return () => {
       socket.off('connect_error', handleSocketError);
       socket.off('new_activity', handleNewActivity);
+      socket.off('activity_deleted', handleActivityDeleted);
+      socket.off('classroom_deleted', handleClassroomDeleted);
       socket.off('activity_error', setActivityError);
     };
-  }, [classroom]);
+  }, [socket, classroom]);
 
   // Third useEffect - Fetch classroom details
   useEffect(() => {
@@ -361,20 +381,6 @@ export default function TeacherDashboard() {
     }
   };
 
-  const [selectedYear, setSelectedYear] = useState('2024');
-  const [selectedMonth, setSelectedMonth] = useState('february');
-
-  const getFilteredActivities = () => {
-    return activityHistory.filter(day => {
-      const date = new Date(day.date);
-      const monthName = date.toLocaleString('default', { month: 'long' }).toLowerCase();
-      return date.getFullYear().toString() === selectedYear && 
-             monthName === selectedMonth.toLowerCase();
-    });
-  };
-
-  const [expandedActivity, setExpandedActivity] = useState(null);
-
   // Add this new state for students list
   const [studentsList] = useState([
     { id: 1, name: "Student A", parentName: "Parent A", attendance: "85%", rollNo: "001" },
@@ -502,18 +508,90 @@ export default function TeacherDashboard() {
       });
 
       // Update activities state
-      setTodaysActivities(prev => [...prev, response.data]);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       
-      // Clear form
+      const activityDate = new Date(response.data.date);
+      activityDate.setHours(0, 0, 0, 0);
+      
+      if (activityDate.getTime() === today.getTime()) {
+        setTodaysActivities(prev => [...prev, response.data]);
+      }
+      
+      setActivities(prev => [...prev, response.data]);
+      
+      // Clear form and close it
       setNewActivityTitle('');
       setNewActivityDescription('');
       setNewActivityDate(new Date().toISOString().split('T')[0]);
-      setShowActivityForm(false);
+      setShowActivityForm(false);  // Close the form
       
       toast.success('Activity added successfully');
     } catch (error) {
       console.error('Error adding activity:', error);
       toast.error(error.response?.data?.message || 'Failed to add activity');
+    }
+  };
+
+  // Add this function to fetch activities
+  const fetchActivities = async (classCode) => {
+    if (!classCode) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await api.get(
+        `/api/activities/classroom/${classCode}`,
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.data) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const todayActs = response.data.filter(activity => {
+          const activityDate = new Date(activity.date);
+          activityDate.setHours(0, 0, 0, 0);
+          return activityDate.getTime() === today.getTime();
+        });
+        
+        setTodaysActivities(todayActs);
+        setActivities(response.data);
+        setActivityError(null);
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setActivityError('Failed to fetch activities');
+      toast.error('Failed to fetch activities');
+    }
+  };
+
+  // Add this useEffect to fetch activities when classroom changes
+  useEffect(() => {
+    if (classroom?.classCode) {
+      fetchActivities(classroom.classCode);
+    }
+  }, [classroom]);
+
+  // Add this function to handle activity deletion
+  const handleDeleteActivity = async (activityId) => {
+    try {
+      if (window.confirm('Are you sure you want to delete this activity?')) {
+        await api.delete(`/api/activities/${activityId}`);
+        
+        // Update local state
+        setTodaysActivities(prev => prev.filter(activity => activity._id !== activityId));
+        setActivities(prev => prev.filter(activity => activity._id !== activityId));
+        
+        toast.success('Activity deleted successfully');
+      }
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      toast.error('Failed to delete activity');
     }
   };
 
@@ -604,21 +682,20 @@ export default function TeacherDashboard() {
                         onClick={() => setExpandedActivity(expandedActivity === index ? null : index)}
                       >
                         <div className="flex items-center space-x-2 text-gray-700">
-                          <ChevronRight 
-                            className={cn(
-                              "h-4 w-4 text-[#00308F] transition-transform",
+                          <ChevronRight
+                            className={`h-4 w-4 text-[#00308F] transition-transform ${
                               expandedActivity === index ? "transform rotate-90" : ""
-                            )} 
+                            }`}
                           />
                           <span>{activity.title}</span>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-500 hover:bg-red-50 h-8 w-8 p-0"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={(e) => {
-                            e.stopPropagation();
-                            setTodaysActivities(todaysActivities.filter((_, i) => i !== index));
+                            e.stopPropagation(); // Prevent expansion when clicking delete
+                            handleDeleteActivity(activity._id);
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -627,18 +704,20 @@ export default function TeacherDashboard() {
                       {expandedActivity === index && (
                         <div className="ml-6 p-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-600">
                           <p className="mb-2">
-                            <span className="font-medium">Description:</span> {activity.description}
+                            <span className="font-medium">Description: </span> 
+                            {activity.description}
                           </p>
                           <p className="mb-2">
-                            <span className="font-medium">Date:</span> {activity.date}
+                            <span className="font-medium">Date: </span> 
+                            {new Date(activity.date).toLocaleDateString()}
                           </p>
                           {activity.tasks && activity.tasks.length > 0 && (
                             <div>
-                              <p className="font-medium mb-2">Completion Tasks:</p>
+                              <p className="font-medium mb-2">Tasks:</p>
                               <div className="flex flex-wrap gap-4">
                                 {activity.tasks.map((task, taskIndex) => (
-                                  <div 
-                                    key={taskIndex} 
+                                  <div
+                                    key={taskIndex}
                                     className="flex items-center bg-gray-50 px-3 py-2 rounded-lg"
                                   >
                                     <div className="h-2 w-2 bg-[#00308F] rounded-full mr-2"></div>
@@ -822,124 +901,11 @@ export default function TeacherDashboard() {
 
           {/* Third Row: Activity History and Class Students */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Activity History */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Calendar className="h-5 w-5 text-[#00308F] mr-2" />
-                  Activity History
-                </CardTitle>
-                <div className="flex gap-2">
-                  <select 
-                    className="px-2 py-1 border rounded-md text-sm"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                  >
-                    <option value="january">January</option>
-                    <option value="february">February</option>
-                    <option value="march">March</option>
-                    <option value="april">April</option>
-                    <option value="may">May</option>
-                    <option value="june">June</option>
-                    <option value="july">July</option>
-                    <option value="august">August</option>
-                    <option value="september">September</option>
-                    <option value="october">October</option>
-                    <option value="november">November</option>
-                    <option value="december">December</option>
-                  </select>
-                  <select 
-                    className="px-2 py-1 border rounded-md text-sm"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                  >
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                  </select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-6">
-                    {getFilteredActivities().length > 0 ? (
-                      getFilteredActivities().map((day, dayIndex) => (
-                        <div key={dayIndex} className="border-b pb-4 last:border-0">
-                          <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-semibold text-gray-800">
-                              {new Date(day.date).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </h3>
-                            <Badge variant="outline" className="text-[#00308F]">
-                              {day.activities.length} Activities
-                            </Badge>
-                          </div>
-                          <div className="space-y-3">
-                            {day.activities.map((activity, actIndex) => (
-                              <div 
-                                key={actIndex}
-                                className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
-                              >
-                                <div className="flex justify-between items-start mb-2">
-                                  <div>
-                                    <h4 className="font-medium text-gray-800">
-                                      {activity.title}
-                                    </h4>
-                                    <p className="text-sm text-gray-600">
-                                      Completion Rate: {Math.round((activity.completed / activity.total) * 100)}%
-                                    </p>
-                                  </div>
-                                  <Badge 
-                                    className={cn(
-                                      "bg-white",
-                                      activity.completed === activity.total 
-                                        ? "text-green-600" 
-                                        : activity.completed >= activity.total * 0.7 
-                                          ? "text-yellow-600" 
-                                          : "text-red-600"
-                                    )}
-                                  >
-                                    {activity.completed}/{activity.total}
-                                  </Badge>
-                                </div>
-                                <div className="w-full bg-white rounded-full h-2">
-                                  <div 
-                                    className={cn(
-                                      "h-full rounded-full",
-                                      activity.completed === activity.total 
-                                        ? "bg-green-500" 
-                                        : activity.completed >= activity.total * 0.7 
-                                          ? "bg-yellow-500" 
-                                          : "bg-red-500"
-                                    )}
-                                    style={{ 
-                                      width: `${(activity.completed / activity.total) * 100}%` 
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        No activities found for {selectedMonth} {selectedYear}
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
             {/* Class Students */}
-            <Card>
+            <Card className="col-span-2">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
-                  <BookOpen className="h-5 w-4 text-[#00308F] mr-2" />
+                  <Users className="h-5 w-5 text-[#00308F] mr-2" />
                   Class Students
                 </CardTitle>
               </CardHeader>
