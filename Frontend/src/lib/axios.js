@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://parento-dcgi.onrender.com';
+const BACKEND_URL = '/api'; // Change this to use relative path
 
 // Create axios instance with default config
 const instance = axios.create({
@@ -9,8 +9,7 @@ const instance = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Origin': 'https://parento.vercel.app'
+    'Accept': 'application/json'
   }
 });
 
