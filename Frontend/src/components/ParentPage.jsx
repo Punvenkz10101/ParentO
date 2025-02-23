@@ -81,6 +81,8 @@ export default function ParentDashboard() {
   const [completionNotes, setCompletionNotes] = useState({});
   const [submittingActivity, setSubmittingActivity] = useState({});
   const [completedActivities, setCompletedActivities] = useState({});
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [completedActivitiesCount, setCompletedActivitiesCount] = useState(0);
 
   const navigate = useNavigate();
 
@@ -322,14 +324,45 @@ export default function ParentDashboard() {
     }
   };
 
+  const fetchTotalPoints = async () => {
+    try {
+      if (!classrooms[0]?.classCode) return;
+      
+      const response = await api.get(`/api/activities/classroom/${classrooms[0].classCode}`);
+      
+      let points = 0;
+      let completedCount = 0;
+      
+      response.data.forEach(activity => {
+        const userCompletions = activity.completions.filter(
+          completion => completion.parentId === localStorage.getItem('userId')
+        );
+        
+        userCompletions.forEach(completion => {
+          points += completion.points || 0;
+        });
+        
+        if (userCompletions.length > 0) {
+          completedCount++;
+        }
+      });
+      
+      setTotalPoints(points);
+      setCompletedActivitiesCount(completedCount);
+    } catch (error) {
+      console.error('Error fetching total points:', error);
+    }
+  };
+
   useEffect(() => {
-    if (classrooms.length > 0 && classrooms[0]?.classCode) {
+    if (classrooms.length > 0) {
       fetchActivities(classrooms[0].classCode);
+      fetchTotalPoints();
     }
   }, [classrooms]);
 
   useEffect(() => {
-    if (!socket || !classrooms.length) return;
+    if (!socket) return;
 
     const handleNewActivity = (activity) => {
       if (activity.classCode === classrooms[0]?.classCode) {
@@ -391,6 +424,21 @@ export default function ParentDashboard() {
     };
   }, [socket, classrooms]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('activity_completed', (data) => {
+      if (data.parentId === localStorage.getItem('userId')) {
+        setTotalPoints(prev => prev + (data.points || 0));
+        setCompletedActivitiesCount(prev => prev + 1);
+      }
+    });
+
+    return () => {
+      socket.off('activity_completed');
+    };
+  }, [socket]);
+
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
   const handleActivityComplete = async (activityId) => {
@@ -421,26 +469,6 @@ export default function ParentDashboard() {
       setSubmittingActivity(prev => ({ ...prev, [activityId]: false }));
     }
   };
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on('activity_completed', (data) => {
-      if (data.parentId === localStorage.getItem('userId')) {
-        setCompletedActivities(prev => ({
-          ...prev,
-          [data.activityId]: {
-            completedAt: new Date(),
-            parentName: data.parentName
-          }
-        }));
-      }
-    });
-
-    return () => {
-      socket.off('activity_completed');
-    };
-  }, [socket]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -859,7 +887,7 @@ export default function ParentDashboard() {
               </CardHeader>
               <CardContent className="flex flex-col justify-center items-center h-full">
                 <div className="text-center">
-                  <p className="text-9xl font-bold text-[#00308F]">85</p>
+                  <p className="text-9xl font-bold text-[#00308F]">{totalPoints}</p>
                   <p className="text-gray-600 mt-2 text-xl">{t('dashboard.totalPoints')}</p>
                 </div>
               </CardContent>
