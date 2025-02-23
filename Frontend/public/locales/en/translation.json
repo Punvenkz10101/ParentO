@@ -23,6 +23,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "welcomeMessage": "Welcome back",
     "attendance": "Attendance",
     "performance": "Performance",
     "activities": "Activities",
@@ -36,21 +37,48 @@
     "viewAll": "View All",
     "progress": "Progress",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "studentProgress": "Student Progress",
+    "mathExam": "Math Exam",
+    "scienceExam": "Science Exam",
+    "englishExam": "English Exam",
+    "leaderboard": "Leaderboard",
+    "viewAllLeaderboard": "View All Rankings",
+    "pointsOverview": "Points Overview",
+    "totalPoints": "Total Points",
+    "pointsEarned": "Points Earned",
+    "noActivitiesFound": "No activities found for",
+    "activityHistory": "Activity History"
   },
   "classroom": {
+    "title": "Classrooms",
     "code": "Class Code",
+    "codePlaceholder": "Enter class code",
     "name": "Class Name",
-    "join": "Join",
+    "join": "Join Classroom",
     "create": "Create",
     "details": "Class Details",
     "students": "Students",
     "teacher": "Teacher",
-    "noClassrooms": "No classrooms found",
+    "teacherName": "Teacher Name",
+    "teacherEmail": "Teacher Email",
+    "teacherInformation": "Teacher Information",
+    "sendEmailToTeacher": "Send email to teacher",
+    "yourChildrenInThisClass": "Your Children in this Class",
+    "student": "Student",
+    "parent": "Parent",
+    "joined": "Joined",
+    "noClassrooms": "No classrooms joined yet",
+    "joinMessage": "Join a classroom to get started",
     "joinSuccess": "Successfully joined the classroom",
     "joinError": "Failed to join classroom",
     "createSuccess": "Classroom created successfully",
-    "createError": "Failed to create classroom"
+    "createError": "Failed to create classroom",
+    "loading": "Loading classrooms...",
+    "retry": "Retry",
+    "viewDetails": "View Details",
+    "exit": "Exit Classroom",
+    "exitSuccess": "Successfully left the classroom"
   },
   "activity": {
     "new": "New Activity",
@@ -75,6 +103,8 @@
     "cancel": "Cancel",
     "recent": "Recent Announcements",
     "previous": "Previous Announcements",
+    "viewPrevious": "View Previous",
+    "noPreviousAnnouncements": "No previous announcements found",
     "addSuccess": "Announcement added successfully",
     "addError": "Failed to add announcement"
   },
@@ -83,13 +113,26 @@
     "edit": "Edit Profile",
     "save": "Save Changes",
     "studentName": "Student Name",
+    "studentNamePlaceholder": "Enter student's name",
     "parentName": "Parent Name",
+    "parentNamePlaceholder": "Enter parent's name",
     "mobile": "Mobile Number",
+    "mobilePlaceholder": "Enter mobile number",
     "updateSuccess": "Profile updated successfully",
     "updateError": "Failed to update profile"
   },
   "tutorial": {
     "title": "How to Use - Video Tutorial",
     "languages": "5 Languages"
+  },
+  "activities": {
+    "title": "Today's Activities",
+    "mathQuiz": "Math Quiz",
+    "scienceExperiment": "Science Experiment",
+    "englishEssay": "English Essay",
+    "historyTest": "History Test",
+    "description": "Description",
+    "date": "Date",
+    "tasks": "Tasks"
   }
 }
