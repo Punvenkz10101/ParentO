@@ -7,9 +7,21 @@ const auth = require('../middleware/auth');
 router.get('/classroom/:classCode', auth, async (req, res) => {
   try {
     const { classCode } = req.params;
-    const activities = await Activity.find({ classCode })
-      .sort({ date: -1 })
-      .populate('createdBy', 'name');
+    
+    // Get today's date at midnight for proper comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const activities = await Activity.find({ 
+      classCode,
+      // Add date filter to only get today's activities and future activities
+      date: {
+        $gte: today
+      }
+    })
+    .sort({ date: 1 }) // Sort by date ascending
+    .populate('createdBy', 'name');
+
     res.json(activities);
   } catch (error) {
     console.error('Error fetching activities:', error);
@@ -27,10 +39,14 @@ router.post('/create', auth, async (req, res) => {
       return res.status(400).json({ message: 'All required fields must be provided' });
     }
 
+    // Create activity with proper date handling
+    const activityDate = new Date(date);
+    activityDate.setHours(0, 0, 0, 0);
+
     const newActivity = new Activity({
       title,
       description,
-      date,
+      date: activityDate,
       tasks: tasks || [],
       classCode,
       createdBy: req.user.id
@@ -38,10 +54,14 @@ router.post('/create', auth, async (req, res) => {
 
     const savedActivity = await newActivity.save();
     
-    // Emit the new activity to connected clients in the classroom
-    req.app.get('io').to(classCode).emit('new_activity', savedActivity);
+    // Populate createdBy before emitting
+    const populatedActivity = await Activity.findById(savedActivity._id)
+      .populate('createdBy', 'name');
     
-    res.json(savedActivity);
+    // Emit the new activity to connected clients in the classroom
+    req.app.get('io').to(classCode).emit('new_activity', populatedActivity);
+    
+    res.json(populatedActivity);
   } catch (error) {
     console.error('Error creating activity:', error);
     res.status(500).json({ message: 'Failed to create activity' });
@@ -59,6 +79,27 @@ router.get('/:id', auth, async (req, res) => {
     res.json(activity);
   } catch (error) {
     console.error('Error fetching activity:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add this new route for deleting an activity
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+
+    // Delete the activity
+    await Activity.findByIdAndDelete(req.params.id);
+
+    // Emit activity deletion event to all clients in the classroom
+    req.app.get('io').to(activity.classCode).emit('activity_deleted', activity._id);
+
+    res.json({ message: 'Activity deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting activity:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

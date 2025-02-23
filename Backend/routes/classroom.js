@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 const Teacher = require('../models/Teacher');
 const Parent = require('../models/Parent');
 const Announcement = require('../models/Announcement');
+const Activity = require('../models/Activity');
 
 // Create a new classroom (Teacher only)
 router.post('/teacher/classroom', auth, async (req, res) => {
@@ -168,7 +169,7 @@ router.post('/parent/exit-classroom', auth, async (req, res) => {
   }
 });
 
-// Add this new route before module.exports
+// Update the delete classroom route
 router.delete('/teacher/classroom/:id', auth, async (req, res) => {
   try {
     const classroomId = req.params.id;
@@ -182,9 +183,15 @@ router.delete('/teacher/classroom/:id', auth, async (req, res) => {
 
     // Delete all announcements for this classroom
     await Announcement.deleteMany({ classCode: classroom.classCode });
+    
+    // Delete all activities for this classroom
+    await Activity.deleteMany({ classCode: classroom.classCode });
 
     // Delete the classroom
     await Classroom.findByIdAndDelete(classroomId);
+
+    // Emit classroom deletion event
+    req.app.get('io').emit('classroom_deleted', classroom.classCode);
 
     res.json({ message: 'Classroom deleted successfully' });
   } catch (error) {
