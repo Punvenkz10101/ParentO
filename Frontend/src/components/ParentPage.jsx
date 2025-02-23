@@ -239,23 +239,15 @@ export default function ParentDashboard() {
     try {
       const response = await api.get(`/api/announcement/classroom/${classCode}`);
       if (response.data) {
-        // Split announcements into recent and old
+        // Only show announcements from the last 24 hours
         const now = new Date();
         const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000);
 
-        const recent = [];
-        const old = [];
+        const recentAnnouncements = response.data.filter(announcement => 
+          new Date(announcement.createdAt) > twentyFourHoursAgo
+        );
 
-        response.data.forEach(announcement => {
-          if (new Date(announcement.createdAt) > twentyFourHoursAgo) {
-            recent.push(announcement);
-          } else {
-            old.push(announcement);
-          }
-        });
-
-        setRecentAnnouncements(recent);
-        setOldAnnouncements(old);
+        setRecentAnnouncements(recentAnnouncements);
       }
     } catch (error) {
       console.error('Error fetching announcements:', error);

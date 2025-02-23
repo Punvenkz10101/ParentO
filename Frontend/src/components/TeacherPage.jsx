@@ -116,6 +116,7 @@ export default function TeacherDashboard() {
   const [activities, setActivities] = useState([]);
   const [expandedActivity, setExpandedActivity] = useState(null);
   const [completedActivities, setCompletedActivities] = useState({});
+  const [parentProgress, setParentProgress] = useState([]);
 
   const leaderboardData = [
     { name: "Parent A", points: 100, studentName: "Student A" },
@@ -604,6 +605,7 @@ export default function TeacherDashboard() {
   useEffect(() => {
     if (classroom?.classCode) {
       fetchActivities(classroom.classCode);
+      fetchParentProgress(classroom.classCode);
     }
   }, [classroom]);
 
@@ -622,6 +624,43 @@ export default function TeacherDashboard() {
     } catch (error) {
       console.error('Error deleting activity:', error);
       toast.error('Failed to delete activity');
+    }
+  };
+
+  // Add this function to fetch parent progress
+  const fetchParentProgress = async (classCode) => {
+    try {
+      const response = await api.get(`/api/activities/classroom/${classCode}`);
+      if (response.data) {
+        // Create a map to store parent progress
+        const progressMap = new Map();
+
+        // Process all activities and their completions
+        response.data.forEach(activity => {
+          activity.completions.forEach(completion => {
+            if (!progressMap.has(completion.parentId)) {
+              progressMap.set(completion.parentId, {
+                name: completion.parentName,
+                points: 0,
+                activitiesCompleted: 0,
+                totalActivities: response.data.length
+              });
+            }
+
+            const parentData = progressMap.get(completion.parentId);
+            parentData.points += completion.points || 0;
+            parentData.activitiesCompleted += 1;
+          });
+        });
+
+        // Convert map to array and sort by points
+        const progressArray = Array.from(progressMap.values())
+          .sort((a, b) => b.points - a.points);
+
+        setParentProgress(progressArray);
+      }
+    } catch (error) {
+      console.error('Error fetching parent progress:', error);
     }
   };
 
@@ -801,42 +840,47 @@ export default function TeacherDashboard() {
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {parentsProgress.map((parent, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="font-semibold text-gray-800">{parent.name}</p>
-                            <p className="text-sm text-gray-600">{parent.studentName}</p>
+                    {parentProgress.length > 0 ? (
+                      parentProgress.map((parent, index) => (
+                        <div 
+                          key={index} 
+                          className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00308F]/20 transition-colors"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <p className="font-semibold text-gray-800">{parent.name}</p>
+                            </div>
+                            <div className="text-right">
+                              <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
+                                {parent.points} Points
+                              </Badge>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <Badge className="bg-[#00308F]/10 text-[#00308F] mb-1">
-                              {parent.points} Points
-                            </Badge>
-                          </div>
-                        </div>
 
-                        {/* Activities Progress */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Activities Completed</span>
-                            <span className="font-medium text-[#00308F]">
-                              {parent.activitiesCompleted}/{parent.totalActivities}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2.5">
-                            <div 
-                              className="bg-[#00308F] h-full rounded-full"
-                              style={{ 
-                                width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
-                              }}
-                            />
+                          {/* Activities Progress */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Activities Completed</span>
+                              <span className="font-medium text-[#00308F]">
+                                {parent.activitiesCompleted}/{parent.totalActivities}
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-2.5">
+                              <div 
+                                className="bg-[#00308F] h-full rounded-full"
+                                style={{ 
+                                  width: `${(parent.activitiesCompleted / parent.totalActivities) * 100}%` 
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No parent progress data available
                       </div>
-                    ))}
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>

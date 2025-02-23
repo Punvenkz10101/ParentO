@@ -37,8 +37,16 @@ router.post('/create', auth, async (req, res) => {
 router.get('/classroom/:classCode', auth, async (req, res) => {
   try {
     const { classCode } = req.params;
-    const announcements = await Announcement.find({ classCode })
-      .sort({ createdAt: -1 }); // Sort by newest first
+    
+    // Calculate 24 hours ago
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+    const announcements = await Announcement.find({ 
+      classCode,
+      createdAt: { $gte: twentyFourHoursAgo } // Only get announcements from last 24 hours
+    }).sort({ createdAt: -1 }); // Sort by newest first
+    
     res.json(announcements);
   } catch (error) {
     console.error('Error fetching announcements:', error);
