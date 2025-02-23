@@ -115,6 +115,7 @@ export default function TeacherDashboard() {
   const [showLeaderboardOverlay, setShowLeaderboardOverlay] = useState(false);
   const [activities, setActivities] = useState([]);
   const [expandedActivity, setExpandedActivity] = useState(null);
+  const [completedActivities, setCompletedActivities] = useState({});
 
   const leaderboardData = [
     { name: "Parent A", points: 100, studentName: "Student A" },
@@ -533,7 +534,7 @@ export default function TeacherDashboard() {
     }
   };
 
-  // Add this function to fetch activities
+  // Modify the fetchActivities function to include completion data
   const fetchActivities = async (classCode) => {
     if (!classCode) return;
     
@@ -558,7 +559,16 @@ export default function TeacherDashboard() {
           activityDate.setHours(0, 0, 0, 0);
           return activityDate.getTime() === today.getTime();
         });
+
+        // Process completion data
+        const completions = {};
+        response.data.forEach(activity => {
+          if (activity.completions && activity.completions.length > 0) {
+            completions[activity._id] = activity.completions;
+          }
+        });
         
+        setCompletedActivities(completions);
         setTodaysActivities(todayActs);
         setActivities(response.data);
         setActivityError(null);
@@ -569,6 +579,26 @@ export default function TeacherDashboard() {
       toast.error('Failed to fetch activities');
     }
   };
+
+  // Add socket listener for real-time updates
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('activity_completed', (data) => {
+      setCompletedActivities(prev => ({
+        ...prev,
+        [data.activityId]: [...(prev[data.activityId] || []), {
+          parentName: data.parentName,
+          points: data.points,
+          completedAt: new Date()
+        }]
+      }));
+    });
+
+    return () => {
+      socket.off('activity_completed');
+    };
+  }, [socket]);
 
   // Add this useEffect to fetch activities when classroom changes
   useEffect(() => {
@@ -712,7 +742,7 @@ export default function TeacherDashboard() {
                             {new Date(activity.date).toLocaleDateString()}
                           </p>
                           {activity.tasks && activity.tasks.length > 0 && (
-                            <div>
+                            <div className="mb-4">
                               <p className="font-medium mb-2">Tasks:</p>
                               <div className="flex flex-wrap gap-4">
                                 {activity.tasks.map((task, taskIndex) => (
@@ -722,6 +752,31 @@ export default function TeacherDashboard() {
                                   >
                                     <div className="h-2 w-2 bg-[#00308F] rounded-full mr-2"></div>
                                     <span>{task}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Add completion status section */}
+                          {completedActivities[activity._id] && completedActivities[activity._id].length > 0 && (
+                            <div className="mt-4 border-t pt-4">
+                              <p className="font-medium mb-2">Completed by:</p>
+                              <div className="space-y-2">
+                                {completedActivities[activity._id].map((completion, idx) => (
+                                  <div 
+                                    key={idx} 
+                                    className="flex items-center justify-between bg-green-50 p-2 rounded-lg"
+                                  >
+                                    <div>
+                                      <p className="text-green-700 font-medium">{completion.parentName}</p>
+                                      <p className="text-xs text-gray-500">
+                                        {new Date(completion.completedAt).toLocaleString()}
+                                      </p>
+                                    </div>
+                                    <Badge className="bg-green-100 text-green-800">
+                                      {completion.points} points
+                                    </Badge>
                                   </div>
                                 ))}
                               </div>

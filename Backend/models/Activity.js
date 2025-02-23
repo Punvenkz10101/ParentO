@@ -33,6 +33,11 @@ const activitySchema = new mongoose.Schema({
     completedAt: { type: Date, default: Date.now },
     points: { type: Number, default: 5 }
   }],
+  totalParentPoints: {
+    type: Map,
+    of: Number,
+    default: new Map()  // Will store parentId -> total points
+  },
   createdAt: {
     type: Date,
     default: Date.now

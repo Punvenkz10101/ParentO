@@ -105,7 +105,7 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// Add completion endpoint
+// Modify the completion endpoint
 router.post('/:activityId/complete', auth, async (req, res) => {
   try {
     const { activityId } = req.params;
@@ -118,13 +118,22 @@ router.post('/:activityId/complete', auth, async (req, res) => {
       return res.status(404).json({ message: 'Activity not found' });
     }
 
+    // Get current total points for this parent
+    let currentPoints = activity.totalParentPoints.get(parentId.toString()) || 0;
+    // Add 5 more points
+    const newPoints = currentPoints + 5;
+
+    // Update total points for this parent
+    activity.totalParentPoints.set(parentId.toString(), newPoints);
+
     // Add completion record
     activity.completions.push({
       parentId,
       parentName,
       description,
       classCode: activity.classCode,
-      completedAt: new Date()
+      completedAt: new Date(),
+      points: newPoints // Store cumulative points
     });
 
     await activity.save();
@@ -133,13 +142,15 @@ router.post('/:activityId/complete', auth, async (req, res) => {
     req.app.get('io').to(activity.classCode).emit('activity_completed', {
       activityId,
       parentName,
-      classCode: activity.classCode
+      classCode: activity.classCode,
+      points: newPoints
     });
 
     res.json({ 
       success: true, 
       message: 'Activity marked as complete',
-      completedAt: new Date()
+      completedAt: new Date(),
+      points: newPoints
     });
 
   } catch (error) {
