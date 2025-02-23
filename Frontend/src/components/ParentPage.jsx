@@ -236,29 +236,27 @@ export default function ParentDashboard() {
   };
 
   const fetchAnnouncements = async (classCode) => {
-    if (!classCode) return;
-    
     try {
       const response = await api.get(`/api/announcement/classroom/${classCode}`);
-      
-      // Split announcements into recent (≤ 7 days) and previous (> 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
-      const recent = [];
-      const old = [];
-      
-      response.data.forEach(announcement => {
-        const announcementDate = new Date(announcement.createdAt);
-        if (announcementDate >= sevenDaysAgo) {
-          recent.push(announcement);
-        } else {
-          old.push(announcement);
-        }
-      });
-      
-      setRecentAnnouncements(recent);
-      setOldAnnouncements(old);
+      if (response.data) {
+        // Split announcements into recent and old
+        const now = new Date();
+        const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000);
+
+        const recent = [];
+        const old = [];
+
+        response.data.forEach(announcement => {
+          if (new Date(announcement.createdAt) > twentyFourHoursAgo) {
+            recent.push(announcement);
+          } else {
+            old.push(announcement);
+          }
+        });
+
+        setRecentAnnouncements(recent);
+        setOldAnnouncements(old);
+      }
     } catch (error) {
       console.error('Error fetching announcements:', error);
       toast.error('Failed to fetch announcements');
@@ -267,10 +265,28 @@ export default function ParentDashboard() {
 
   useEffect(() => {
     if (classrooms.length > 0) {
-      const classroom = classrooms[0]; // Get the first classroom
-      fetchAnnouncements(classroom.classCode);
+      const classCode = classrooms[0].classCode;
+      fetchActivities(classCode);
+      fetchTotalPoints();
+      fetchAnnouncements(classCode);
     }
   }, [classrooms]);
+
+  useEffect(() => {
+    if (!socket || !classrooms[0]?.classCode) return;
+
+    socket.emit('join_classroom', classrooms[0].classCode);
+
+    socket.on('new_announcement', (announcement) => {
+      if (announcement.classCode === classrooms[0].classCode) {
+        setRecentAnnouncements(prev => [announcement, ...prev]);
+      }
+    });
+
+    return () => {
+      socket.off('new_announcement');
+    };
+  }, [socket, classrooms]);
 
   const fetchActivities = async (classCode) => {
     if (!classCode) return;
@@ -898,63 +914,30 @@ export default function ParentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Announcements */}
             <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl font-bold flex items-center">
-                    <Bell className="h-5 w-5 text-[#00308F] mr-2" />
-                    {t('announcements.title')}
-                  </CardTitle>
-                  {oldAnnouncements.length > 0 && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setShowPreviousAnnouncements(true)}
-                      className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-                    >
-                      <Clock className="h-4 w-4" />
-                      {t('announcements.viewPrevious')}
-                      <Badge variant="secondary" className="ml-1">
-                        {oldAnnouncements.length}
-                      </Badge>
-                    </Button>
-                  )}
-                </div>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <Bell className="h-5 w-5 text-[#00308F] mr-2" />
+                  {t('dashboard.announcements')}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {showPreviousAnnouncements ? (
-                      <>
-                        <div>
-                          <h3 className="mb-2 text-sm font-medium">{t('announcements.recent')}</h3>
-                          {recentAnnouncements.map((announcement, index) => (
-                            <div key={index} className="mb-4">
-                              <p className="text-sm font-medium">{announcement.title}</p>
-                              <p className="text-sm text-gray-500">{announcement.description}</p>
-                              <p className="text-xs text-gray-400">{announcement.date}</p>
-                            </div>
-                          ))}
+                    {recentAnnouncements.map((announcement, index) => (
+                      <div 
+                        key={announcement._id} 
+                        className="p-4 bg-white rounded-lg border border-gray-200"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-medium text-gray-800">{announcement.title}</h3>
+                          <Badge variant="secondary">New</Badge>
                         </div>
-                        <div>
-                          <h3 className="mb-2 text-sm font-medium">{t('announcements.previous')}</h3>
-                          {oldAnnouncements.map((announcement, index) => (
-                            <div key={index} className="mb-4">
-                              <p className="text-sm font-medium">{announcement.title}</p>
-                              <p className="text-sm text-gray-500">{announcement.description}</p>
-                              <p className="text-xs text-gray-400">{announcement.date}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      announcements.map((announcement, index) => (
-                        <div key={index} className="space-y-1">
-                          <p className="text-sm font-medium">{announcement.title}</p>
-                          <p className="text-sm text-gray-500">{announcement.description}</p>
-                          <p className="text-xs text-gray-400">{announcement.date}</p>
-                        </div>
-                      ))
-                    )}
+                        <p className="text-gray-600">{announcement.description}</p>
+                        <p className="text-sm text-gray-500 mt-2">
+                          {new Date(announcement.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </ScrollArea>
               </CardContent>

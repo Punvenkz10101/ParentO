@@ -17,11 +17,16 @@ router.post('/create', auth, async (req, res) => {
     const announcement = new Announcement({
       title,
       description,
-      classCode
+      classCode,
+      createdBy: req.user.id
     });
 
-    await announcement.save();
-    res.status(201).json(announcement);
+    const savedAnnouncement = await announcement.save();
+    
+    // Emit socket event
+    req.app.get('io').to(classCode).emit('new_announcement', savedAnnouncement);
+    
+    res.status(201).json(savedAnnouncement);
   } catch (error) {
     console.error('Error creating announcement:', error);
     res.status(500).json({ message: 'Server error while creating announcement' });
