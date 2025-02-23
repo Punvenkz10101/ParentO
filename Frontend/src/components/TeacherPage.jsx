@@ -117,19 +117,7 @@ export default function TeacherDashboard() {
   const [expandedActivity, setExpandedActivity] = useState(null);
   const [completedActivities, setCompletedActivities] = useState({});
   const [parentProgress, setParentProgress] = useState([]);
-
-  const leaderboardData = [
-    { name: "Parent A", points: 100, studentName: "Student A" },
-    { name: "Parent B", points: 90, studentName: "Student B" },
-    { name: "Parent C", points: 85, studentName: "Student C" },
-    { name: "Parent D", points: 80, studentName: "Student D" },
-    { name: "Parent E", points: 75, studentName: "Student E" },
-    { name: "Parent F", points: 70, studentName: "Student F" },
-    { name: "Parent G", points: 65, studentName: "Student G" },
-    { name: "Parent H", points: 60, studentName: "Student H" },
-    { name: "Parent I", points: 55, studentName: "Student I" },
-    { name: "Parent J", points: 50, studentName: "Student J" },
-  ];
+  const [studentParentList, setStudentParentList] = useState([]);
 
   const medalIcons = ["🥇", "🥈", "🥉"];
 
@@ -606,6 +594,7 @@ export default function TeacherDashboard() {
     if (classroom?.classCode) {
       fetchActivities(classroom.classCode);
       fetchParentProgress(classroom.classCode);
+      fetchStudentParentData(classroom.classCode);
     }
   }, [classroom]);
 
@@ -661,6 +650,19 @@ export default function TeacherDashboard() {
       }
     } catch (error) {
       console.error('Error fetching parent progress:', error);
+    }
+  };
+
+  // Add this function to fetch student-parent data
+  const fetchStudentParentData = async (classCode) => {
+    try {
+      const response = await api.get(`/api/classroom/teacher/students/${classCode}`);
+      if (response.data) {
+        setStudentParentList(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching student-parent data:', error);
+      toast.error('Failed to fetch student data');
     }
   };
 
@@ -894,24 +896,25 @@ export default function TeacherDashboard() {
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xl font-bold flex items-center">
                   <Trophy className="h-5 w-5 text-[#00308F] mr-2" />
-                  Parent Leaderboard
+                  Leaderboard
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {leaderboardData.slice(0, 5).map((parent, index) => (
+                  {parentProgress.slice(0, 3).map((parent, index) => (
                     <div
                       key={index}
-                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors"
-                      onClick={() => setShowLeaderboardOverlay(true)}
+                      className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl min-w-[2rem]">
-                          {formatNumberToEmoji(index + 1)}
+                          {medalIcons[index]}
                         </span>
                         <div>
                           <p className="font-medium text-gray-800">{parent.name}</p>
-                          <p className="text-sm text-gray-600">{parent.studentName}</p>
+                          <p className="text-sm text-gray-600">
+                            {parent.activitiesCompleted} activities completed
+                          </p>
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
@@ -919,13 +922,6 @@ export default function TeacherDashboard() {
                       </Badge>
                     </div>
                   ))}
-                  <Button 
-                    variant="outline" 
-                    className="w-full mt-2"
-                    onClick={() => setShowLeaderboardOverlay(true)}
-                  >
-                    View Full Leaderboard
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1009,26 +1005,36 @@ export default function TeacherDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-6">
-                    {studentsList.map((student) => (
-                      <div
-                        key={student.id}
-                        className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium text-gray-800">{student.name}</p>
-                            <p className="text-sm text-gray-600">{student.parentName}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className="bg-white text-[#00308F]">
-                              {student.attendance}
-                            </Badge>
+                <ScrollArea className="h-[300px] pr-4">
+                  <div className="space-y-4">
+                    {studentParentList.length > 0 ? (
+                      studentParentList.map((item, index) => (
+                        <div 
+                          key={index}
+                          className="p-4 bg-white rounded-lg border border-gray-200"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-gray-800">{item.studentName}</p>
+                              <p className="text-sm text-gray-600">Parent: {item.parentName}</p>
+                              <p className="text-sm text-gray-500">Contact: {item.mobileNumber}</p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleRemoveStudent(item._id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No students enrolled yet
                       </div>
-                    ))}
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
@@ -1324,18 +1330,20 @@ export default function TeacherDashboard() {
             <CardContent>
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-3">
-                  {leaderboardData.map((parent, index) => (
+                  {parentProgress.map((parent, index) => (
                     <div
                       key={index}
                       className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl min-w-[2rem]">
-                          {formatNumberToEmoji(index + 1)}
+                          {medalIcons[index]}
                         </span>
                         <div>
                           <p className="font-medium text-gray-800">{parent.name}</p>
-                          <p className="text-sm text-gray-600">{parent.studentName}</p>
+                          <p className="text-sm text-gray-600">
+                            {parent.activitiesCompleted} activities completed
+                          </p>
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">

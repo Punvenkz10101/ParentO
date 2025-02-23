@@ -83,6 +83,7 @@ export default function ParentDashboard() {
   const [completedActivities, setCompletedActivities] = useState({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [completedActivitiesCount, setCompletedActivitiesCount] = useState(0);
+  const [leaderboard, setLeaderboard] = useState([]);
 
   const navigate = useNavigate();
 
@@ -117,19 +118,6 @@ export default function ParentDashboard() {
   };
 
   const teacherName = 'Mrs. Sharma';
-
-  const leaderboardData = [
-    { name: "Parent A", points: 100, studentName: "Student A" },
-    { name: "Parent B", points: 90, studentName: "Student B" },
-    { name: "Parent C", points: 85, studentName: "Student C" },
-    { name: "Parent D", points: 80, studentName: "Student D" },
-    { name: "Parent E", points: 75, studentName: "Student E" },
-    { name: "Parent F", points: 70, studentName: "Student F" },
-    { name: "Parent G", points: 65, studentName: "Student G" },
-    { name: "Parent H", points: 60, studentName: "Student H" },
-    { name: "Parent I", points: 55, studentName: "Student I" },
-    { name: "Parent J", points: 50, studentName: "Student J" },
-  ];
 
   const medalIcons = ["🥇", "🥈", "🥉"];
 
@@ -255,12 +243,48 @@ export default function ParentDashboard() {
     }
   };
 
+  const fetchLeaderboard = async (classCode) => {
+    try {
+      const response = await api.get(`/api/activities/classroom/${classCode}`);
+      if (response.data) {
+        // Create a map to store parent progress
+        const progressMap = new Map();
+
+        // Process all activities and their completions
+        response.data.forEach(activity => {
+          activity.completions.forEach(completion => {
+            if (!progressMap.has(completion.parentId)) {
+              progressMap.set(completion.parentId, {
+                name: completion.parentName,
+                points: 0,
+                activitiesCompleted: 0
+              });
+            }
+
+            const parentData = progressMap.get(completion.parentId);
+            parentData.points += completion.points || 0;
+            parentData.activitiesCompleted += 1;
+          });
+        });
+
+        // Convert map to array and sort by points
+        const leaderboardArray = Array.from(progressMap.values())
+          .sort((a, b) => b.points - a.points);
+
+        setLeaderboard(leaderboardArray);
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    }
+  };
+
   useEffect(() => {
     if (classrooms.length > 0) {
       const classCode = classrooms[0].classCode;
       fetchActivities(classCode);
       fetchTotalPoints();
       fetchAnnouncements(classCode);
+      fetchLeaderboard(classCode);
     }
   }, [classrooms]);
 
@@ -361,13 +385,6 @@ export default function ParentDashboard() {
       console.error('Error fetching total points:', error);
     }
   };
-
-  useEffect(() => {
-    if (classrooms.length > 0) {
-      fetchActivities(classrooms[0].classCode);
-      fetchTotalPoints();
-    }
-  }, [classrooms]);
 
   useEffect(() => {
     if (!socket) return;
@@ -856,7 +873,7 @@ export default function ParentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {leaderboardData.slice(0, 3).map((parent, index) => (
+                  {leaderboard.slice(0, 3).map((parent, index) => (
                     <div
                       key={index}
                       className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors"
@@ -867,7 +884,9 @@ export default function ParentDashboard() {
                         </span>
                         <div>
                           <p className="font-medium text-gray-800">{parent.name}</p>
-                          <p className="text-sm text-gray-600">{parent.studentName}</p>
+                          <p className="text-sm text-gray-600">
+                            {parent.activitiesCompleted} activities completed
+                          </p>
                         </div>
                       </div>
                       <Badge className="bg-white text-[#00308F]">
