@@ -25,10 +25,17 @@ const activitySchema = new mongoose.Schema({
     ref: 'Teacher',
     required: true
   },
+  completions: [{
+    parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    parentName: String,
+    description: String,
+    classCode: String,
+    completedAt: { type: Date, default: Date.now }
+  }],
   createdAt: {
     type: Date,
     default: Date.now
   }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Activity', activitySchema); 

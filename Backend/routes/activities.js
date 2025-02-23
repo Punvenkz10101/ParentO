@@ -104,4 +104,47 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// Add completion endpoint
+router.post('/:activityId/complete', auth, async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const { description } = req.body;
+    const parentId = req.user.id;
+    const parentName = req.user.name;
+
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+
+    // Add completion record
+    activity.completions.push({
+      parentId,
+      parentName,
+      description,
+      classCode: activity.classCode,
+      completedAt: new Date()
+    });
+
+    await activity.save();
+
+    // Emit socket event to notify about completion
+    req.app.get('io').to(activity.classCode).emit('activity_completed', {
+      activityId,
+      parentName,
+      classCode: activity.classCode
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Activity marked as complete',
+      completedAt: new Date()
+    });
+
+  } catch (error) {
+    console.error('Error completing activity:', error);
+    res.status(500).json({ message: 'Error marking activity as complete' });
+  }
+});
+
 module.exports = router; 

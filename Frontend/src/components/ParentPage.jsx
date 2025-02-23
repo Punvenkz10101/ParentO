@@ -26,6 +26,7 @@ import {
   Star,
   Settings,
   Menu,
+  CheckCircle,
 } from 'lucide-react';
 import {
   Avatar,
@@ -50,6 +51,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Mail, Users, Clock } from 'lucide-react';
 import { socket } from '../lib/socket';
 import { useSocket } from '../context/SocketContext';
+import { Textarea } from "./ui/textarea";
 
 export default function ParentDashboard() {
   const { t } = useTranslation();
@@ -76,6 +78,9 @@ export default function ParentDashboard() {
   const [activityError, setActivityError] = useState(null);
   const [mobileNumber, setMobileNumber] = useState('');
   const [expandedActivity, setExpandedActivity] = useState(null);
+  const [completionNotes, setCompletionNotes] = useState({});
+  const [submittingActivity, setSubmittingActivity] = useState({});
+  const [completedActivities, setCompletedActivities] = useState({});
 
   const navigate = useNavigate();
 
@@ -373,6 +378,55 @@ export default function ParentDashboard() {
 
   const firstLetter = name ? name.charAt(0).toUpperCase() : '';
 
+  const handleActivityComplete = async (activityId) => {
+    try {
+      setSubmittingActivity(prev => ({ ...prev, [activityId]: true }));
+      
+      const response = await api.post(`/api/activities/${activityId}/complete`, {
+        description: completionNotes[activityId] || ''
+      });
+      
+      if (response.data.success) {
+        setCompletedActivities(prev => ({
+          ...prev,
+          [activityId]: {
+            completedAt: response.data.completedAt,
+            description: completionNotes[activityId]
+          }
+        }));
+        toast.success('Activity marked as complete!');
+      }
+      
+      // Clear the notes after successful submission
+      setCompletionNotes(prev => ({ ...prev, [activityId]: '' }));
+      setSubmittingActivity(prev => ({ ...prev, [activityId]: false }));
+    } catch (error) {
+      console.error('Error marking activity as complete:', error);
+      toast.error('Failed to mark activity as complete');
+      setSubmittingActivity(prev => ({ ...prev, [activityId]: false }));
+    }
+  };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('activity_completed', (data) => {
+      if (data.parentId === localStorage.getItem('userId')) {
+        setCompletedActivities(prev => ({
+          ...prev,
+          [data.activityId]: {
+            completedAt: new Date(),
+            parentName: data.parentName
+          }
+        }));
+      }
+    });
+
+    return () => {
+      socket.off('activity_completed');
+    };
+  }, [socket]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
@@ -646,6 +700,50 @@ export default function ParentDashboard() {
                                     </div>
                                   ))}
                                 </div>
+                              </div>
+                            )}
+                            
+                            {completedActivities[activity._id] ? (
+                              <div className="mt-4 border-t pt-4">
+                                <div className="bg-green-50 text-green-700 p-4 rounded-lg">
+                                  <div className="flex items-center">
+                                    <CheckCircle className="h-5 w-5 mr-2" />
+                                    <span className="font-medium">Completed</span>
+                                  </div>
+                                  <p className="mt-2 text-sm">
+                                    Completed on: {new Date(completedActivities[activity._id].completedAt).toLocaleDateString()}
+                                  </p>
+                                  {completedActivities[activity._id].description && (
+                                    <p className="mt-2 text-sm">
+                                      Notes: {completedActivities[activity._id].description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-4 border-t pt-4 space-y-4">
+                                <div className="space-y-2">
+                                  <label className="text-sm font-medium">
+                                    Completion Notes
+                                  </label>
+                                  <Textarea
+                                    placeholder="Add any notes about completing this activity..."
+                                    value={completionNotes[activity._id] || ''}
+                                    onChange={(e) => setCompletionNotes(prev => ({
+                                      ...prev,
+                                      [activity._id]: e.target.value
+                                    }))}
+                                    className="min-h-[100px]"
+                                  />
+                                </div>
+                                
+                                <Button
+                                  onClick={() => handleActivityComplete(activity._id)}
+                                  disabled={submittingActivity[activity._id]}
+                                  className="w-full"
+                                >
+                                  {submittingActivity[activity._id] ? 'Submitting...' : 'Mark as Complete'}
+                                </Button>
                               </div>
                             )}
                           </div>
