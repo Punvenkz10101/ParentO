@@ -21,7 +21,6 @@ export default defineConfig({
         ws: true,
       },
     },
-    historyApiFallback: true,
   },
   build: {
     outDir: 'dist',
