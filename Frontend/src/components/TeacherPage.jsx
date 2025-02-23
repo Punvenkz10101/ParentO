@@ -40,7 +40,6 @@ import { cn } from "@/lib/utils";
 import { socket } from '../lib/socket';
 import { useSocket } from '../context/SocketContext';
 import api from '../lib/axios';
-import axios from 'axios';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -494,7 +493,7 @@ export default function TeacherDashboard() {
         return;
       }
 
-      await axios.delete(`http://localhost:5000/api/classroom/teacher/classroom/${classroomId}`, {
+      await api.delete(`/api/classroom/teacher/classroom/${classroomId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

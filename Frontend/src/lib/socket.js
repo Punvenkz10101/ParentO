@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 let socket;
 
 try {
-  socket = io('http://localhost:5000', {
+  socket = io('https://parento-dcgi.onrender.com', {
     autoConnect: true,
     reconnection: true,
     reconnectionAttempts: 5,
