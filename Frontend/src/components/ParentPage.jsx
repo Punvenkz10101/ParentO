@@ -868,27 +868,32 @@ export default function ParentDashboard() {
               <CardContent>
                 <ScrollArea className="h-[280px]">
                   <div className="space-y-3">
-                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="text-sm">
-                        <span className="font-medium">{t('dashboard.mathExam')}: </span>
-                        <span className="mx-2">•</span>
-                        <span>Score: 85/100</span>
-                      </p>
-                    </div>
-                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="text-sm">
-                        <span className="font-medium">{t('dashboard.scienceExam')}: </span>
-                        <span className="mx-2">•</span>
-                        <span>Score: 90/100</span>
-                      </p>
-                    </div>
-                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                      <p className="text-sm">
-                        <span className="font-medium">{t('dashboard.englishExam')}: </span>
-                        <span className="mx-2">•</span>
-                        <span>Score: 78/100</span>
-                      </p>
-                    </div>
+                    {allMarks && allMarks.length > 0 ? (
+                      allMarks.map((mark, index) => (
+                        <div key={index} className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-medium text-gray-900">{mark.subject}</h4>
+                              <p className="text-sm text-gray-500">
+                                {new Date(mark.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-[#00308F]">
+                                {mark.marks}/{mark.totalMarks}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {((mark.marks / mark.totalMarks) * 100).toFixed(1)}%
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No marks available yet
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
