@@ -27,6 +27,11 @@ import {
   Settings,
   Menu,
   CheckCircle,
+  TrendingUp,
+  Award,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import {
   Avatar,
@@ -84,6 +89,11 @@ export default function ParentDashboard() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [completedActivitiesCount, setCompletedActivitiesCount] = useState(0);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [studentProgress, setStudentProgress] = useState(null);
+  const [showAllMarks, setShowAllMarks] = useState(false);
+  const [showAllFeedback, setShowAllFeedback] = useState(false);
+  const [allMarks, setAllMarks] = useState([]);
+  const [allFeedback, setAllFeedback] = useState([]);
 
   const navigate = useNavigate();
 
@@ -494,6 +504,30 @@ export default function ParentDashboard() {
       setSubmittingActivity(prev => ({ ...prev, [activityId]: false }));
     }
   };
+
+  useEffect(() => {
+    const fetchStudentProgress = async () => {
+      if (classrooms.length > 0) {
+        try {
+          const classCode = classrooms[0].classCode;
+          const [progressRes, marksRes, feedbackRes] = await Promise.all([
+            api.get(`/api/classroom/parent/progress/${classCode}`),
+            api.get(`/api/classroom/parent/marks/${classCode}`),
+            api.get(`/api/classroom/parent/feedback/${classCode}`)
+          ]);
+
+          setStudentProgress(progressRes.data);
+          setAllMarks(marksRes.data);
+          setAllFeedback(feedbackRes.data);
+        } catch (error) {
+          console.error('Error fetching student progress:', error);
+          toast.error('Failed to fetch student progress');
+        }
+      }
+    };
+
+    fetchStudentProgress();
+  }, [classrooms]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -955,6 +989,145 @@ export default function ParentDashboard() {
             </Card>
           </div>
         </div>
+
+        {/* Student Progress Section */}
+        {studentProgress && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <TrendingUp className="h-5 w-5 text-[#00308F] mr-2" />
+                  Academic Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-blue-900">Activities</h3>
+                      <Award className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-blue-900 mt-2">
+                      {studentProgress.progress.completedActivities}/{studentProgress.progress.totalActivities}
+                    </p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      {studentProgress.progress.completionRate.toFixed(1)}% Completion
+                    </p>
+                  </div>
+
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-green-900">Average Score</h3>
+                      <Star className="h-4 w-4 text-green-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-green-900 mt-2">
+                      {studentProgress.progress.averageMarks}%
+                    </p>
+                    <p className="text-sm text-green-700 mt-1">
+                      From {studentProgress.progress.totalMarks} assessments
+                    </p>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-purple-900">Feedback</h3>
+                      <MessageSquare className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-purple-900 mt-2">
+                      {studentProgress.progress.totalFeedback}
+                    </p>
+                    <p className="text-sm text-purple-700 mt-1">
+                      Teacher observations
+                    </p>
+                  </div>
+                </div>
+
+                {/* Marks Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Recent Marks</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAllMarks(!showAllMarks)}
+                    >
+                      {showAllMarks ? (
+                        <ChevronUp className="h-4 w-4 mr-2" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 mr-2" />
+                      )}
+                      {showAllMarks ? 'Show Less' : 'Show All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {(showAllMarks ? allMarks : allMarks.slice(0, 3)).map((mark, index) => (
+                      <div
+                        key={index}
+                        className="bg-white p-4 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-medium text-gray-900">{mark.subject}</h4>
+                            <p className="text-sm text-gray-500">
+                              {new Date(mark.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-[#00308F]">
+                              {mark.marks}/{mark.totalMarks}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {((mark.marks / mark.totalMarks) * 100).toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Feedback Section */}
+                <div className="space-y-4 mt-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Teacher Feedback</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAllFeedback(!showAllFeedback)}
+                    >
+                      {showAllFeedback ? (
+                        <ChevronUp className="h-4 w-4 mr-2" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 mr-2" />
+                      )}
+                      {showAllFeedback ? 'Show Less' : 'Show All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {(showAllFeedback ? allFeedback : allFeedback.slice(0, 3)).map((feedback, index) => (
+                      <div
+                        key={index}
+                        className="bg-white p-4 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">{feedback.type}</Badge>
+                              <span className="text-sm text-gray-500">
+                                {new Date(feedback.date).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-gray-700">{feedback.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
 
       {/* Classroom Details Modal */}

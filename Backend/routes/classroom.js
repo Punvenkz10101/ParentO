@@ -462,4 +462,140 @@ router.get('/teacher/feedback/:classCode/:studentId', auth, async (req, res) => 
   }
 });
 
+// Add route for parents to get their child's marks
+router.get('/parent/marks/:classCode', auth, async (req, res) => {
+  try {
+    const parentId = req.user.id;
+    const { classCode } = req.params;
+
+    // Find the classroom and verify parent's child is enrolled
+    const classroom = await Classroom.findOne({
+      classCode,
+      'students.parent': parentId
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom not found or not enrolled' });
+    }
+
+    // Get the student ID from the classroom
+    const student = classroom.students.find(s => s.parent.toString() === parentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found in classroom' });
+    }
+
+    // Get all marks for the student
+    const marks = await Marks.find({ 
+      classCode, 
+      studentId: student._id 
+    })
+    .sort({ date: -1 });
+
+    res.json(marks);
+  } catch (error) {
+    console.error('Error fetching marks:', error);
+    res.status(500).json({ message: 'Server error while fetching marks' });
+  }
+});
+
+// Add route for parents to get their child's feedback
+router.get('/parent/feedback/:classCode', auth, async (req, res) => {
+  try {
+    const parentId = req.user.id;
+    const { classCode } = req.params;
+
+    // Find the classroom and verify parent's child is enrolled
+    const classroom = await Classroom.findOne({
+      classCode,
+      'students.parent': parentId
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom not found or not enrolled' });
+    }
+
+    // Get the student ID from the classroom
+    const student = classroom.students.find(s => s.parent.toString() === parentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found in classroom' });
+    }
+
+    // Get all feedback for the student
+    const feedback = await Feedback.find({ 
+      classCode, 
+      studentId: student._id 
+    })
+    .sort({ date: -1 });
+
+    res.json(feedback);
+  } catch (error) {
+    console.error('Error fetching feedback:', error);
+    res.status(500).json({ message: 'Server error while fetching feedback' });
+  }
+});
+
+// Add route to get student's overall progress
+router.get('/parent/progress/:classCode', auth, async (req, res) => {
+  try {
+    const parentId = req.user.id;
+    const { classCode } = req.params;
+
+    // Find the classroom and verify parent's child is enrolled
+    const classroom = await Classroom.findOne({
+      classCode,
+      'students.parent': parentId
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom not found or not enrolled' });
+    }
+
+    // Get the student ID from the classroom
+    const student = classroom.students.find(s => s.parent.toString() === parentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found in classroom' });
+    }
+
+    // Get all marks, feedback, and activities for the student
+    const [marks, feedback, activities] = await Promise.all([
+      Marks.find({ classCode, studentId: student._id }).sort({ date: -1 }),
+      Feedback.find({ classCode, studentId: student._id }).sort({ date: -1 }),
+      Activity.find({ classCode }).sort({ date: -1 })
+    ]);
+
+    // Calculate overall progress
+    const totalActivities = activities.length;
+    const completedActivities = activities.filter(activity => 
+      activity.completions.some(completion => 
+        completion.parentId.toString() === parentId
+      )
+    ).length;
+
+    // Calculate average marks
+    const averageMarks = marks.length > 0
+      ? marks.reduce((acc, mark) => acc + (mark.marks / mark.totalMarks * 100), 0) / marks.length
+      : 0;
+
+    res.json({
+      student: {
+        name: student.studentName,
+        joinedAt: student.joinedAt
+      },
+      progress: {
+        totalActivities,
+        completedActivities,
+        completionRate: totalActivities > 0 ? (completedActivities / totalActivities * 100) : 0,
+        averageMarks: Math.round(averageMarks * 10) / 10,
+        totalMarks: marks.length,
+        totalFeedback: feedback.length
+      },
+      recentMarks: marks.slice(0, 5),
+      recentFeedback: feedback.slice(0, 5)
+    });
+  } catch (error) {
+    console.error('Error fetching progress:', error);
+    res.status(500).json({ message: 'Server error while fetching progress' });
+  }
+});
+
 module.exports = router;
