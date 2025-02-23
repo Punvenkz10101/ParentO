@@ -456,17 +456,32 @@ export default function TeacherDashboard() {
     setSelectedClassroom(classroom);
     setShowDetailsModal(true);
     
-    // Fetch parent details for each student
-    const parentDetailsMap = {};
-    for (const student of classroom.students || []) {
-      if (student?.parent && student.parent._id) {  
-        const parentDetails = await fetchParentDetails(student.parent._id);
-        if (parentDetails) {
-          parentDetailsMap[student.parent._id] = parentDetails;
+    try {
+      // Fetch all students in the classroom
+      const studentsResponse = await api.get(`/api/classroom/teacher/students/${classroom.classCode}`);
+      
+      // Fetch parent details for each student
+      const studentsWithParentDetails = await Promise.all(studentsResponse.data.map(async (student) => {
+        if (student?.parent && student.parent._id) {
+          const parentDetails = await fetchParentDetails(student.parent._id);
+          return {
+            ...student,
+            parentDetails: parentDetails || null
+          };
         }
-      }
+        return student;
+      }));
+
+      // Update the classroom object with detailed student information
+      setSelectedClassroom({
+        ...classroom,
+        students: studentsWithParentDetails
+      });
+      
+    } catch (error) {
+      console.error('Error fetching classroom details:', error);
+      toast.error('Failed to fetch classroom details');
     }
-    setStudentParentDetails(parentDetailsMap);
   };
 
   const handleDeleteClassroom = async (classroomId) => {
@@ -636,30 +651,44 @@ export default function TeacherDashboard() {
     }
   };
 
-  // Add this function to fetch parent progress
+  // Update the fetchParentProgress function
   const fetchParentProgress = async (classCode) => {
     try {
-      const response = await api.get(`/api/activities/classroom/${classCode}`);
-      if (response.data) {
+      // First get the classroom details to get the list of enrolled parents
+      const classroomResponse = await api.get(`/api/classroom/teacher/students/${classCode}`);
+      const enrolledStudents = classroomResponse.data;
+      
+      // Get activities data
+      const activitiesResponse = await api.get(`/api/activities/classroom/${classCode}`);
+      const activities = activitiesResponse.data;
+
+      if (enrolledStudents && activities) {
         // Create a map to store parent progress
         const progressMap = new Map();
 
-        // Process all activities and their completions
-        response.data.forEach(activity => {
-          activity.completions.forEach(completion => {
-            if (!progressMap.has(completion.parentId)) {
-              progressMap.set(completion.parentId, {
-                name: completion.parentName,
-                points: 0,
-                activitiesCompleted: 0,
-                totalActivities: response.data.length
-              });
-            }
-
-            const parentData = progressMap.get(completion.parentId);
-            parentData.points += completion.points || 0;
-            parentData.activitiesCompleted += 1;
+        // Initialize progress for all enrolled parents
+        enrolledStudents.forEach(student => {
+          progressMap.set(student.parent.toString(), {
+            name: student.parentName,
+            studentName: student.studentName,
+            points: 0,
+            activitiesCompleted: 0,
+            totalActivities: activities.length
           });
+        });
+
+        // Process all activities and their completions
+        activities.forEach(activity => {
+          if (activity.completions) {
+            activity.completions.forEach(completion => {
+              // Only count completions from enrolled parents
+              if (progressMap.has(completion.parentId)) {
+                const parentData = progressMap.get(completion.parentId);
+                parentData.points += completion.points || 0;
+                parentData.activitiesCompleted += 1;
+              }
+            });
+          }
         });
 
         // Convert map to array and sort by points
@@ -670,15 +699,39 @@ export default function TeacherDashboard() {
       }
     } catch (error) {
       console.error('Error fetching parent progress:', error);
+      toast.error('Failed to fetch parent progress');
     }
   };
 
-  // Add this function to fetch student-parent data
+  // Update the fetchStudentParentData function
   const fetchStudentParentData = async (classCode) => {
     try {
       const response = await api.get(`/api/classroom/teacher/students/${classCode}`);
       if (response.data) {
-        setStudentParentList(response.data);
+        // Transform the data to include marks and feedback
+        const studentsWithDetails = await Promise.all(response.data.map(async (student) => {
+          try {
+            // Fetch marks for each student
+            const marksResponse = await api.get(`/api/classroom/teacher/marks/${classCode}/${student._id}`);
+            // Fetch feedback for each student
+            const feedbackResponse = await api.get(`/api/classroom/teacher/feedback/${classCode}/${student._id}`);
+            
+            return {
+              ...student,
+              marks: marksResponse.data || [],
+              feedback: feedbackResponse.data || []
+            };
+          } catch (error) {
+            console.error(`Error fetching details for student ${student._id}:`, error);
+            return {
+              ...student,
+              marks: [],
+              feedback: []
+            };
+          }
+        }));
+        
+        setStudentParentList(studentsWithDetails);
       }
     } catch (error) {
       console.error('Error fetching student-parent data:', error);
@@ -1124,7 +1177,7 @@ export default function TeacherDashboard() {
                 {!attendanceSubmitted && (
                   <Button
                     onClick={handleSubmitAttendance}
-                    disabled={submittingAttendance || studentParentList.length === 0}
+                    disabled={submittingAttendance || !studentParentList || studentParentList.length === 0}
                   >
                     {submittingAttendance ? 'Submitting...' : 'Submit Attendance'}
                   </Button>
@@ -1133,146 +1186,143 @@ export default function TeacherDashboard() {
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {studentParentList.map((item, index) => (
-                      <div 
-                        key={index}
-                        className="p-4 bg-white rounded-lg border border-gray-200"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-4 w-full">
-                            {!attendanceSubmitted && (
-                              <input
-                                type="checkbox"
-                                checked={attendanceData[item._id] || false}
-                                onChange={(e) => setAttendanceData(prev => ({
-                                  ...prev,
-                                  [item._id]: e.target.checked
-                                }))}
-                                className="h-5 w-5 rounded border-gray-300"
-                              />
-                            )}
-                            <div className="w-full">
-                              <div className="flex justify-between items-center w-full">
-                                <div>
-                                  <p className="font-medium text-gray-800">{item.studentName}</p>
-                                  <p className="text-sm text-gray-600">Parent: {item.parentName}</p>
-                                  <p className="text-sm text-gray-500">Contact: {item.mobileNumber}</p>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedStudent(item);
-                                      setShowMarksOverlay(true);
-                                    }}
-                                    className="flex items-center"
-                                  >
-                                    <Star className="h-4 w-4 mr-1" />
-                                    Add Marks
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedStudent(item);
-                                      setShowFeedbackOverlay(true);
-                                    }}
-                                    className="flex items-center"
-                                  >
-                                    <MessageSquare className="h-4 w-4 mr-1" />
-                                    Add Feedback
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => handleRemoveStudent(item._id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                    {studentParentList && studentParentList.length > 0 ? (
+                      studentParentList.map((student, index) => (
+                        <div 
+                          key={student._id || index}
+                          className="p-4 bg-white rounded-lg border border-gray-200"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-4 w-full">
+                              {!attendanceSubmitted && (
+                                <input
+                                  type="checkbox"
+                                  checked={attendanceData[student._id] || false}
+                                  onChange={(e) => setAttendanceData(prev => ({
+                                    ...prev,
+                                    [student._id]: e.target.checked
+                                  }))}
+                                  className="h-5 w-5 rounded border-gray-300"
+                                />
+                              )}
+                              <div className="w-full">
+                                <div className="flex justify-between items-center w-full">
+                                  <div>
+                                    <p className="font-medium text-gray-800">{student.studentName}</p>
+                                    <p className="text-sm text-gray-600">Parent: {student.parentName}</p>
+                                    <p className="text-sm text-gray-500">Contact: {student.mobileNumber}</p>
+                                    <p className="text-sm text-gray-500">Joined: {new Date(student.joinedAt).toLocaleDateString()}</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedStudent(student);
+                                        setShowMarksOverlay(true);
+                                      }}
+                                      className="flex items-center"
+                                    >
+                                      <Star className="h-4 w-4 mr-1" />
+                                      Add Marks
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedStudent(student);
+                                        setShowFeedbackOverlay(true);
+                                      }}
+                                      className="flex items-center"
+                                    >
+                                      <MessageSquare className="h-4 w-4 mr-1" />
+                                      Add Feedback
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
-
-                              {/* Dropdown toggle button */}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setExpandedStudent(expandedStudent === index ? null : index)}
-                                className="mt-2 text-gray-600 hover:text-gray-800 w-full justify-between"
-                              >
-                                <span>View Details</span>
-                                <ChevronRight
-                                  className={`h-4 w-4 transition-transform ${
-                                    expandedStudent === index ? "rotate-90" : ""
-                                  }`}
-                                />
-                              </Button>
-
-                              {/* Expandable content */}
-                              {expandedStudent === index && (
-                                <div className="mt-4 space-y-4 border-t pt-4">
-                                  {/* Marks Section */}
-                                  <div>
-                                    <h4 className="font-medium text-gray-700 mb-2 flex items-center">
-                                      <Star className="h-4 w-4 mr-2 text-[#00308F]" />
-                                      Academic Performance
-                                    </h4>
-                                    {item.marks && item.marks.length > 0 ? (
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        {item.marks.map((mark, idx) => (
-                                          <div key={idx} className="bg-blue-50 p-2 rounded">
-                                            <p className="font-medium text-sm">{mark.subject}</p>
-                                            <p className="text-sm text-gray-600">
-                                              Score: {mark.marks}/{mark.totalMarks}
-                                              <span className="text-xs ml-2">
-                                                ({((mark.marks/mark.totalMarks) * 100).toFixed(1)}%)
-                                              </span>
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                              {new Date(mark.date).toLocaleDateString()}
-                                            </p>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    ) : (
-                                      <p className="text-sm text-gray-500">No marks recorded yet</p>
-                                    )}
-                                  </div>
-
-                                  {/* Feedback Section */}
-                                  <div>
-                                    <h4 className="font-medium text-gray-700 mb-2 flex items-center">
-                                      <MessageSquare className="h-4 w-4 mr-2 text-[#00308F]" />
-                                      Non-Academic Feedback
-                                    </h4>
-                                    {item.feedback && item.feedback.length > 0 ? (
-                                      <div className="space-y-2">
-                                        {item.feedback.map((fb, idx) => (
-                                          <div key={idx} className="bg-gray-50 p-3 rounded">
-                                            <div className="flex justify-between items-start">
-                                              <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium">
-                                                {fb.type}
-                                              </span>
-                                              <span className="text-xs text-gray-500">
-                                                {new Date(fb.date).toLocaleDateString()}
-                                              </span>
-                                            </div>
-                                            <p className="mt-2 text-sm">{fb.description}</p>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    ) : (
-                                      <p className="text-sm text-gray-500">No feedback recorded yet</p>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           </div>
+
+                          {/* View Details Button */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setExpandedStudent(expandedStudent === index ? null : index)}
+                            className="mt-2 text-gray-600 hover:text-gray-800 w-full justify-between"
+                          >
+                            <span>View Details</span>
+                            <ChevronRight
+                              className={`h-4 w-4 transition-transform ${
+                                expandedStudent === index ? "rotate-90" : ""
+                              }`}
+                            />
+                          </Button>
+
+                          {/* Expanded Details */}
+                          {expandedStudent === index && (
+                            <div className="mt-4 space-y-4 border-t pt-4">
+                              {/* Marks Section */}
+                              <div>
+                                <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                                  <Star className="h-4 w-4 mr-2 text-[#00308F]" />
+                                  Academic Performance
+                                </h4>
+                                {student.marks && student.marks.length > 0 ? (
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {student.marks.map((mark, idx) => (
+                                      <div key={idx} className="bg-blue-50 p-2 rounded">
+                                        <p className="font-medium text-sm">{mark.subject}</p>
+                                        <p className="text-sm text-gray-600">
+                                          Score: {mark.marks}/{mark.totalMarks}
+                                          <span className="text-xs ml-2">
+                                            ({((mark.marks/mark.totalMarks) * 100).toFixed(1)}%)
+                                          </span>
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                          {new Date(mark.date).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-gray-500">No marks recorded yet</p>
+                                )}
+                              </div>
+
+                              {/* Feedback Section */}
+                              <div>
+                                <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                                  <MessageSquare className="h-4 w-4 mr-2 text-[#00308F]" />
+                                    Feedback History
+                                </h4>
+                                {student.feedback && student.feedback.length > 0 ? (
+                                  <div className="space-y-2">
+                                    {student.feedback.map((fb, idx) => (
+                                      <div key={idx} className="bg-gray-50 p-3 rounded">
+                                        <div className="flex justify-between items-start">
+                                          <Badge variant="outline">{fb.type}</Badge>
+                                          <span className="text-xs text-gray-500">
+                                            {new Date(fb.date).toLocaleDateString()}
+                                          </span>
+                                        </div>
+                                        <p className="mt-2 text-sm">{fb.description}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-gray-500">No feedback recorded yet</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No students enrolled in this class yet
                       </div>
-                    ))}
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
