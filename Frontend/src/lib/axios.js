@@ -8,6 +8,7 @@ const instance = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
@@ -31,24 +32,19 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Response error:', error);
-    
-    if (error.response?.status === 401) {
-      const userType = localStorage.getItem('userType');
-      localStorage.clear();
-      localStorage.setItem('userType', userType);
-      window.location.href = `/login/${userType}`;
-      toast.error('Session expired. Please login again.');
-    } else if (error.response?.status === 404) {
-      console.error('Resource not found:', error.config.url);
-      toast.error('Resource not found. Please try again later.');
-    } else if (error.response?.data?.message) {
-      toast.error(error.response.data.message);
+    if (error.response) {
+      // Server responded with error
+      const message = error.response.data?.message || 'An error occurred';
+      toast.error(message);
+    } else if (error.request) {
+      // Request was made but no response
+      toast.error('Unable to connect to server');
     } else {
-      toast.error('An error occurred. Please try again.');
+      // Something else happened
+      toast.error('An error occurred');
     }
     return Promise.reject(error);
   }
 );
 
-export default instance; 
+export default instance;

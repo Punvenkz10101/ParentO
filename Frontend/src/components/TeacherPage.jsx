@@ -363,7 +363,6 @@ export default function TeacherDashboard() {
           {
             headers: { 
               'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
             }
           }
         );
@@ -418,7 +417,6 @@ export default function TeacherDashboard() {
         {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
           }
         }
       );
@@ -496,7 +494,6 @@ export default function TeacherDashboard() {
       await api.delete(`/api/classroom/teacher/classroom/${classroomId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
         }
       });
 
@@ -567,7 +564,6 @@ export default function TeacherDashboard() {
         {
           headers: { 
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
           }
         }
       );

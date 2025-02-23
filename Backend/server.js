@@ -34,8 +34,8 @@ const corsOptions = {
       'http://localhost:5174',
       'http://localhost:5175',
       'http://localhost:5176',
-      'https://parento.onrender.com',
-      'https://parento-frontend.onrender.com'
+      'https://parento.vercel.app',
+      'https://parento-dcgi.onrender.com'
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
@@ -46,7 +46,7 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 };
 
 // Apply CORS to Express
@@ -55,8 +55,25 @@ app.use(express.json());
 
 // Configure Socket.IO with updated CORS
 const io = new Server(server, {
-  cors: corsOptions,
+  cors: {
+    origin: ['https://parento.vercel.app', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+  },
+  allowEIO3: true, // Allow Engine.IO version 3
   pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['polling', 'websocket'],
+  allowUpgrades: true,
+  perMessageDeflate: false,
+  httpCompression: true,
+  path: '/socket.io/'
+});
+
+// Add error handling for Socket.IO server
+io.engine.on("connection_error", (err) => {
+  console.log('Socket.IO connection error:', err);
 });
 
 // Socket.IO connection handling
