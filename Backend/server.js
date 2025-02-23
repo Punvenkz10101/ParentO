@@ -33,10 +33,12 @@ const corsOptions = {
       'http://localhost:5173',
       'http://localhost:5174',
       'http://localhost:5175',
-      'http://localhost:5176'
+      'http://localhost:5176',
+      'https://parento.onrender.com',
+      'https://parento-frontend.onrender.com'
     ];
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -84,6 +86,11 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: 'ParentO API is running' });
+});
+
 // Register routes once
 app.use('/api/parent', parentAuthRoutes);
 app.use('/api/teacher', teacherAuthRoutes);
@@ -100,14 +107,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something broke!' });
 });
 
-// 404 handler
+// 404 handler for undefined routes
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
 
 // Add error handling for the server
@@ -118,11 +125,11 @@ server.on('error', (error) => {
 
   switch (error.code) {
     case 'EACCES':
-      console.error('Port 5000 requires elevated privileges');
+      console.error('Port 3000 requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error('Port 5000 is already in use');
+      console.error('Port 3000 is already in use');
       process.exit(1);
       break;
     default:
