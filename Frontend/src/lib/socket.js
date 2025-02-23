@@ -1,14 +1,14 @@
 import { io } from 'socket.io-client';
-import { SOCKET_URL } from '../url';
+import { SOCKET_URL, IS_DEVELOPMENT } from '../url';
 import { toast } from 'react-hot-toast';
 
 const socketOptions = {
   autoConnect: false,
   reconnection: true,
-  reconnectionAttempts: 5,
+  reconnectionAttempts: IS_DEVELOPMENT ? Infinity : 5,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
-  timeout: 20000,
+  timeout: IS_DEVELOPMENT ? 30000 : 20000,
   transports: ['websocket', 'polling'],
   upgrade: true,
   withCredentials: true,
@@ -20,49 +20,64 @@ const socketOptions = {
 
 export const socket = io(SOCKET_URL, socketOptions);
 
+// Development logging
+if (IS_DEVELOPMENT) {
+  socket.onAny((event, ...args) => {
+    console.log('Socket Event:', event, args);
+  });
+}
+
 // Connection event handlers
 socket.on('connect', () => {
-  console.log('Socket connected successfully');
+  if (IS_DEVELOPMENT) {
+    console.log('Socket connected successfully');
+  }
 });
 
 socket.on('connect_error', (error) => {
-  console.error('Socket connection error:', error);
+  if (IS_DEVELOPMENT) {
+    console.error('Socket connection error:', error);
+  }
+  
   if (error.message === 'xhr poll error') {
-    // Fallback to polling if websocket fails
     socket.io.opts.transports = ['polling'];
   }
-  // Show error message to user
+  
   toast.error('Connection error. Retrying...');
 });
 
 socket.on('disconnect', (reason) => {
-  console.log('Socket disconnected:', reason);
+  if (IS_DEVELOPMENT) {
+    console.log('Socket disconnected:', reason);
+  }
+  
   if (reason === 'io server disconnect') {
-    // Server disconnected the client
     socket.connect();
   }
 });
 
-// Reconnection event handlers
+// Reconnection handlers
 socket.io.on('reconnect', (attempt) => {
-  console.log('Socket reconnected after', attempt, 'attempts');
+  if (IS_DEVELOPMENT) {
+    console.log('Socket reconnected after', attempt, 'attempts');
+  }
   toast.success('Reconnected to server');
 });
 
-socket.io.on('reconnect_attempt', (attempt) => {
-  console.log('Socket attempting to reconnect:', attempt);
-});
-
 socket.io.on('reconnect_error', (error) => {
-  console.error('Socket reconnection error:', error);
+  if (IS_DEVELOPMENT) {
+    console.error('Socket reconnection error:', error);
+  }
 });
 
 socket.io.on('reconnect_failed', () => {
-  console.error('Socket reconnection failed');
+  if (IS_DEVELOPMENT) {
+    console.error('Socket reconnection failed');
+  }
   toast.error('Failed to reconnect. Please refresh the page.');
 });
 
-// Update auth token when it changes
+// Token update handler
 window.addEventListener('storage', (event) => {
   if (event.key === 'token') {
     socket.auth.token = event.newValue;
@@ -72,20 +87,18 @@ window.addEventListener('storage', (event) => {
   }
 });
 
-// Connect only if user is authenticated
+// Auto-connect if authenticated
 if (localStorage.getItem('token')) {
   socket.connect();
 }
 
-// Add ping/pong to check connection health
-setInterval(() => {
-  if (socket.connected) {
-    const start = Date.now();
-    socket.volatile.emit('ping', () => {
-      const latency = Date.now() - start;
-      console.log('Socket latency:', latency + 'ms');
-    });
-  }
-}, 25000);
+// Health check (only in production)
+if (!IS_DEVELOPMENT) {
+  setInterval(() => {
+    if (socket.connected) {
+      socket.volatile.emit('ping');
+    }
+  }, 25000);
+}
 
 export default socket;

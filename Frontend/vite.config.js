@@ -13,14 +13,15 @@ export default defineConfig({
         target: 'https://parento-dcgi.onrender.com',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
       },
       '/socket.io': {
         target: 'https://parento-dcgi.onrender.com',
         changeOrigin: true,
         secure: false,
-        ws: true,
-      },
-    },
+        ws: true
+      }
+    }
   },
   build: {
     outDir: 'dist',
@@ -30,14 +31,14 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-slot', 'class-variance-authority', 'clsx'],
-        },
-      },
-    },
+          ui: ['@radix-ui/react-slot', 'class-variance-authority', 'clsx']
+        }
+      }
+    }
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
+      '@': path.resolve(__dirname, './src')
+    }
+  }
 })

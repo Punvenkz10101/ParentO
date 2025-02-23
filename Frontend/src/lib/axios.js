@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '../url';
+import { API_URL, IS_DEVELOPMENT } from '../url';
 import { toast } from 'react-hot-toast';
 
 const api = axios.create({
@@ -9,8 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  // Add timeout
-  timeout: 15000,
+  timeout: IS_DEVELOPMENT ? 30000 : 15000, // Longer timeout in development
   // Add retry logic
   retry: 3,
   retryDelay: (retryCount) => {
@@ -25,6 +24,16 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Log requests in development
+    if (IS_DEVELOPMENT) {
+      console.log('API Request:', {
+        url: config.url,
+        method: config.method,
+        data: config.data
+      });
+    }
+
     // Add timestamp to prevent caching
     if (config.method === 'get') {
       config.params = {
@@ -35,14 +44,36 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    if (IS_DEVELOPMENT) {
+      console.error('Request Error:', error);
+    }
     return Promise.reject(error);
   }
 );
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log responses in development
+    if (IS_DEVELOPMENT) {
+      console.log('API Response:', {
+        url: response.config.url,
+        status: response.status,
+        data: response.data
+      });
+    }
+    return response;
+  },
   async (error) => {
+    // Log errors in development
+    if (IS_DEVELOPMENT) {
+      console.error('Response Error:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+    }
+
     const originalRequest = error.config;
 
     // Retry failed requests (except for 401 and 404)
@@ -63,36 +94,26 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          // Unauthorized - clear storage and redirect to login
+          toast.error('Session expired. Please login again.');
           localStorage.clear();
-          sessionStorage.clear();
           window.location.href = '/';
           break;
         case 404:
-          // Not Found
-          console.error('Resource not found:', originalRequest.url);
-          toast.error('Resource not found. Please try again later.');
+          toast.error('Resource not found. Please try again.');
           break;
         case 403:
-          // Forbidden
-          toast.error('You do not have permission to perform this action');
+          toast.error('Access denied. You don\'t have permission.');
           break;
         case 500:
-          // Server Error
           toast.error('Server error. Please try again later.');
           break;
         default:
-          // Other errors
           toast.error(error.response.data?.message || 'An error occurred');
       }
     } else if (error.request) {
-      // Network error
-      console.error('Network Error:', error.request);
-      toast.error('Unable to connect to server. Please check your internet connection.');
+      toast.error('Unable to connect to server. Please check your connection.');
     } else {
-      // Other errors
-      console.error('Error:', error.message);
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error('An unexpected error occurred.');
     }
 
     return Promise.reject(error);
