@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const instance = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: BACKEND_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -19,6 +21,7 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('Request error:', error);
     toast.error('Request failed');
     return Promise.reject(error);
   }
@@ -28,12 +31,17 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('Response error:', error);
+    
     if (error.response?.status === 401) {
       const userType = localStorage.getItem('userType');
       localStorage.clear();
       localStorage.setItem('userType', userType);
       window.location.href = `/login/${userType}`;
       toast.error('Session expired. Please login again.');
+    } else if (error.response?.status === 404) {
+      console.error('Resource not found:', error.config.url);
+      toast.error('Resource not found. Please try again later.');
     } else if (error.response?.data?.message) {
       toast.error(error.response.data.message);
     } else {

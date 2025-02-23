@@ -6,6 +6,7 @@ const Teacher = require('../models/Teacher');
 const Parent = require('../models/Parent');
 const Announcement = require('../models/Announcement');
 const Activity = require('../models/Activity');
+const Attendance = require('../models/Attendance');
 
 // Create a new classroom (Teacher only)
 router.post('/teacher/classroom', auth, async (req, res) => {
@@ -197,6 +198,114 @@ router.delete('/teacher/classroom/:id', auth, async (req, res) => {
   } catch (error) {
     console.error('Error deleting classroom:', error);
     res.status(500).json({ message: 'Server error while deleting classroom' });
+  }
+});
+
+// Add this new route for fetching student-parent data
+router.get('/teacher/students/:classCode', auth, async (req, res) => {
+  try {
+    const { classCode } = req.params;
+    const classroom = await Classroom.findOne({ classCode });
+    
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom not found' });
+    }
+
+    // Check if the requesting teacher owns this classroom
+    if (classroom.teacher.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to access this classroom' });
+    }
+
+    // Return the students array from the classroom
+    res.json(classroom.students);
+  } catch (error) {
+    console.error('Error fetching student-parent data:', error);
+    res.status(500).json({ message: 'Server error while fetching student data' });
+  }
+});
+
+// Update the attendance status route
+router.get('/teacher/attendance/:classCode', auth, async (req, res) => {
+  try {
+    const { classCode } = req.params;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const attendance = await Attendance.findOne({
+      classCode,
+      date: {
+        $gte: today,
+        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      }
+    });
+
+    res.json({ 
+      attendanceSubmitted: !!attendance,
+      date: today,
+      attendance: attendance || null
+    });
+  } catch (error) {
+    console.error('Error checking attendance status:', error);
+    res.status(500).json({ message: 'Server error while checking attendance' });
+  }
+});
+
+// Update the submit attendance route
+router.post('/teacher/attendance/:classCode', auth, async (req, res) => {
+  try {
+    const { classCode } = req.params;
+    const { attendance: attendanceData } = req.body;
+    const teacherId = req.user.id;
+
+    const classroom = await Classroom.findOne({ classCode });
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom not found' });
+    }
+
+    if (classroom.teacher.toString() !== teacherId) {
+      return res.status(403).json({ message: 'Not authorized to submit attendance for this classroom' });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if attendance already exists for today
+    let attendance = await Attendance.findOne({
+      classCode,
+      date: {
+        $gte: today,
+        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      }
+    });
+
+    if (attendance) {
+      return res.status(400).json({ message: 'Attendance already submitted for today' });
+    }
+
+    // Create attendance records
+    const attendanceRecords = classroom.students.map(student => ({
+      studentId: student._id,
+      present: !!attendanceData[student._id],
+      studentName: student.studentName,
+      parentName: student.parentName
+    }));
+
+    attendance = new Attendance({
+      classCode,
+      date: today,
+      teacher: teacherId,
+      attendance: attendanceRecords
+    });
+
+    await attendance.save();
+
+    res.json({ 
+      message: 'Attendance submitted successfully',
+      attendance
+    });
+  } catch (error) {
+    console.error('Error submitting attendance:', error);
+    res.status(500).json({ message: 'Server error while submitting attendance' });
   }
 });
 
