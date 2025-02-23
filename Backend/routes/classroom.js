@@ -7,6 +7,8 @@ const Parent = require('../models/Parent');
 const Announcement = require('../models/Announcement');
 const Activity = require('../models/Activity');
 const Attendance = require('../models/Attendance');
+const Marks = require('../models/Marks');
+const Feedback = require('../models/Feedback');
 
 // Create a new classroom (Teacher only)
 router.post('/teacher/classroom', auth, async (req, res) => {
@@ -306,6 +308,157 @@ router.post('/teacher/attendance/:classCode', auth, async (req, res) => {
   } catch (error) {
     console.error('Error submitting attendance:', error);
     res.status(500).json({ message: 'Server error while submitting attendance' });
+  }
+});
+
+// Add route for adding marks
+router.post('/teacher/marks/:classCode/:studentId', auth, async (req, res) => {
+  try {
+    const { classCode, studentId } = req.params;
+    const { subject, marks, totalMarks } = req.body;
+    const teacherId = req.user.id;
+
+    // Validate input
+    if (!subject || !marks || !totalMarks) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Check if classroom exists and teacher has access
+    const classroom = await Classroom.findOne({ 
+      classCode,
+      teacher: teacherId,
+      'students._id': studentId 
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom or student not found' });
+    }
+
+    // Create new marks entry
+    const marksEntry = new Marks({
+      classCode,
+      studentId,
+      subject,
+      marks: Number(marks),
+      totalMarks: Number(totalMarks),
+      teacher: teacherId
+    });
+
+    await marksEntry.save();
+
+    // Emit socket event for real-time updates
+    req.app.get('io').to(classCode).emit('marks_added', {
+      studentId,
+      marksEntry
+    });
+
+    res.json(marksEntry);
+  } catch (error) {
+    console.error('Error adding marks:', error);
+    res.status(500).json({ message: 'Server error while adding marks' });
+  }
+});
+
+// Add route for getting student marks
+router.get('/teacher/marks/:classCode/:studentId', auth, async (req, res) => {
+  try {
+    const { classCode, studentId } = req.params;
+    const teacherId = req.user.id;
+
+    // Verify access
+    const classroom = await Classroom.findOne({ 
+      classCode,
+      teacher: teacherId,
+      'students._id': studentId 
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom or student not found' });
+    }
+
+    // Get all marks for the student
+    const marks = await Marks.find({ classCode, studentId })
+      .sort({ date: -1 });
+
+    res.json(marks);
+  } catch (error) {
+    console.error('Error fetching marks:', error);
+    res.status(500).json({ message: 'Server error while fetching marks' });
+  }
+});
+
+// Add route for adding feedback
+router.post('/teacher/feedback/:classCode/:studentId', auth, async (req, res) => {
+  try {
+    const { classCode, studentId } = req.params;
+    const { type, description } = req.body;
+    const teacherId = req.user.id;
+
+    // Validate input
+    if (!type || !description) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Check if classroom exists and teacher has access
+    const classroom = await Classroom.findOne({ 
+      classCode,
+      teacher: teacherId,
+      'students._id': studentId 
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom or student not found' });
+    }
+
+    // Create new feedback entry
+    const feedbackEntry = new Feedback({
+      classCode,
+      studentId,
+      type,
+      description,
+      teacher: teacherId
+    });
+
+    await feedbackEntry.save();
+
+    // Emit socket event for real-time updates
+    req.app.get('io').to(classCode).emit('feedback_added', {
+      studentId,
+      feedbackEntry
+    });
+
+    res.json(feedbackEntry);
+  } catch (error) {
+    console.error('Error adding feedback:', error);
+    res.status(500).json({ message: 'Server error while adding feedback' });
+  }
+});
+
+// Add route for getting student feedback
+router.get('/teacher/feedback/:classCode/:studentId', auth, async (req, res) => {
+  try {
+    const { classCode, studentId } = req.params;
+    const teacherId = req.user.id;
+
+    // Verify access
+    const classroom = await Classroom.findOne({ 
+      classCode,
+      teacher: teacherId,
+      'students._id': studentId 
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classroom or student not found' });
+    }
+
+    // Get all feedback for the student
+    const feedback = await Feedback.find({ classCode, studentId })
+      .sort({ date: -1 });
+
+    res.json(feedback);
+  } catch (error) {
+    console.error('Error fetching feedback:', error);
+    res.status(500).json({ message: 'Server error while fetching feedback' });
   }
 });
 

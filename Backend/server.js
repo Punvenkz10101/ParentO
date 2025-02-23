@@ -10,6 +10,16 @@ const http = require('http');
 const { Server } = require('socket.io');
 const activitiesRoutes = require('./routes/activities');
 
+// Register models
+require('./models/Teacher');
+require('./models/Parent');
+require('./models/Classroom');
+require('./models/Announcement');
+require('./models/Activity');
+require('./models/Attendance');
+require('./models/Marks');
+require('./models/Feedback');
+
 const app = express();
 const server = http.createServer(app);
 
