@@ -17,7 +17,8 @@ import {
   Trash2,
   LogOut, 
   User,
-  Users
+  Users,
+  MessageSquare
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,8 @@ import { socket } from '../lib/socket';
 import { useSocket } from '../context/SocketContext';
 import api from '../lib/axios';
 import axios from 'axios';
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
@@ -121,6 +124,19 @@ export default function TeacherDashboard() {
   const [attendanceData, setAttendanceData] = useState({});
   const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
   const [submittingAttendance, setSubmittingAttendance] = useState(false);
+  const [showMarksOverlay, setShowMarksOverlay] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [markDetails, setMarkDetails] = useState({
+    subject: '',
+    marks: '',
+    totalMarks: ''
+  });
+  const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
+  const [feedbackDetails, setFeedbackDetails] = useState({
+    type: '',
+    description: ''
+  });
+  const [expandedStudent, setExpandedStudent] = useState(null);
 
   const medalIcons = ["🥇", "🥈", "🥉"];
 
@@ -701,6 +717,73 @@ export default function TeacherDashboard() {
     }
   };
 
+  // Add this function to handle marks submission
+  const handleAddMarks = async () => {
+    try {
+      if (!markDetails.subject || !markDetails.marks || !markDetails.totalMarks) {
+        toast.error('Please fill all fields');
+        return;
+      }
+
+      const response = await api.post(`/api/classroom/teacher/marks/${classroom.classCode}/${selectedStudent._id}`, {
+        ...markDetails,
+        marks: Number(markDetails.marks),
+        totalMarks: Number(markDetails.totalMarks)
+      });
+
+      // Update local state
+      setStudentParentList(prev => prev.map(student => {
+        if (student._id === selectedStudent._id) {
+          return {
+            ...student,
+            marks: [...(student.marks || []), response.data]
+          };
+        }
+        return student;
+      }));
+
+      setShowMarksOverlay(false);
+      setMarkDetails({ subject: '', marks: '', totalMarks: '' });
+      toast.success('Marks added successfully');
+    } catch (error) {
+      console.error('Error adding marks:', error);
+      toast.error('Failed to add marks');
+    }
+  };
+
+  // Add this function to handle feedback submission
+  const handleAddFeedback = async () => {
+    try {
+      if (!feedbackDetails.type || !feedbackDetails.description) {
+        toast.error('Please fill all fields');
+        return;
+      }
+
+      const response = await api.post(
+        `/api/classroom/teacher/feedback/${classroom.classCode}/${selectedStudent._id}`,
+        feedbackDetails
+      );
+
+      // Update local state
+      setStudentParentList(prev => prev.map(student => {
+        if (student._id === selectedStudent._id) {
+          return {
+            ...student,
+            feedback: [...(student.feedback || []), response.data]
+          };
+        }
+        return student;
+      }));
+
+      setShowFeedbackOverlay(false);
+      setFeedbackDetails({ type: '', description: '' });
+      toast.success('Feedback added successfully');
+    } catch (error) {
+      console.error('Error adding feedback:', error);
+      toast.error('Failed to add feedback');
+    }
+  };
+
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Top Navigation Bar */}
@@ -1050,47 +1133,146 @@ export default function TeacherDashboard() {
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
-                    {studentParentList.length > 0 ? (
-                      studentParentList.map((item, index) => (
-                        <div 
-                          key={index}
-                          className="p-4 bg-white rounded-lg border border-gray-200"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-4">
-                              {!attendanceSubmitted && (
-                                <input
-                                  type="checkbox"
-                                  checked={attendanceData[item._id] || false}
-                                  onChange={(e) => setAttendanceData(prev => ({
-                                    ...prev,
-                                    [item._id]: e.target.checked
-                                  }))}
-                                  className="h-5 w-5 rounded border-gray-300"
-                                />
-                              )}
-                              <div>
-                                <p className="font-medium text-gray-800">{item.studentName}</p>
-                                <p className="text-sm text-gray-600">Parent: {item.parentName}</p>
-                                <p className="text-sm text-gray-500">Contact: {item.mobileNumber}</p>
+                    {studentParentList.map((item, index) => (
+                      <div 
+                        key={index}
+                        className="p-4 bg-white rounded-lg border border-gray-200"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-4 w-full">
+                            {!attendanceSubmitted && (
+                              <input
+                                type="checkbox"
+                                checked={attendanceData[item._id] || false}
+                                onChange={(e) => setAttendanceData(prev => ({
+                                  ...prev,
+                                  [item._id]: e.target.checked
+                                }))}
+                                className="h-5 w-5 rounded border-gray-300"
+                              />
+                            )}
+                            <div className="w-full">
+                              <div className="flex justify-between items-center w-full">
+                                <div>
+                                  <p className="font-medium text-gray-800">{item.studentName}</p>
+                                  <p className="text-sm text-gray-600">Parent: {item.parentName}</p>
+                                  <p className="text-sm text-gray-500">Contact: {item.mobileNumber}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedStudent(item);
+                                      setShowMarksOverlay(true);
+                                    }}
+                                    className="flex items-center"
+                                  >
+                                    <Star className="h-4 w-4 mr-1" />
+                                    Add Marks
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedStudent(item);
+                                      setShowFeedbackOverlay(true);
+                                    }}
+                                    className="flex items-center"
+                                  >
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Add Feedback
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => handleRemoveStudent(item._id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
+
+                              {/* Dropdown toggle button */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setExpandedStudent(expandedStudent === index ? null : index)}
+                                className="mt-2 text-gray-600 hover:text-gray-800 w-full justify-between"
+                              >
+                                <span>View Details</span>
+                                <ChevronRight
+                                  className={`h-4 w-4 transition-transform ${
+                                    expandedStudent === index ? "rotate-90" : ""
+                                  }`}
+                                />
+                              </Button>
+
+                              {/* Expandable content */}
+                              {expandedStudent === index && (
+                                <div className="mt-4 space-y-4 border-t pt-4">
+                                  {/* Marks Section */}
+                                  <div>
+                                    <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                                      <Star className="h-4 w-4 mr-2 text-[#00308F]" />
+                                      Academic Performance
+                                    </h4>
+                                    {item.marks && item.marks.length > 0 ? (
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        {item.marks.map((mark, idx) => (
+                                          <div key={idx} className="bg-blue-50 p-2 rounded">
+                                            <p className="font-medium text-sm">{mark.subject}</p>
+                                            <p className="text-sm text-gray-600">
+                                              Score: {mark.marks}/{mark.totalMarks}
+                                              <span className="text-xs ml-2">
+                                                ({((mark.marks/mark.totalMarks) * 100).toFixed(1)}%)
+                                              </span>
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                              {new Date(mark.date).toLocaleDateString()}
+                                            </p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-gray-500">No marks recorded yet</p>
+                                    )}
+                                  </div>
+
+                                  {/* Feedback Section */}
+                                  <div>
+                                    <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                                      <MessageSquare className="h-4 w-4 mr-2 text-[#00308F]" />
+                                      Non-Academic Feedback
+                                    </h4>
+                                    {item.feedback && item.feedback.length > 0 ? (
+                                      <div className="space-y-2">
+                                        {item.feedback.map((fb, idx) => (
+                                          <div key={idx} className="bg-gray-50 p-3 rounded">
+                                            <div className="flex justify-between items-start">
+                                              <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium">
+                                                {fb.type}
+                                              </span>
+                                              <span className="text-xs text-gray-500">
+                                                {new Date(fb.date).toLocaleDateString()}
+                                              </span>
+                                            </div>
+                                            <p className="mt-2 text-sm">{fb.description}</p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-gray-500">No feedback recorded yet</p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleRemoveStudent(item._id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        No students enrolled yet
                       </div>
-                    )}
+                    ))}
                   </div>
                 </ScrollArea>
               </CardContent>
@@ -1658,6 +1840,118 @@ export default function TeacherDashboard() {
                   )}
                 </div>
               </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Marks Overlay */}
+      {showMarksOverlay && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Add Marks - {selectedStudent.studentName}</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => {
+                  setShowMarksOverlay(false);
+                  setMarkDetails({ subject: '', marks: '', totalMarks: '' });
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label>Subject</Label>
+                  <Input
+                    value={markDetails.subject}
+                    onChange={(e) => setMarkDetails(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="Enter subject name"
+                  />
+                </div>
+                <div>
+                  <Label>Marks Obtained</Label>
+                  <Input
+                    type="number"
+                    value={markDetails.marks}
+                    onChange={(e) => setMarkDetails(prev => ({ ...prev, marks: e.target.value }))}
+                    placeholder="Enter marks obtained"
+                  />
+                </div>
+                <div>
+                  <Label>Total Marks</Label>
+                  <Input
+                    type="number"
+                    value={markDetails.totalMarks}
+                    onChange={(e) => setMarkDetails(prev => ({ ...prev, totalMarks: e.target.value }))}
+                    placeholder="Enter total marks"
+                  />
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={handleAddMarks}
+                >
+                  Add Marks
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Feedback Overlay */}
+      {showFeedbackOverlay && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Add Feedback - {selectedStudent.studentName}</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => {
+                  setShowFeedbackOverlay(false);
+                  setFeedbackDetails({ type: '', description: '' });
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label>Type</Label>
+                  <select
+                    className="w-full p-2 border rounded-md mt-1"
+                    value={feedbackDetails.type}
+                    onChange={(e) => setFeedbackDetails(prev => ({ ...prev, type: e.target.value }))}
+                  >
+                    <option value="">Select type</option>
+                    <option value="Behavior">Behavior</option>
+                    <option value="Participation">Participation</option>
+                    <option value="Social Skills">Social Skills</option>
+                    <option value="Leadership">Leadership</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    value={feedbackDetails.description}
+                    onChange={(e) => setFeedbackDetails(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Enter detailed feedback..."
+                    className="min-h-[100px]"
+                  />
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={handleAddFeedback}
+                >
+                  Add Feedback
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
