@@ -118,6 +118,9 @@ export default function TeacherDashboard() {
   const [completedActivities, setCompletedActivities] = useState({});
   const [parentProgress, setParentProgress] = useState([]);
   const [studentParentList, setStudentParentList] = useState([]);
+  const [attendanceData, setAttendanceData] = useState({});
+  const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
+  const [submittingAttendance, setSubmittingAttendance] = useState(false);
 
   const medalIcons = ["🥇", "🥈", "🥉"];
 
@@ -595,6 +598,7 @@ export default function TeacherDashboard() {
       fetchActivities(classroom.classCode);
       fetchParentProgress(classroom.classCode);
       fetchStudentParentData(classroom.classCode);
+      checkAttendanceStatus(classroom.classCode);
     }
   }, [classroom]);
 
@@ -663,6 +667,37 @@ export default function TeacherDashboard() {
     } catch (error) {
       console.error('Error fetching student-parent data:', error);
       toast.error('Failed to fetch student data');
+    }
+  };
+
+  // Add this function to check attendance status
+  const checkAttendanceStatus = async (classCode) => {
+    try {
+      const response = await api.get(`/api/classroom/teacher/attendance/${classCode}`);
+      setAttendanceSubmitted(response.data.attendanceSubmitted);
+    } catch (error) {
+      console.error('Error checking attendance status:', error);
+    }
+  };
+
+  // Add this function to handle attendance submission
+  const handleSubmitAttendance = async () => {
+    try {
+      setSubmittingAttendance(true);
+      const response = await api.post(
+        `/api/classroom/teacher/attendance/${classroom.classCode}`,
+        {
+          attendance: attendanceData,
+          date: new Date()
+        }
+      );
+      setAttendanceSubmitted(true);
+      toast.success('Attendance submitted successfully');
+    } catch (error) {
+      console.error('Error submitting attendance:', error);
+      toast.error(error.response?.data?.message || 'Failed to submit attendance');
+    } finally {
+      setSubmittingAttendance(false);
     }
   };
 
@@ -1003,6 +1038,14 @@ export default function TeacherDashboard() {
                   <Users className="h-5 w-5 text-[#00308F] mr-2" />
                   Class Students
                 </CardTitle>
+                {!attendanceSubmitted && (
+                  <Button
+                    onClick={handleSubmitAttendance}
+                    disabled={submittingAttendance || studentParentList.length === 0}
+                  >
+                    {submittingAttendance ? 'Submitting...' : 'Submit Attendance'}
+                  </Button>
+                )}
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
@@ -1014,10 +1057,23 @@ export default function TeacherDashboard() {
                           className="p-4 bg-white rounded-lg border border-gray-200"
                         >
                           <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-gray-800">{item.studentName}</p>
-                              <p className="text-sm text-gray-600">Parent: {item.parentName}</p>
-                              <p className="text-sm text-gray-500">Contact: {item.mobileNumber}</p>
+                            <div className="flex items-center gap-4">
+                              {!attendanceSubmitted && (
+                                <input
+                                  type="checkbox"
+                                  checked={attendanceData[item._id] || false}
+                                  onChange={(e) => setAttendanceData(prev => ({
+                                    ...prev,
+                                    [item._id]: e.target.checked
+                                  }))}
+                                  className="h-5 w-5 rounded border-gray-300"
+                                />
+                              )}
+                              <div>
+                                <p className="font-medium text-gray-800">{item.studentName}</p>
+                                <p className="text-sm text-gray-600">Parent: {item.parentName}</p>
+                                <p className="text-sm text-gray-500">Contact: {item.mobileNumber}</p>
+                              </div>
                             </div>
                             <Button
                               variant="ghost"
