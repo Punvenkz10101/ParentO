@@ -23,37 +23,32 @@ require('./models/Feedback');
 const app = express();
 const server = http.createServer(app);
 
-// Update CORS configuration to be more flexible
-const corsOptions = {
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-      'http://localhost:5176',
-      'https://parento.vercel.app',
-      'https://parento-dcgi.onrender.com'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+// Basic CORS middleware
+app.use(cors({
+  origin: ['https://parento.vercel.app', 'http://localhost:5173'],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-};
+  optionsSuccessStatus: 204
+}));
 
-// Apply CORS to Express
-app.use(cors(corsOptions));
+// Additional headers middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://parento.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
+
 app.use(express.json());
 
-// Configure Socket.IO with updated CORS
+// Configure Socket.IO
 const io = new Server(server, {
   cors: {
     origin: ['https://parento.vercel.app', 'http://localhost:5173'],
@@ -61,22 +56,19 @@ const io = new Server(server, {
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
   },
-  allowEIO3: true, // Allow Engine.IO version 3
+  transports: ['polling', 'websocket'],
+  allowEIO3: true,
   pingTimeout: 60000,
   pingInterval: 25000,
-  transports: ['polling', 'websocket'],
-  allowUpgrades: true,
-  perMessageDeflate: false,
-  httpCompression: true,
   path: '/socket.io/'
 });
 
-// Add error handling for Socket.IO server
+// Socket.IO error handling
 io.engine.on("connection_error", (err) => {
   console.log('Socket.IO connection error:', err);
 });
 
-// Socket.IO connection handling
+// Add error handling for Socket.IO server
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 

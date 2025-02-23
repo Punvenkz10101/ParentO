@@ -23,7 +23,7 @@ function App() {
           <Route 
             path="/parentDashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute userType="parent">
                 <ParentDashboard />
               </ProtectedRoute>
             }
@@ -31,7 +31,7 @@ function App() {
           <Route 
             path="/parent/profile" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute userType="parent">
                 <ParentProfile />
               </ProtectedRoute>
             }
@@ -39,7 +39,7 @@ function App() {
           <Route 
             path="/teacherDashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute userType="teacher">
                 <TeacherDashboard />
               </ProtectedRoute>
             }
@@ -47,19 +47,19 @@ function App() {
           <Route 
             path="/teacher/profile" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute userType="teacher">
                 <TeacherProfile />
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </SocketProvider>
   );
 }
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, userType: requiredType }) => {
   const token = localStorage.getItem('token');
   const userType = localStorage.getItem('userType');
   const navigate = useNavigate();
@@ -67,26 +67,30 @@ const ProtectedRoute = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      navigate('/', { replace: true });
-      return;
-    }
+    const checkAuth = () => {
+      if (!token) {
+        navigate('/', { replace: true });
+        return;
+      }
 
-    const currentPath = location.pathname;
-    
-    // Define the correct path for each user type
-    const correctPath = userType === 'parent' ? '/parentDashboard' : '/teacherDashboard';
-    
-    // Only redirect if we're on the wrong path
-    if (currentPath !== correctPath) {
-      navigate(correctPath, { replace: true });
-    }
-    
-    setIsLoading(false);
-  }, [token, userType]);
+      if (userType !== requiredType) {
+        const correctPath = userType === 'parent' ? '/parentDashboard' : '/teacherDashboard';
+        navigate(correctPath, { replace: true });
+        return;
+      }
 
-  if (isLoading || !token) {
-    return null;
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [token, userType, requiredType, navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!token) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
