@@ -366,7 +366,7 @@ export default function ParentDashboard() {
             
             {/* Add this new div for the centered title */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
-              <h1 className="text-2xl font-bold text-blue-600">{t('dashboard.title')}</h1>
+              <h1 className="text-2xl font-bold text-blue-600">{t('Parent  Dashboard')}</h1>
             </div>
             
             {/* Rest of your navbar content */}
@@ -381,7 +381,7 @@ export default function ParentDashboard() {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64">
-                    <DropdownMenuLabel className="text-lg">{t('dashboard.welcomeMessage')}, {name}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-lg">{t('Hi!')}, {name}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-base cursor-pointer"
@@ -410,7 +410,7 @@ export default function ParentDashboard() {
           <CardContent className="flex justify-between items-center p-6">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">{t('dashboard.welcome')}</h2>
-              <p className="opacity-90">{t('dashboard.welcomeMessage')}, {name}!</p>
+              <p className="opacity-90">{t('Hello')}, {name}!</p>
             </div>
             <Avatar className="h-16 w-16 border-4 border-white/50">
               <AvatarImage src="/avatars/parent.png" alt="Parent" />
