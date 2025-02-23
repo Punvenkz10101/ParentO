@@ -295,7 +295,22 @@ export default function ParentDashboard() {
           activityDate.setHours(0, 0, 0, 0);
           return activityDate.getTime() === today.getTime();
         });
+
+        // Set completed activities from fetched data
+        const completedActs = {};
+        response.data.forEach(activity => {
+          const userCompletion = activity.completions?.find(
+            completion => completion.parentId === localStorage.getItem('userId')
+          );
+          if (userCompletion) {
+            completedActs[activity._id] = {
+              completedAt: userCompletion.completedAt,
+              description: userCompletion.description
+            };
+          }
+        });
         
+        setCompletedActivities(completedActs);
         setTodaysActivities(todayActs);
         setActivities(response.data);
         setActivityError(null);

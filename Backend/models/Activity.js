@@ -30,7 +30,8 @@ const activitySchema = new mongoose.Schema({
     parentName: String,
     description: String,
     classCode: String,
-    completedAt: { type: Date, default: Date.now }
+    completedAt: { type: Date, default: Date.now },
+    points: { type: Number, default: 5 }
   }],
   createdAt: {
     type: Date,

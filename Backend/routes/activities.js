@@ -20,7 +20,8 @@ router.get('/classroom/:classCode', auth, async (req, res) => {
       }
     })
     .sort({ date: 1 }) // Sort by date ascending
-    .populate('createdBy', 'name');
+    .populate('createdBy', 'name')
+    .lean(); // Convert to plain JavaScript object
 
     res.json(activities);
   } catch (error) {
