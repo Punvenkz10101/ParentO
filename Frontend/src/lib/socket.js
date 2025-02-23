@@ -1,8 +1,16 @@
 import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../url';
+
+export const socket = io(SOCKET_URL, {
+  withCredentials: true,
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  autoConnect: false
+});
 
 let socket;
-
-const SOCKET_URL = 'https://parento-dcgi.onrender.com';
 
 const socketOptions = {
   autoConnect: false, // Don't connect automatically

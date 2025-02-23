@@ -1,11 +1,9 @@
 import axios from 'axios';
+import { API_URL } from '../url';
 import { toast } from 'react-hot-toast';
 
-const BACKEND_URL = '/api'; // Change this to use relative path
-
-// Create axios instance with default config
-const instance = axios.create({
-  baseURL: BACKEND_URL,
+const api = axios.create({
+  baseURL: API_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -13,10 +11,9 @@ const instance = axios.create({
   }
 });
 
-// Request interceptor
-instance.interceptors.request.use(
+// Request interceptor for adding auth token
+api.interceptors.request.use(
   (config) => {
-    // Add auth token if available
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -28,8 +25,8 @@ instance.interceptors.request.use(
   }
 );
 
-// Response interceptor
-instance.interceptors.response.use(
+// Response interceptor for handling errors
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('API Error:', error);
@@ -39,10 +36,10 @@ instance.interceptors.response.use(
       const message = error.response.data?.message || 'An error occurred';
       toast.error(message);
       
-      // Handle 401 Unauthorized
       if (error.response.status === 401) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        // Handle unauthorized access
+        localStorage.clear();
+        window.location.href = '/';
       }
     } else if (error.request) {
       // Request was made but no response
@@ -58,4 +55,4 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance;
+export default api;
