@@ -20,7 +20,8 @@ import {
   Users,
   MessageSquare
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
