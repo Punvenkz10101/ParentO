@@ -22,8 +22,11 @@ export default function AuthForm({ type }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = type === "login" ? "login" : "register";
-      const response = await api.post(`/auth/${userType}/${endpoint}`, formData);
+      // Construct the endpoint URL without /api prefix since it's handled by axios baseURL
+      const endpoint = `/${userType}/${type === "login" ? "login" : "signup"}`;
+      
+      console.log('Attempting to call:', endpoint);
+      const response = await api.post(endpoint, formData);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -35,12 +38,17 @@ export default function AuthForm({ type }) {
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
         navigate(dashboardPath, { replace: true });
       } else if (type === "signup") {
-        toast.success(t('auth.signupSuccess'));
+        toast.success('Registration successful! Please login.');
         navigate(`/login/${userType}`, { replace: true });
       }
     } catch (error) {
       console.error('Auth error:', error);
-      toast.error(error.response?.data?.message || t(`auth.${type}Failed`));
+      
+      if (error.response?.status === 404) {
+        toast.error('Service temporarily unavailable. Please try again later.');
+      } else {
+        toast.error(error.response?.data?.message || 'Authentication failed. Please try again.');
+      }
     }
   };
 
