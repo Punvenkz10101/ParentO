@@ -3,7 +3,7 @@ import { API_URL, IS_DEVELOPMENT } from '../url';
 import { toast } from 'react-hot-toast';
 
 const instance = axios.create({
-  baseURL: 'https://parento-dcgi.onrender.com',
+  baseURL: 'https://parento-dcgi.onrender.com/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ instance.interceptors.request.use(
     }
 
     // Log requests in development
-    if (IS_DEVELOPMENT) {
+    if (process.env.NODE_ENV === 'development') {
       console.log('API Request:', {
         url: config.url,
         method: config.method,
