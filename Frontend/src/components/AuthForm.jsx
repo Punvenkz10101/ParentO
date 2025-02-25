@@ -22,11 +22,8 @@ export default function AuthForm({ type }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // The /api prefix will be added by the axios interceptor
-      const endpoint = `/${userType}/${type === "login" ? "login" : "signup"}`;
-      
-      console.log('Attempting to call:', endpoint);
-      const response = await api.post(endpoint, formData);
+      const endpoint = type === "login" ? "login" : "signup";
+      const response = await api.post(`/api/${userType}/${endpoint}`, formData);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -43,12 +40,7 @@ export default function AuthForm({ type }) {
       }
     } catch (error) {
       console.error('Auth error:', error);
-      
-      if (error.response?.status === 404) {
-        toast.error('Service temporarily unavailable. Please try again later.');
-      } else {
-        toast.error(error.response?.data?.message || 'Authentication failed. Please try again.');
-      }
+      toast.error(error.response?.data?.message || 'Authentication failed');
     }
   };
 
