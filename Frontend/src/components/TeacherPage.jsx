@@ -1100,12 +1100,15 @@ export default function TeacherDashboard() {
                   <Bell className="h-5 w-5 text-[#00308F] mr-2" />
                   Announcements
                 </CardTitle>
-                <div className="flex gap-2">
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Previous Announcements Button */}
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setShowPreviousAnnouncements(true)}
-                    className="flex items-center"
+                    className="w-full flex items-center justify-center"
                   >
                     <Calendar className="h-4 w-4 mr-2" />
                     Previous Announcements
@@ -1113,50 +1116,53 @@ export default function TeacherDashboard() {
                       <Badge className="ml-2 bg-gray-500">{oldAnnouncements.length}</Badge>
                     )}
                   </Button>
+
+                  {/* Add Announcement Button */}
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setShowAnnouncementForm(true)}
+                    className="w-full flex items-center justify-center"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add
+                    Add Announcement
                   </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[300px] pr-4">
-                  <div className="space-y-4">
-                    {recentAnnouncements.map((announcement) => (
-                      <div 
-                        key={announcement._id} 
-                        className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
-                        <div className="flex-1">
-                          <p className="text-gray-700">
-                            <span className="font-medium">{announcement.title}</span>
-                            <span className="mx-2">•</span>
-                            <span>{announcement.description}</span>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
+
+                  {/* Announcements List */}
+                  <ScrollArea className="h-[300px] pr-4 mt-4">
+                    <div className="space-y-4">
+                      {recentAnnouncements.map((announcement) => (
+                        <div 
+                          key={announcement._id} 
+                          className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div className="h-2 w-2 bg-[#00308F] rounded-full"></div>
+                          <div className="flex-1">
+                            <p className="text-gray-700">
+                              <span className="font-medium">{announcement.title}</span>
+                              <span className="mx-2">•</span>
+                              <span>{announcement.description}</span>
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    {recentAnnouncements.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        No recent announcements
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                      ))}
+                      {recentAnnouncements.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          No recent announcements
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
               </CardContent>
             </Card>
           </div>
