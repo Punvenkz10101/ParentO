@@ -19,6 +19,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  // Add /api prefix to all requests that don't start with http or /api
+  if (!config.url.startsWith('http') && !config.url.startsWith('/api')) {
+    config.url = `/api${config.url}`;
+  }
+
   // Log the full URL for debugging
   const fullUrl = `${BASE_URL}${config.url}`;
   console.log('Making request to:', fullUrl);

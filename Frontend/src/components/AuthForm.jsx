@@ -22,7 +22,7 @@ export default function AuthForm({ type }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Construct the endpoint URL without /api prefix since it's handled by axios baseURL
+      // The /api prefix will be added by the axios interceptor
       const endpoint = `/${userType}/${type === "login" ? "login" : "signup"}`;
       
       console.log('Attempting to call:', endpoint);
