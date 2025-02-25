@@ -6,7 +6,8 @@ const instance = axios.create({
   baseURL: 'https://parento-dcgi.onrender.com',
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
@@ -35,9 +36,10 @@ instance.interceptors.request.use(
       };
     }
 
-    // Remove the /api prefix from the URLs
-    if (config.url.startsWith('/api/')) {
-      config.url = config.url.replace('/api/', '/');
+    // Don't modify URLs that already have the full path
+    if (!config.url.startsWith('http')) {
+      // Remove the /api prefix from the URLs if it exists
+      config.url = config.url.replace(/^\/api/, '');
     }
     return config;
   },

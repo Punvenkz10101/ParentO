@@ -5,27 +5,15 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
-    host: true,
     proxy: {
       '/api': {
         target: 'https://parento-dcgi.onrender.com',
         changeOrigin: true,
-        secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
-      },
-      '/socket.io': {
-        target: 'https://parento-dcgi.onrender.com',
-        changeOrigin: true,
-        secure: false,
-        ws: true
       }
     }
   },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -34,10 +22,5 @@ export default defineConfig({
         }
       }
     }
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
-    }
   }
-})
+});
