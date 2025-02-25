@@ -23,7 +23,13 @@ export default function AuthForm({ type }) {
     e.preventDefault();
     try {
       const endpoint = type === "login" ? "login" : "signup";
-      const response = await api.post(`/api/${userType}/${endpoint}`, formData);
+      console.log('Submitting auth request:', {
+        userType,
+        endpoint,
+        url: `${userType}/${endpoint}`
+      });
+
+      const response = await api.post(`${userType}/${endpoint}`, formData);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -33,7 +39,7 @@ export default function AuthForm({ type }) {
         localStorage.setItem('userType', userType);
         
         const dashboardPath = userType === "parent" ? "/parentDashboard" : "/teacherDashboard";
-        navigate(dashboardPath, { replace: true });
+        window.location.href = dashboardPath;
       } else if (type === "signup") {
         toast.success('Registration successful! Please login.');
         navigate(`/login/${userType}`, { replace: true });
