@@ -92,28 +92,48 @@ api.interceptors.response.use(
 
     // Handle specific error cases
     if (error.response) {
+      // Check if the error is from a login attempt
+      const isLoginAttempt = error.config.url.includes('/auth/login') || 
+                            error.config.url.includes('/auth/teacher/login') ||
+                            error.config.url.includes('/auth/parent/login');
+
       switch (error.response.status) {
         case 401:
-          toast.error('Session expired. Please login again.');
-          localStorage.clear();
-          window.location.href = '/';
+          if (isLoginAttempt) {
+            // For login attempts, show "Account not found" message
+            toast.error('Account not found. Please check your credentials.');
+          } else {
+            // For other 401 errors (like expired sessions)
+            toast.error('Session expired. Please login again.');
+            localStorage.clear();
+            window.location.href = '/';
+          }
           break;
         case 404:
-          toast.error('Resource not found. Please try again.');
+          if (isLoginAttempt) {
+            toast.error('Account not found. Please check your credentials.');
+          } else {
+            toast.error('Resource not found');
+          }
           break;
         case 403:
-          toast.error('Access denied. You don\'t have permission.');
+          toast.error('Access denied');
           break;
         case 500:
           toast.error('Server error. Please try again later.');
           break;
         default:
-          toast.error(error.response.data?.message || 'An error occurred');
+          // Check for specific error messages from the backend
+          if (error.response.data?.message?.toLowerCase().includes('not found')) {
+            toast.error('Account not found. Please check your credentials.');
+          } else {
+            toast.error(error.response.data?.message || 'An error occurred');
+          }
       }
     } else if (error.request) {
-      toast.error('Unable to connect to server. Please check your connection.');
+      toast.error('Unable to connect to server');
     } else {
-      toast.error('An unexpected error occurred.');
+      toast.error('An error occurred');
     }
 
     return Promise.reject(error);
