@@ -23,7 +23,7 @@ export default function AuthForm({ type }) {
     e.preventDefault();
     try {
       const endpoint = type === "login" ? "login" : "signup";
-      const response = await api.post(`/api/${userType}/${endpoint}`, formData);
+      const response = await api.post(`/${userType}/${endpoint}`, formData);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);

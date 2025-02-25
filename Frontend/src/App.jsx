@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { SocketProvider } from './context/SocketContext';
@@ -57,7 +57,7 @@ function App() {
             <Route path="/login/:userType" element={<AuthForm type="login" />} />
             <Route path="/signup/:userType" element={<AuthForm type="signup" />} />
             <Route
-              path="/teacher"
+              path="/teacherDashboard"
               element={
                 <ProtectedRoute allowedUserType="teacher">
                   <TeacherDashboard />
@@ -65,7 +65,7 @@ function App() {
               }
             />
             <Route
-              path="/parent"
+              path="/parentDashboard"
               element={
                 <ProtectedRoute allowedUserType="parent">
                   <ParentDashboard />
@@ -73,7 +73,7 @@ function App() {
               }
             />
             <Route
-              path="/teacher/profile"
+              path="/teacherProfile"
               element={
                 <ProtectedRoute allowedUserType="teacher">
                   <TeacherProfile />
@@ -81,14 +81,13 @@ function App() {
               }
             />
             <Route
-              path="/parent/profile"
+              path="/parentProfile"
               element={
                 <ProtectedRoute allowedUserType="parent">
                   <ParentProfile />
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </SocketProvider>
