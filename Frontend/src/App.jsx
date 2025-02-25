@@ -49,6 +49,8 @@ function App() {
   return (
     <Router>
       <SocketProvider>
+        <Toaster position="top-right" />
+        <LanguageSwitcher />
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Hero />} />
@@ -89,18 +91,6 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
-        
-        <Toaster
-          position="top-right"
-          reverseOrder={false}
-          toastOptions={{
-            duration: 5000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-          }}
-        />
       </SocketProvider>
     </Router>
   );
