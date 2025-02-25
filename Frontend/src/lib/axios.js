@@ -24,31 +24,49 @@ api.interceptors.request.use((config) => {
     config.url = `/api${config.url}`;
   }
 
-  // Log the full URL for debugging
+  // Log the full URL and request details for debugging
   const fullUrl = `${BASE_URL}${config.url}`;
-  console.log('Making request to:', fullUrl);
+  console.log('Making request:', {
+    url: fullUrl,
+    method: config.method,
+    data: config.data,
+    headers: config.headers
+  });
 
   return config;
 }, error => Promise.reject(error));
 
 // Response interceptor
 api.interceptors.response.use(
-  response => response,
+  response => {
+    console.log('Successful response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   error => {
-    console.error('API Error:', error);
-    console.log('Failed request URL:', `${BASE_URL}${error.config?.url}`);
+    console.error('API Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+      response: error.response?.data
+    });
 
     if (error.response) {
       switch (error.response.status) {
         case 404:
-          console.log('Resource not found at:', `${BASE_URL}${error.config?.url}`);
           toast.error('Service unavailable. Please try again later.');
           break;
         case 401:
           toast.error('Invalid credentials. Please try again.');
           break;
+        case 400:
+          toast.error(error.response.data?.message || 'Invalid request. Please check your input.');
+          break;
         default:
-          toast.error(error.response.data?.message || 'An error occurred');
+          toast.error('An unexpected error occurred. Please try again.');
       }
     } else if (error.request) {
       toast.error('Unable to connect to server. Please check your internet connection.');
