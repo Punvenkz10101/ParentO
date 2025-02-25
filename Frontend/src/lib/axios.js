@@ -38,7 +38,7 @@ instance.interceptors.request.use(
 
     // Don't modify URLs that already have the full path
     if (!config.url.startsWith('http')) {
-      // Remove the /api prefix from the URLs if it exists
+      // Remove /api prefix if it exists
       config.url = config.url.replace(/^\/api/, '');
     }
     return config;
@@ -67,7 +67,7 @@ instance.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           if (isLoginAttempt) {
-            toast.error('Account not found. Please check your credentials.');
+            toast.error('Invalid credentials');
           } else {
             toast.error('Session expired. Please login again.');
             localStorage.clear();
